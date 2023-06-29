@@ -1,13 +1,22 @@
 package com.github.sebseb7.autotrade.config;
 
-import java.util.List;
 import com.google.common.collect.ImmutableList;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
-import fi.dy.masa.malilib.hotkeys.KeyAction;
-import fi.dy.masa.malilib.hotkeys.KeybindSettings;
+import java.util.List;
 
-public class Hotkeys
-{
-    public static final List<ConfigHotkey> HOTKEY_LIST = ImmutableList.of(
-    );
+public class Hotkeys {
+  public static final ConfigHotkey TOGGLE_KEY =
+      new ConfigHotkey("toggleTrading", "", "Enables / disables auto trading");
+  public static final ConfigHotkey SET_INPUT_KEY =
+      new ConfigHotkey("setInputContainer", "", "Sets the input (item to sell) container");
+  public static final ConfigHotkey SET_OUTPUT_KEY =
+      new ConfigHotkey("setOutputContainer", "", "Sets the output (item bought) container");
+  public static final ConfigHotkey SET_EMERALD_KEY =
+      new ConfigHotkey("setEmeraldContainer", "", "Set the emerald container");
+  public static final ConfigHotkey OPEN_GUI_SETTINGS =
+      new ConfigHotkey("openGuiSettings", "", "Open the Config GUI");
+
+  public static final List<ConfigHotkey> HOTKEY_LIST =
+      ImmutableList.of(
+          TOGGLE_KEY, SET_INPUT_KEY, SET_OUTPUT_KEY, SET_EMERALD_KEY, OPEN_GUI_SETTINGS);
 }
