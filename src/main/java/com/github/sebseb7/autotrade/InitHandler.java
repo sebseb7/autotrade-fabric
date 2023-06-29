@@ -5,6 +5,7 @@ import com.github.sebseb7.autotrade.event.InputHandler;
 import com.github.sebseb7.autotrade.event.KeybindCallbacks;
 import fi.dy.masa.malilib.config.ConfigManager;
 import fi.dy.masa.malilib.event.InputEventHandler;
+import fi.dy.masa.malilib.event.TickHandler;
 import fi.dy.masa.malilib.interfaces.IInitializationHandler;
 
 public class InitHandler implements IInitializationHandler {
@@ -14,6 +15,8 @@ public class InitHandler implements IInitializationHandler {
 
 		InputHandler handler = new InputHandler();
 		InputEventHandler.getKeybindManager().registerKeybindProvider(handler);
+
+		TickHandler.getInstance().registerClientTickHandler(KeybindCallbacks.getInstance());
 
 		KeybindCallbacks.getInstance().setCallbacks();
 	}

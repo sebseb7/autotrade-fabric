@@ -14,7 +14,7 @@ public class Hotkeys {
 	public static final ConfigHotkey SET_INPUT_KEY = new ConfigHotkey("setInputContainer", "",
 			"Sets the input (item to sell) container");
 	public static final ConfigHotkey SET_OUTPUT_KEY = new ConfigHotkey("setOutputContainer", "",
-			"Sets the output (item bought) container");
+			"Sets the output (item to buy) container");
 	public static final ConfigHotkey SET_EMERALD_KEY = new ConfigHotkey("setEmeraldContainer", "",
 			"Set the emerald container");
 	public static final ConfigHotkey OPEN_GUI_SETTINGS = new ConfigHotkey("openGuiSettings", "", "Open the Config GUI");

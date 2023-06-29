@@ -9,13 +9,20 @@ import fi.dy.masa.malilib.gui.Message;
 import fi.dy.masa.malilib.hotkeys.IHotkeyCallback;
 import fi.dy.masa.malilib.hotkeys.IKeybind;
 import fi.dy.masa.malilib.hotkeys.KeyAction;
+import fi.dy.masa.malilib.interfaces.IClientTickHandler;
 import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.InfoUtils;
+import java.util.Vector;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.util.Hand;
 
-public class KeybindCallbacks implements IHotkeyCallback {
+public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 	private static final KeybindCallbacks INSTANCE = new KeybindCallbacks();
+
+	private Vector<Entity> villagersInRange = new Vector<Entity>();
 
 	public static KeybindCallbacks getInstance() {
 		return INSTANCE;
@@ -64,5 +71,41 @@ public class KeybindCallbacks implements IHotkeyCallback {
 		}
 
 		return false;
+	}
+
+	@Override
+	public void onClientTick(MinecraftClient mc) {
+		if (this.functionalityEnabled() == false || mc.player == null) {
+			return;
+		}
+		mc.inGameHud.getChatHud().addToMessageHistory("here");
+
+		if (GuiUtils.getCurrentScreen() instanceof HandledScreen) {
+			return;
+		}
+
+		boolean found = false;
+
+		Vector<Entity> newVillagersInRange = new Vector<Entity>(villagersInRange);
+
+		for (Entity entity : mc.player.clientWorld.getEntities()) {
+			if (entity instanceof VillagerEntity) {
+				if (entity.getPos().distanceTo(mc.player.getPos()) < 3) {
+					if (found == false) {
+						if (newVillagersInRange.contains(entity) == false) {
+							found = true;
+							newVillagersInRange.add(entity);
+							mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
+						}
+					}
+				}
+			}
+		}
+		for (Entity entity : villagersInRange) {
+			if ((entity.getPos().distanceTo(mc.player.getPos()) < 4) == false) {
+				newVillagersInRange.remove(entity);
+			}
+		}
+		villagersInRange = newVillagersInRange;
 	}
 }
