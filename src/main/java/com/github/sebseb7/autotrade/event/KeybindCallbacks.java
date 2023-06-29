@@ -15,55 +15,54 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 
 public class KeybindCallbacks implements IHotkeyCallback {
-  private static final KeybindCallbacks INSTANCE = new KeybindCallbacks();
+	private static final KeybindCallbacks INSTANCE = new KeybindCallbacks();
 
-  public static KeybindCallbacks getInstance() {
-    return INSTANCE;
-  }
+	public static KeybindCallbacks getInstance() {
+		return INSTANCE;
+	}
 
-  private KeybindCallbacks() {}
+	private KeybindCallbacks() {
+	}
 
-  public void setCallbacks() {
-    for (ConfigHotkey hotkey : Hotkeys.HOTKEY_LIST) {
-      hotkey.getKeybind().setCallback(this);
-    }
-  }
+	public void setCallbacks() {
+		for (ConfigHotkey hotkey : Hotkeys.HOTKEY_LIST) {
+			hotkey.getKeybind().setCallback(this);
+		}
+	}
 
-  public boolean functionalityEnabled() {
-    return Configs.Generic.ENABLED.getBooleanValue();
-  }
+	public boolean functionalityEnabled() {
+		return Configs.Generic.ENABLED.getBooleanValue();
+	}
 
-  @Override
-  public boolean onKeyAction(KeyAction action, IKeybind key) {
-    boolean cancel = this.onKeyActionImpl(action, key);
-    return cancel;
-  }
+	@Override
+	public boolean onKeyAction(KeyAction action, IKeybind key) {
+		boolean cancel = this.onKeyActionImpl(action, key);
+		return cancel;
+	}
 
-  private boolean onKeyActionImpl(KeyAction action, IKeybind key) {
-    MinecraftClient mc = MinecraftClient.getInstance();
+	private boolean onKeyActionImpl(KeyAction action, IKeybind key) {
+		MinecraftClient mc = MinecraftClient.getInstance();
 
-    if (mc.player == null || mc.world == null) {
-      return false;
-    }
+		if (mc.player == null || mc.world == null) {
+			return false;
+		}
 
-    if (key == Hotkeys.TOGGLE_KEY.getKeybind()) {
-      Configs.Generic.ENABLED.toggleBooleanValue();
-      String msg =
-          this.functionalityEnabled()
-              ? "autotrade.message.toggled_mod_on"
-              : "autotrade.message.toggled_mod_off";
-      InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, msg);
-      return true;
-    } else if (key == Hotkeys.OPEN_GUI_SETTINGS.getKeybind()) {
-      GuiBase.openGui(new GuiConfigs());
-      return true;
-    }
+		if (key == Hotkeys.TOGGLE_KEY.getKeybind()) {
+			Configs.Generic.ENABLED.toggleBooleanValue();
+			String msg = this.functionalityEnabled()
+					? "autotrade.message.toggled_mod_on"
+					: "autotrade.message.toggled_mod_off";
+			InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, msg);
+			return true;
+		} else if (key == Hotkeys.OPEN_GUI_SETTINGS.getKeybind()) {
+			GuiBase.openGui(new GuiConfigs());
+			return true;
+		}
 
-    if (this.functionalityEnabled() == false
-        || (GuiUtils.getCurrentScreen() instanceof HandledScreen) == false) {
-      return false;
-    }
+		if (this.functionalityEnabled() == false || (GuiUtils.getCurrentScreen() instanceof HandledScreen) == false) {
+			return false;
+		}
 
-    return false;
-  }
+		return false;
+	}
 }

@@ -6,10 +6,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AutoTrade implements ModInitializer {
-  public static final Logger logger = LogManager.getLogger(Reference.MOD_ID);
+	public static final Logger logger = LogManager.getLogger(Reference.MOD_ID);
 
-  @Override
-  public void onInitialize() {
-    InitializationHandler.getInstance().registerInitializationHandler(new InitHandler());
-  }
+	@Override
+	public void onInitialize() {
+		InitializationHandler.getInstance().registerInitializationHandler(new InitHandler());
+	}
 }

@@ -8,13 +8,13 @@ import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.interfaces.IInitializationHandler;
 
 public class InitHandler implements IInitializationHandler {
-  @Override
-  public void registerModHandlers() {
-    ConfigManager.getInstance().registerConfigHandler(Reference.MOD_ID, new Configs());
+	@Override
+	public void registerModHandlers() {
+		ConfigManager.getInstance().registerConfigHandler(Reference.MOD_ID, new Configs());
 
-    InputHandler handler = new InputHandler();
-    InputEventHandler.getKeybindManager().registerKeybindProvider(handler);
+		InputHandler handler = new InputHandler();
+		InputEventHandler.getKeybindManager().registerKeybindProvider(handler);
 
-    KeybindCallbacks.getInstance().setCallbacks();
-  }
+		KeybindCallbacks.getInstance().setCallbacks();
+	}
 }
