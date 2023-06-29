@@ -42,23 +42,60 @@ public class Configs implements IConfigHandler {
             35,
             "stacks to take from input container (or emerald container in buy-only mode)");
     public static final ConfigInteger INPUT_CONTAINER_X =
-        new ConfigInteger("inputContainerX", 0, -30000000, 30000000, "Input container X");
+        new ConfigInteger(
+            "inputContainerX",
+            0,
+            -30000000,
+            30000000,
+            "Input container X (not used when sell disabled)");
     public static final ConfigInteger INPUT_CONTAINER_Y =
-        new ConfigInteger("inputContainerY", 0, -64, 320, "Input container Y");
+        new ConfigInteger(
+            "inputContainerY", 0, -64, 320, "Input container Y (not used when sell disabled)");
     public static final ConfigInteger INPUT_CONTAINER_Z =
-        new ConfigInteger("outputContainerZ", 0, -30000000, 30000000, "Input container Z");
+        new ConfigInteger(
+            "outputContainerZ",
+            0,
+            -30000000,
+            30000000,
+            "Input container Z (not used when sell disabled)");
     public static final ConfigInteger OUTPUT_CONTAINER_X =
-        new ConfigInteger("outputContainerX", 0, -30000000, 30000000, "Output container X");
+        new ConfigInteger(
+            "outputContainerX",
+            0,
+            -30000000,
+            30000000,
+            "Input container X (not used when buy disabled)");
     public static final ConfigInteger OUTPUT_CONTAINER_Y =
-        new ConfigInteger("outputContainerY", 0, -64, 320, "Output container Y");
+        new ConfigInteger(
+            "outputContainerY", 0, -64, 320, "Output container Y (not used when buy disabled)");
     public static final ConfigInteger OUTPUT_CONTAINER_Z =
-        new ConfigInteger("outputContainerZ", 0, -30000000, 30000000, "Output container Z");
+        new ConfigInteger(
+            "outputContainerZ",
+            0,
+            -30000000,
+            30000000,
+            "Output container Z (not used when buy disabled)");
     public static final ConfigInteger EMERALD_CONTAINER_X =
-        new ConfigInteger("emeraldContainerX", 0, -30000000, 30000000, "Emerald container X");
+        new ConfigInteger(
+            "emeraldContainerX",
+            0,
+            -30000000,
+            30000000,
+            "Emerald container X (not used when buy&sell enabled)");
     public static final ConfigInteger EMERALD_CONTAINER_Y =
-        new ConfigInteger("emeraldContainerY", 0, -64, 320, "Emerald container Y");
+        new ConfigInteger(
+            "emeraldContainerY",
+            0,
+            -64,
+            320,
+            "Emerald container Y (not used when buy&sell enabled)");
     public static final ConfigInteger EMERALD_CONTAINER_Z =
-        new ConfigInteger("emeraldContainerZ", 0, -30000000, 30000000, "Emerald container Z");
+        new ConfigInteger(
+            "emeraldContainerZ",
+            0,
+            -30000000,
+            30000000,
+            "Emerald container Z (not used when buy&sell enabled)");
 
     public static final ImmutableList<IConfigValue> OPTIONS =
         ImmutableList.of(
