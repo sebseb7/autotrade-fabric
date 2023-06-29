@@ -3,5 +3,8 @@
     "autotrade.gui.button.config_gui.hotkeys": "Hotkeys",
     "autotrade.gui.button.config_gui.toggles": "Toggles",
 
-    "autotrade.gui.title.configs": "AutoTrade"
+    "autotrade.gui.title.configs": "AutoTrade",
+
+    "autotrade.message.toggled_mod_off": "Toggled Auto Trade §cOFF",
+    "autotrade.message.toggled_mod_on": "Toggled Auto Trade §aON"
 }
