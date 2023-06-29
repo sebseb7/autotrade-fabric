@@ -9,9 +9,9 @@
 		"sebseb7"
 	],
 	"contact": {
-		"homepage": "",
-		"issues": "",
-		"sources": ""
+		"homepage": "https://modrinth.com/mod/autotrade-fabric",
+		"issues": "https://github.com/sebseb7/autotrade-fabric/issues",
+		"sources": "https://github.com/sebseb7/autotrade-fabric"
 	},
 
 	"license": "0BSD",
