@@ -42,19 +42,19 @@ public class Configs implements IConfigHandler {
             35,
             "stacks to take from input container (or emerald container in buy-only mode)");
     public static final ConfigInteger INPUT_CONTAINER_X =
-        new ConfigInteger("inputContainerX", 0, -3000000, 30000000, "Input container X");
+        new ConfigInteger("inputContainerX", 0, -30000000, 30000000, "Input container X");
     public static final ConfigInteger INPUT_CONTAINER_Y =
         new ConfigInteger("inputContainerY", 0, -64, 320, "Input container Y");
     public static final ConfigInteger INPUT_CONTAINER_Z =
         new ConfigInteger("outputContainerZ", 0, -30000000, 30000000, "Input container Z");
     public static final ConfigInteger OUTPUT_CONTAINER_X =
-        new ConfigInteger("outputContainerX", 0, -3000000, 30000000, "Output container X");
+        new ConfigInteger("outputContainerX", 0, -30000000, 30000000, "Output container X");
     public static final ConfigInteger OUTPUT_CONTAINER_Y =
         new ConfigInteger("outputContainerY", 0, -64, 320, "Output container Y");
     public static final ConfigInteger OUTPUT_CONTAINER_Z =
         new ConfigInteger("outputContainerZ", 0, -30000000, 30000000, "Output container Z");
     public static final ConfigInteger EMERALD_CONTAINER_X =
-        new ConfigInteger("emeraldContainerX", 0, -3000000, 30000000, "Emerald container X");
+        new ConfigInteger("emeraldContainerX", 0, -30000000, 30000000, "Emerald container X");
     public static final ConfigInteger EMERALD_CONTAINER_Y =
         new ConfigInteger("emeraldContainerY", 0, -64, 320, "Emerald container Y");
     public static final ConfigInteger EMERALD_CONTAINER_Z =
