@@ -16,7 +16,7 @@ jobs:
     - name: Execute Gradle build
       run: ./gradlew build
     - run: mkdir staging && cp build/libs/*.jar staging
-    - run: cd target && md5sum *.jar > ../md5sum.txt
+    - run: cd build/libs && md5sum *.jar > ../../md5sum.txt
     - run: echo "filename=`ls build/libs/*.jar |xargs basename`" >> $GITHUB_ENV
     - uses: actions/upload-artifact@v3
       with:
