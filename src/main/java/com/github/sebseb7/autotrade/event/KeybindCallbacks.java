@@ -283,6 +283,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 							newVillagersInRange.add(entity);
 							mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
 							state = false;
+							break;
 						}
 					}
 				}
@@ -295,6 +296,9 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			}
 		}
 		villagersInRange = newVillagersInRange;
+		if (found) {
+			return;
+		}
 
 		BlockPos input = new BlockPos(Configs.Generic.INPUT_CONTAINER_X.getIntegerValue(),
 				Configs.Generic.INPUT_CONTAINER_Y.getIntegerValue(),
@@ -310,6 +314,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 					new BlockHitResult(input.toCenterPos(), Direction.UP, input, false));
 			if (result.isAccepted()) {
 				inputOpened = true;
+				return;
 			}
 		}
 		if ((output.toCenterPos().distanceTo(mc.player.getPos()) < 4) && (outputInRange == false)) {
@@ -318,6 +323,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 					new BlockHitResult(output.toCenterPos(), Direction.UP, output, false));
 			if (result.isAccepted()) {
 				outputOpened = true;
+				return;
 			}
 		}
 
