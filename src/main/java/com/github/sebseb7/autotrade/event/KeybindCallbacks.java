@@ -50,6 +50,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 	private boolean inputOpened = false;
 	private boolean outputInRange = false;
 	private boolean outputOpened = false;
+	private int tickCount = 0;
 
 	public static KeybindCallbacks getInstance() {
 		return INSTANCE;
@@ -326,6 +327,14 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 		}
 		if (output.toCenterPos().distanceTo(mc.player.getPos()) > 5) {
 			outputOpened = false;
+			outputInRange = false;
+		}
+
+		tickCount++;
+		if (tickCount > 200) {
+			tickCount = 0;
+			villagersInRange = new Vector<Entity>();
+			inputInRange = false;
 			outputInRange = false;
 		}
 
