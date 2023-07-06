@@ -14,7 +14,10 @@ Player movement is not part of this mod. You have to move between villagers and 
 
 - itemscroller trade favorites break trading
 
-Setup required for the Demo World Download:
+# Demo World Download
+
+- https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.2/AutoTradeDemo_WDL.zip
+- Setup required for the Demo World Download:
 
 ![image](https://github.com/sebseb7/autotrade-fabric/assets/677956/486c76e0-6c17-4cd9-8ca4-c0eaab71e7cc)
 
