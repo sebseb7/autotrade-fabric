@@ -21,4 +21,6 @@ Player movement is not part of this mod. You have to move between villagers and 
 
 ![image](https://github.com/sebseb7/autotrade-fabric/assets/677956/486c76e0-6c17-4cd9-8ca4-c0eaab71e7cc)
 
+# Demo Video
+
 https://youtu.be/ZbxkZqb-VsU
