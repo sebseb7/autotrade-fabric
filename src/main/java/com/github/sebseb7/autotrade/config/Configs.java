@@ -42,10 +42,12 @@ public class Configs implements IConfigHandler {
 				"Output container Y (not used when buy disabled)");
 		public static final ConfigInteger OUTPUT_CONTAINER_Z = new ConfigInteger("outputContainerZ", 0, -30000000,
 				30000000, "Output container Z (not used when buy disabled)");
+		public static final ConfigInteger VOID_TRADING_DELAY = new ConfigInteger("voidTradingDelay", 0, 0, 30000000,
+				"delay in ticks for void trading");
 
 		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ENABLE_SELL, SELL_ITEM,
 				ENABLE_BUY, BUY_ITEM, MAX_INPUT_ITEMS, INPUT_CONTAINER_X, INPUT_CONTAINER_Y, INPUT_CONTAINER_Z,
-				OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y, OUTPUT_CONTAINER_Z);
+				OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y, OUTPUT_CONTAINER_Z, VOID_TRADING_DELAY);
 	}
 
 	public static void loadFromFile() {

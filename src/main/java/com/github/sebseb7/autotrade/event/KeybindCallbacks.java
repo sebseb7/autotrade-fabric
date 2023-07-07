@@ -51,6 +51,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 	private boolean outputInRange = false;
 	private boolean outputOpened = false;
 	private int tickCount = 0;
+	private int voidDelay = 0;
 
 	public static KeybindCallbacks getInstance() {
 		return INSTANCE;
@@ -192,6 +193,12 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 
 	@Override
 	public void onClientTick(MinecraftClient mc) {
+
+		if (voidDelay > 0) {
+			voidDelay--;
+			return;
+		}
+
 		if (this.functionalityEnabled() == false || mc.player == null) {
 			return;
 		}
@@ -282,6 +289,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 							found = true;
 							newVillagersInRange.add(entity);
 							mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
+							voidDelay = Configs.Generic.VOID_TRADING_DELAY.getIntegerValue();
 							state = false;
 							break;
 						}
