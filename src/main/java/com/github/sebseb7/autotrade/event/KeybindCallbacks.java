@@ -218,7 +218,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 					String sellId = Registries.ITEM.getId(sellItem.getItem()).toString();
 					String buyId = Registries.ITEM.getId(buyItem.getItem()).toString();
 
-					if (sellId.equals(buyItemStr) && Configs.Generic.ENABLE_BUY.getBooleanValue()) {
+					if (sellId.equals(buyItemStr) && Configs.Generic.ENABLE_BUY.getBooleanValue()
+							&& buyItem.getCount() <= Configs.Generic.BUY_LIMIT.getIntegerValue()) {
 						Slot slot = handler.getSlot(2);
 						handler.switchTo(i);
 						handler.setRecipeIndex(i);
@@ -230,7 +231,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 							System.out.println("err " + e.toString());
 						}
 					}
-					if (buyId.equals(sellItemStr) && Configs.Generic.ENABLE_SELL.getBooleanValue()) {
+					if (buyId.equals(sellItemStr) && Configs.Generic.ENABLE_SELL.getBooleanValue()
+							&& buyItem.getCount() <= Configs.Generic.SELL_LIMIT.getIntegerValue()) {
 						Slot slot = handler.getSlot(2);
 						handler.switchTo(i);
 						handler.setRecipeIndex(i);

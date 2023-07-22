@@ -24,10 +24,13 @@ public class Configs implements IConfigHandler {
 				"Enable selling (if disabled emeralds are taken from the input container)");
 		public static final ConfigString SELL_ITEM = new ConfigString("sellItem", "minecraft:gold_ingot",
 				"The item to sell for emerald.");
+		public static final ConfigInteger SELL_LIMIT = new ConfigInteger("sellLimit", 64, 1, 64,
+				"max price to sell for");
 		public static final ConfigBoolean ENABLE_BUY = new ConfigBoolean("enableBuy", false,
 				"Enable buying (if disabled emeralds are placed in the output container)");
 		public static final ConfigString BUY_ITEM = new ConfigString("buyItem", "minecraft:redstone",
 				"The item to buy using emerald.");
+		public static final ConfigInteger BUY_LIMIT = new ConfigInteger("buyLimit", 64, 1, 64, "max price to buy for");
 		public static final ConfigInteger MAX_INPUT_ITEMS = new ConfigInteger("maxInputStacks", 9, 1, 35,
 				"stacks to take from input container (or emerald container in buy-only mode)");
 		public static final ConfigInteger INPUT_CONTAINER_X = new ConfigInteger("inputContainerX", 0, -30000000,
@@ -46,8 +49,8 @@ public class Configs implements IConfigHandler {
 				"delay in ticks for void trading");
 
 		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ENABLE_SELL, SELL_ITEM,
-				ENABLE_BUY, BUY_ITEM, MAX_INPUT_ITEMS, INPUT_CONTAINER_X, INPUT_CONTAINER_Y, INPUT_CONTAINER_Z,
-				OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y, OUTPUT_CONTAINER_Z, VOID_TRADING_DELAY);
+				SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS, INPUT_CONTAINER_X, INPUT_CONTAINER_Y,
+				INPUT_CONTAINER_Z, OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y, OUTPUT_CONTAINER_Z, VOID_TRADING_DELAY);
 	}
 
 	public static void loadFromFile() {
