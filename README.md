@@ -8,7 +8,7 @@ Player movement is not part of this mod. You have to move between villagers and 
 
 # Supported Version:
 
-- Minecraft 1.20 / 1.20.1
+- Minecraft 1.20 / 1.20.1 / 1.20.2
 
 # Known Issues:
 
