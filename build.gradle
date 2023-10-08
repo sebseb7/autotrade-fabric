@@ -55,6 +55,7 @@ spotless {
 import com.modrinth.minotaur.dependencies.ModDependency
 modrinth {
 	token = System.getenv("MODRINTH_TOKEN")
+	syncBodyFrom = rootProject.file("README.md").text
 	projectId = 'C1naQCmt'
 	uploadFile = remapJar
 	gameVersions = ['1.20.2']

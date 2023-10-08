@@ -6,9 +6,15 @@ Allows you to AFK trade with villagers.
 
 Player movement is not part of this mod. You have to move between villagers and input and output containers using minecart, water stream or other methods.
 
+Default keybind for options GUI: Right-Shift+T
+
 # Supported Version:
 
 - Minecraft 1.20 / 1.20.1 / 1.20.2
+
+# Requires:
+
+- malilib (0.0.5 requires malilib version 0.16.2-nyan.6 https://github.com/Nyan-Work/malilib/releases/download/snapshot-1.20.2/malilib-fabric-1.20.2-0.16.2-nyan.6.jar)
 
 # Known Issues:
 
@@ -24,3 +30,7 @@ Player movement is not part of this mod. You have to move between villagers and 
 # Demo Video
 
 https://youtu.be/ZbxkZqb-VsU
+
+# Void Trading
+
+For void trading support see: https://github.com/sebseb7/autotrade-fabric/issues/1
