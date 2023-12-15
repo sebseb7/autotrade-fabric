@@ -32,4 +32,6 @@ jobs:
       with:
         files: build/libs/*.jar
     - name: Modrinth Body
+      env:
+         MODRINTH_TOKEN: ${{ vars.MODRINTH_TOKEN }}
       run: ./gradlew modrinthSyncBody
