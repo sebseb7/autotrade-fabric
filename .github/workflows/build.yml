@@ -34,5 +34,5 @@ jobs:
         files: build/libs/*.jar
     - name: Test
       env:
-         TEST: ${{ vars.TEST2 }}
-      run: set
+         MODRINTH_TOKEN: ${{ vars.MODRINTH_TOKEN }}
+      run: ./gradlew modrinthSyncBody
