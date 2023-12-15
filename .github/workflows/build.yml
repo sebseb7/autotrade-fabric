@@ -26,16 +26,6 @@ jobs:
       with:
         name: md5sum.txt
         path: md5sum.txt
-    - name: Modrinth Body
-      if: startsWith(github.ref, 'refs/tags/')
-      env:
-        MODRINTH_TOKEN: ${{ secrets.MODRINTH_PAT }}
-      run: ./gradlew modrinthSyncBody
-    - name: Modrinth
-      if: startsWith(github.ref, 'refs/tags/')
-      env:
-        MODRINTH_TOKEN: ${{ secrets.MODRINTH_PAT }}
-      run: ./gradlew modrinth
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')

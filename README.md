@@ -10,11 +10,11 @@ Default keybind for options GUI: Right-Shift+T
 
 # Supported Version:
 
-- Minecraft 1.20 / 1.20.1 / 1.20.2
+- Minecraft 1.20.0-4
 
 # Requires:
 
-- malilib (0.0.5 requires malilib version 0.16.2-nyan.6 https://github.com/Nyan-Work/malilib/releases/download/snapshot-1.20.2/malilib-fabric-1.20.2-0.16.2-nyan.6.jar)
+- malilib 
 
 # Known Issues:
 
