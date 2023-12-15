@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.2-SNAPSHOT'
+	id 'fabric-loom' version '1.4-SNAPSHOT'
 	id 'com.diffplug.spotless' version '6.19.0'
 	id "com.modrinth.minotaur" version "2.+"
 }
@@ -11,13 +11,16 @@ repositories {
 	maven { url 'https://masa.dy.fi/maven' }
 	maven { url 'https://maven.terraformersmc.com/releases/' }
 	maven { url 'https://jitpack.io' }
+	flatDir {
+		dirs '.'
+	}
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.mappings_version}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
-	modImplementation "com.github.Nyan-Work:malilib:${project.malilib_version}"
+	modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.minecraft_version_out}:${project.malilib_version}"
 	modCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }
 
@@ -58,7 +61,7 @@ modrinth {
 	syncBodyFrom = rootProject.file("README.md").text
 	projectId = 'C1naQCmt'
 	uploadFile = remapJar
-	gameVersions = ['1.20.2']
+	gameVersions = ['1.20.3','1.20.4']
 	loaders = ['fabric']
 	dependencies = []
 }

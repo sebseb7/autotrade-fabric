@@ -7,6 +7,9 @@ import org.apache.logging.log4j.Logger;
 
 public class AutoTrade implements ModInitializer {
 	public static final Logger logger = LogManager.getLogger(Reference.MOD_ID);
+	public static long sessionStart = 0;
+	public static int sold = 0;
+	public static int bought = 0;
 
 	@Override
 	public void onInitialize() {

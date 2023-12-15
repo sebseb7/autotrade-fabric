@@ -1,5 +1,6 @@
 package com.github.sebseb7.autotrade.event;
 
+import com.github.sebseb7.autotrade.AutoTrade;
 import com.github.sebseb7.autotrade.config.Configs;
 import com.github.sebseb7.autotrade.config.Hotkeys;
 import com.github.sebseb7.autotrade.gui.GuiConfigs;
@@ -52,6 +53,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 	private boolean outputOpened = false;
 	private int tickCount = 0;
 	private int voidDelay = 0;
+	private int screenOpened = 0;
 
 	public static KeybindCallbacks getInstance() {
 		return INSTANCE;
@@ -152,6 +154,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 					? "autotrade.message.toggled_mod_on"
 					: "autotrade.message.toggled_mod_off";
 			InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, msg);
+			if (this.functionalityEnabled()) {
+				AutoTrade.sold = 0;
+				AutoTrade.bought = 0;
+				AutoTrade.sessionStart = System.currentTimeMillis() / 1000L;
+			}
 		} else if (key == Hotkeys.OPEN_GUI_SETTINGS.getKeybind()) {
 			GuiBase.openGui(new GuiConfigs());
 			return true;
@@ -224,6 +231,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 						handler.switchTo(i);
 						handler.setRecipeIndex(i);
 						mc.getNetworkHandler().sendPacket(new SelectMerchantTradeC2SPacket(i));
+						AutoTrade.sold += offer.getMaxUses();
 						try {
 							mc.interactionManager.clickSlot(handler.syncId, slot.id, 0, SlotActionType.QUICK_MOVE,
 									mc.player);
@@ -236,6 +244,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 						Slot slot = handler.getSlot(2);
 						handler.switchTo(i);
 						handler.setRecipeIndex(i);
+						AutoTrade.bought += offer.getMaxUses();
 						mc.getNetworkHandler().sendPacket(new SelectMerchantTradeC2SPacket(i));
 						try {
 							mc.interactionManager.clickSlot(handler.syncId, slot.id, 0, SlotActionType.QUICK_MOVE,
@@ -285,7 +294,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 
 		for (Entity entity : mc.player.clientWorld.getEntities()) {
 			if (entity instanceof VillagerEntity) {
-				if (entity.getPos().distanceTo(mc.player.getPos()) < 3) {
+				if (entity.getPos().distanceTo(mc.player.getPos()) < 2.5f) {
 					if (found == false) {
 						if (newVillagersInRange.contains(entity) == false) {
 							found = true;
@@ -352,6 +361,15 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			villagersInRange = new Vector<Entity>();
 			inputInRange = false;
 			outputInRange = false;
+			if (GuiUtils.getCurrentScreen() instanceof MerchantScreen) {
+				GuiUtils.getCurrentScreen().close();
+			}
+			if (GuiUtils.getCurrentScreen() instanceof ShulkerBoxScreen) {
+				GuiUtils.getCurrentScreen().close();
+			}
+			if (GuiUtils.getCurrentScreen() instanceof GenericContainerScreen) {
+				GuiUtils.getCurrentScreen().close();
+			}
 		}
 
 	}
