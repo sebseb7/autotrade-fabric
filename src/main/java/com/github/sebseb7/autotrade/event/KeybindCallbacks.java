@@ -22,6 +22,7 @@ import net.minecraft.client.gui.screen.ingame.MerchantScreen;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.entity.passive.WanderingTraderEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket;
@@ -293,7 +294,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 		Vector<Entity> newVillagersInRange = new Vector<Entity>(villagersInRange);
 
 		for (Entity entity : mc.player.clientWorld.getEntities()) {
-			if (entity instanceof VillagerEntity) {
+			if (entity instanceof VillagerEntity || entity instanceof WanderingTraderEntity) {
 				if (entity.getPos().distanceTo(mc.player.getPos()) < 2.5f) {
 					if (found == false) {
 						if (newVillagersInRange.contains(entity) == false) {
