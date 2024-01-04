@@ -332,19 +332,15 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			inputInRange = true;
 			ActionResult result = mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
 					new BlockHitResult(input.toCenterPos(), Direction.UP, input, false));
-			if (result.isAccepted()) {
-				inputOpened = true;
-				return;
-			}
+			inputOpened = true;
+			return;
 		}
 		if ((output.toCenterPos().distanceTo(mc.player.getPos()) < 4) && (outputInRange == false)) {
 			outputInRange = true;
 			ActionResult result = mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
 					new BlockHitResult(output.toCenterPos(), Direction.UP, output, false));
-			if (result.isAccepted()) {
-				outputOpened = true;
-				return;
-			}
+			outputOpened = true;
+			return;
 		}
 
 		if (input.toCenterPos().distanceTo(mc.player.getPos()) > 5) {
