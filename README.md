@@ -4,9 +4,11 @@
 
 Allows you to AFK trade with villagers.
 
-Player movement is not part of this mod. You have to move between villagers and input and output containers using minecart, water stream or other methods.
+Player movement is not part of this mod. You have to move between villagers and input and output containers using minecart, water stream or other methods. Use a light sensor to trade only once per day per villager to keep prices from climbing.
 
 Default keybind for options GUI: Right-Shift+T
+
+if you can't access settings via the keybind, try modmenu https://modrinth.com/mod/modmenu
 
 # Supported Version:
 
