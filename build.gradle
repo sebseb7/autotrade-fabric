@@ -4,8 +4,10 @@ plugins {
 	id "com.modrinth.minotaur" version "2.+"
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+java {
+	sourceCompatibility = JavaVersion.VERSION_18
+	targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
 	maven { url 'https://masa.dy.fi/maven' }
@@ -25,7 +27,9 @@ dependencies {
 }
 
 group = project.group + "." + project.mod_id
-archivesBaseName = project.mod_file_name + '-' + project.minecraft_version_out
+base {
+	archivesName = project.mod_file_name + '-' + project.minecraft_version_out
+}
 version = project.mod_version
 
 if (version.endsWith('-dev')) {
