@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Vector;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.entity.Entity;
@@ -212,11 +211,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 		}
 
 		if (GuiUtils.getCurrentScreen() instanceof MerchantScreen) {
+			MerchantScreen screen = (MerchantScreen) GuiUtils.getCurrentScreen();
 			if (state == false) {
 				String sellItemStr = Configs.Generic.SELL_ITEM.getStringValue();
 				String buyItemStr = Configs.Generic.BUY_ITEM.getStringValue();
 				state = true;
-				MerchantScreen screen = (MerchantScreen) GuiUtils.getCurrentScreen();
 				MerchantScreenHandler handler = screen.getScreenHandler();
 				TradeOfferList offers = handler.getRecipes();
 				for (int i = 0; i < offers.size(); i++) {
@@ -255,8 +254,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 						}
 					}
 				}
-				screen.close();
 			}
+			screen.close();
 			return;
 		}
 
@@ -283,10 +282,6 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 				processOutput(handler);
 				screen.close();
 			}
-		}
-
-		if (GuiUtils.getCurrentScreen() instanceof HandledScreen) {
-			return;
 		}
 
 		boolean found = false;
