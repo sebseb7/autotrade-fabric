@@ -12,7 +12,7 @@ if you can't access settings via the keybind, try modmenu https://modrinth.com/m
 
 # Supported Version:
 
-- Minecraft 1.20.0-4
+- Minecraft 1.19.4 - 1.20.4
 
 # Requires:
 
