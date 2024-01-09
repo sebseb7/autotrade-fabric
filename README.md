@@ -14,6 +14,20 @@ if you can't access settings via the keybind, try modmenu https://modrinth.com/m
 
 - Minecraft 1.19.4 - 1.20.4
 
+# Build for 1.20.3 / 1.20.4
+
+```
+./gradlw build
+```
+
+# Build for older minecraft versions:
+
+```
+./gradlew build -Pminecraft_version_out=1.20.2 -Pminecraft_version=1.20.2 -Pminecraft_version_min=1.20.2 -Pmalilib_version=0.17.0 -Pmod_menu_version=8.0.1 -Pmappings_version=1.20.2+build.4
+./gradlew build -Pminecraft_version_out=1.20.1 -Pminecraft_version=1.20.1 -Pminecraft_version_min=1.20 -Pmalilib_version=0.16.1 -Pmod_menu_version=7.0.1 -Pmappings_version=1.20.1+build.10
+./gradlew build -Pminecraft_version_out=1.19.4 -Pminecraft_version=1.19.4 -Pminecraft_version_min=1.19.4 -Pmalilib_version=0.15.2 -Pmod_menu_version=6.1.0 -Pmappings_version=1.19.4+build.2
+```
+
 # Requires:
 
 - malilib 
