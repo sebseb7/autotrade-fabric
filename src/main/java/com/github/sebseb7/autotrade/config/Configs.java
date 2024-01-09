@@ -47,7 +47,7 @@ public class Configs implements IConfigHandler {
 				30000000, "Output container Z (not used when buy disabled)");
 		public static final ConfigInteger VOID_TRADING_DELAY = new ConfigInteger("voidTradingDelay", 0, 0, 30000000,
 				"delay in ticks for void trading");
-		public static final ConfigBoolean VOID_TRADING_DELAY_AFTER_TELEPORT = new ConfigBoolean("delayAfterTelport",
+		public static final ConfigBoolean VOID_TRADING_DELAY_AFTER_TELEPORT = new ConfigBoolean("delayAfterTeleport",
 				false, "Start the delay after th villager is gone");
 
 		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ENABLE_SELL, SELL_ITEM,
