@@ -45,6 +45,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 	private static final KeybindCallbacks INSTANCE = new KeybindCallbacks();
 
 	private Vector<Entity> villagersInRange = new Vector<Entity>();
+	private int villagerActive = 0;
 
 	private boolean state = false;
 	private boolean inputInRange = false;
@@ -206,10 +207,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			if (Configs.Generic.VOID_TRADING_DELAY_AFTER_TELEPORT.getBooleanValue()) {
 				boolean found = false;
 				for (Entity entity : mc.player.clientWorld.getEntities()) {
-					if (entity instanceof VillagerEntity || entity instanceof WanderingTraderEntity) {
-						if (villagersInRange.contains(entity)) {
-							found = true;
-						}
+					if (entity.getId() == villagerActive) {
+						found = true;
 					}
 				}
 
@@ -316,6 +315,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 							newVillagersInRange.add(entity);
 							mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
 							voidDelay = Configs.Generic.VOID_TRADING_DELAY.getIntegerValue();
+							villagerActive = entity.getId();
 							state = false;
 							break;
 						}
