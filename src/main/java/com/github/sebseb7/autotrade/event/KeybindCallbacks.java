@@ -202,7 +202,22 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 	public void onClientTick(MinecraftClient mc) {
 
 		if (voidDelay > 0) {
-			voidDelay--;
+
+			if (Configs.Generic.VOID_TRADING_DELAY_AFTER_TELEPORT.getBooleanValue()) {
+				boolean found = false;
+				for (Entity entity : mc.player.clientWorld.getEntities()) {
+					if (entity instanceof VillagerEntity || entity instanceof WanderingTraderEntity) {
+						found = true;
+					}
+				}
+
+				if (!found) {
+					voidDelay--;
+				}
+			} else {
+				voidDelay--;
+			}
+
 			return;
 		}
 
