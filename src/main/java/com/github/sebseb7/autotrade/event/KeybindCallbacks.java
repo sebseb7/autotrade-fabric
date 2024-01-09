@@ -207,7 +207,9 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 				boolean found = false;
 				for (Entity entity : mc.player.clientWorld.getEntities()) {
 					if (entity instanceof VillagerEntity || entity instanceof WanderingTraderEntity) {
-						found = true;
+						if (villagersInRange.contains(entity)) {
+							found = true;
+						}
 					}
 				}
 
