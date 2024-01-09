@@ -256,6 +256,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 				}
 			}
 			screen.close();
+			inputInRange = false;
+			outputInRange = false;
 			return;
 		}
 
