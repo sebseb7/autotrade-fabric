@@ -17,7 +17,7 @@ if you can't access settings via the keybind, try modmenu https://modrinth.com/m
 # Build for 1.20.3 / 1.20.4
 
 ```
-./gradlw build
+./gradlew build
 ```
 
 # Build for older minecraft versions:
