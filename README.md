@@ -43,7 +43,21 @@ if you can't access settings via the keybind, try modmenu https://modrinth.com/m
 - https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.2/AutoTradeDemo_WDL.zip
 - Setup required for the Demo World Download:
 
+# Settings Screen
+
 <img width="570" alt="image" src="https://github.com/sebseb7/autotrade-fabric/assets/677956/4e6f8311-96a8-4952-bad7-3eab5e812828">
+
+# Possible Setup
+
+- shulker unloader presenter for input
+- shulker loader presenter for output
+- input, output, villagers connected by circular water stream to move the player
+
+![b8e3f8d519109677b7eb24cd034440253de8a313](https://github.com/sebseb7/autotrade-fabric/assets/677956/f48c2d3e-e839-40ee-8d20-c0140eca06d2)
+
+- block the water stream like this, to have the player trade only once per day to keep prices low:
+
+<img width="1254" alt="image" src="https://github.com/sebseb7/autotrade-fabric/assets/677956/974bc9af-e5aa-40be-b980-c5721434e130">
 
 
 # Demo Video
