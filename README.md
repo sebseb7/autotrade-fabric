@@ -59,6 +59,7 @@ if you can't access settings via the keybind, try modmenu https://modrinth.com/m
 
 <img width="1254" alt="image" src="https://github.com/sebseb7/autotrade-fabric/assets/677956/974bc9af-e5aa-40be-b980-c5721434e130">
 
+- on 2b2t water stream for player movement doesn't work somehow, minecart circuit works.
 
 # Demo Video
 
