@@ -23,7 +23,8 @@ public class Configs implements IConfigHandler {
 		public static final ConfigBoolean ITEM_FRAME = new ConfigBoolean("selectUsingItemFrame", true,
 				"Select buy/sell items with item frames (max. distance 3) with items nametagged \"buy\" or \"sell\"");
 		public static final ConfigBoolean GLASS_BLOCK = new ConfigBoolean("selectUsingGlassBlock", false,
-				"Select input and output containers by placing red (input) and blue (output) stained glass blocks 3 blocks above them");
+				"Select input and output containers by placing red (input) and blue (output) stained glass blocks <selectionBlockOffset> blocks above them (or below if negative)");
+		public static final ConfigInteger SELECTOR_OFFSET = new ConfigInteger("selectionBlockOffset", 3, -10, 10, "");
 		public static final ConfigBoolean ENABLE_SELL = new ConfigBoolean("enableSell", false,
 				"Enable selling (if disabled emeralds are taken from the input container)");
 		public static final ConfigString SELL_ITEM = new ConfigString("sellItem", "minecraft:gold_ingot",
@@ -56,9 +57,9 @@ public class Configs implements IConfigHandler {
 				"true: Start the delay after the villager was unloaded; false: Start the delay after the trade has been completed");
 
 		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ITEM_FRAME, GLASS_BLOCK,
-				ENABLE_SELL, SELL_ITEM, SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS, INPUT_CONTAINER_X,
-				INPUT_CONTAINER_Y, INPUT_CONTAINER_Z, OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y, OUTPUT_CONTAINER_Z,
-				VOID_TRADING_DELAY, VOID_TRADING_DELAY_AFTER_TELEPORT);
+				SELECTOR_OFFSET, ENABLE_SELL, SELL_ITEM, SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS,
+				INPUT_CONTAINER_X, INPUT_CONTAINER_Y, INPUT_CONTAINER_Z, OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y,
+				OUTPUT_CONTAINER_Z, VOID_TRADING_DELAY, VOID_TRADING_DELAY_AFTER_TELEPORT);
 	}
 
 	public static void loadFromFile() {

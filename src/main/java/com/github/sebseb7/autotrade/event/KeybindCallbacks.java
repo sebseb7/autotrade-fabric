@@ -237,31 +237,33 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			int playerZ = (int) mc.player.getPos().getZ();
 			int playerY = (int) mc.player.getPos().getY();
 
-			for (int x = playerX - 6; x < playerX + 6; x += 1) {
-				for (int z = playerZ - 6; z < playerZ + 6; z += 1) {
-					for (int y = playerY - 6; y < playerY + 6; y += 1) {
+			int selectorOffset = Configs.Generic.SELECTOR_OFFSET.getIntegerValue();
+
+			for (int x = playerX - (selectorOffset + 3); x < playerX + (selectorOffset + 3); x += 1) {
+				for (int z = playerZ - (selectorOffset + 3); z < playerZ + (selectorOffset + 3); z += 1) {
+					for (int y = playerY - (selectorOffset + 3); y < playerY + (selectorOffset + 3); y += 1) {
 						BlockPos pos = new BlockPos(x, y, z);
 						if (mc.player.clientWorld.getBlockState(pos).isOf(Blocks.RED_STAINED_GLASS)) {
 							if ((x != Configs.Generic.INPUT_CONTAINER_X.getIntegerValue())
-									|| ((y - 3) != Configs.Generic.INPUT_CONTAINER_Y.getIntegerValue())
+									|| ((y - selectorOffset) != Configs.Generic.INPUT_CONTAINER_Y.getIntegerValue())
 									|| (z != Configs.Generic.INPUT_CONTAINER_Z.getIntegerValue())) {
 								Configs.Generic.INPUT_CONTAINER_X.setIntegerValue(x);
-								Configs.Generic.INPUT_CONTAINER_Y.setIntegerValue(y - 3);
+								Configs.Generic.INPUT_CONTAINER_Y.setIntegerValue(y - selectorOffset);
 								Configs.Generic.INPUT_CONTAINER_Z.setIntegerValue(z);
 								InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
-										"autotrade.message.input_container_set", x, y - 3, z);
+										"autotrade.message.input_container_set", x, y - selectorOffset, z);
 							}
 							break;
 						}
 						if (mc.player.clientWorld.getBlockState(pos).isOf(Blocks.BLUE_STAINED_GLASS)) {
 							if ((x != Configs.Generic.OUTPUT_CONTAINER_X.getIntegerValue())
-									|| ((y - 3) != Configs.Generic.OUTPUT_CONTAINER_Y.getIntegerValue())
+									|| ((y - selectorOffset) != Configs.Generic.OUTPUT_CONTAINER_Y.getIntegerValue())
 									|| (z != Configs.Generic.OUTPUT_CONTAINER_Z.getIntegerValue())) {
 								Configs.Generic.OUTPUT_CONTAINER_X.setIntegerValue(x);
-								Configs.Generic.OUTPUT_CONTAINER_Y.setIntegerValue(y - 3);
+								Configs.Generic.OUTPUT_CONTAINER_Y.setIntegerValue(y - selectorOffset);
 								Configs.Generic.OUTPUT_CONTAINER_Z.setIntegerValue(z);
 								InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
-										"autotrade.message.output_container_set", x, y - 3, z);
+										"autotrade.message.output_container_set", x, y - selectorOffset, z);
 							}
 							break;
 						}
