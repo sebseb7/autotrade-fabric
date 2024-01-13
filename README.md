@@ -8,6 +8,8 @@ Player movement is not part of this mod. You have to move between villagers and 
 
 Default keybind for options GUI: Right-Shift+T
 
+Beginning with version v0.0.10 you can select the sell/buy items using nametagges items in items frames and the input/output containers by placing glass blocks nearby.
+
 if you can't access settings via the keybind, try modmenu https://modrinth.com/mod/modmenu
 
 # Supported Version:
