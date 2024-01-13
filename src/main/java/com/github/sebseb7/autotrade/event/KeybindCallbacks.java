@@ -15,16 +15,20 @@ import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.InfoUtils;
 import java.util.HashMap;
 import java.util.Vector;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.passive.WanderingTraderEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket;
+import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.MerchantScreenHandler;
@@ -37,6 +41,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
@@ -226,6 +231,81 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			return;
 		}
 
+		if (Configs.Generic.GLASS_BLOCK.getBooleanValue()) {
+
+			int playerX = (int) mc.player.getPos().getX();
+			int playerZ = (int) mc.player.getPos().getZ();
+			int playerY = (int) mc.player.getPos().getY();
+
+			for (int x = playerX - 6; x < playerX + 6; x += 1) {
+				for (int z = playerZ - 6; z < playerZ + 6; z += 1) {
+					for (int y = playerY - 6; y < playerY + 6; y += 1) {
+						BlockPos pos = new BlockPos(x, y, z);
+						if (mc.player.clientWorld.getBlockState(pos).isOf(Blocks.RED_STAINED_GLASS)) {
+							if ((x != Configs.Generic.INPUT_CONTAINER_X.getIntegerValue())
+									|| ((y - 3) != Configs.Generic.INPUT_CONTAINER_Y.getIntegerValue())
+									|| (z != Configs.Generic.INPUT_CONTAINER_Z.getIntegerValue())) {
+								Configs.Generic.INPUT_CONTAINER_X.setIntegerValue(x);
+								Configs.Generic.INPUT_CONTAINER_Y.setIntegerValue(y - 3);
+								Configs.Generic.INPUT_CONTAINER_Z.setIntegerValue(z);
+								InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
+										"autotrade.message.input_container_set", x, y - 3, z);
+							}
+							break;
+						}
+						if (mc.player.clientWorld.getBlockState(pos).isOf(Blocks.BLUE_STAINED_GLASS)) {
+							if ((x != Configs.Generic.OUTPUT_CONTAINER_X.getIntegerValue())
+									|| ((y - 3) != Configs.Generic.OUTPUT_CONTAINER_Y.getIntegerValue())
+									|| (z != Configs.Generic.OUTPUT_CONTAINER_Z.getIntegerValue())) {
+								Configs.Generic.OUTPUT_CONTAINER_X.setIntegerValue(x);
+								Configs.Generic.OUTPUT_CONTAINER_Y.setIntegerValue(y - 3);
+								Configs.Generic.OUTPUT_CONTAINER_Z.setIntegerValue(z);
+								InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
+										"autotrade.message.output_container_set", x, y - 3, z);
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (Configs.Generic.ITEM_FRAME.getBooleanValue()) {
+
+			for (ItemFrameEntity entity : mc.player.clientWorld.getEntitiesByClass(ItemFrameEntity.class,
+					new Box(mc.player.getPos().getX() - 3, mc.player.getPos().getY() - 3, mc.player.getPos().getZ() - 3,
+							mc.player.getPos().getX() + 3, mc.player.getPos().getY() + 3,
+							mc.player.getPos().getZ() + 3),
+					EntityPredicates.VALID_ENTITY)) {
+				ItemStack stack = entity.getHeldItemStack();
+				if (stack.hasNbt()) {
+					NbtCompound tag = stack.getNbt();
+					NbtCompound elem = tag.getCompound("display");
+					if (elem != null) {
+						if (elem.getString("Name").equals("\"sell\"")) {
+							String sellItem = Registries.ITEM.getId(stack.getItem()).toString();
+							if (!Configs.Generic.SELL_ITEM.getStringValue().equals(sellItem)) {
+								InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
+										"autotrade.message.sell_item_set", sellItem);
+								Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
+								break;
+							}
+						}
+						if (elem.getString("Name").equals("\"buy\"")) {
+							String buyItem = Registries.ITEM.getId(stack.getItem()).toString();
+							if (!Configs.Generic.BUY_ITEM.getStringValue().equals(buyItem)) {
+								InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
+										"autotrade.message.buy_item_set", buyItem);
+								Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
+								break;
+							}
+						}
+					}
+				}
+
+			}
+		}
+
 		if (GuiUtils.getCurrentScreen() instanceof MerchantScreen) {
 			MerchantScreen screen = (MerchantScreen) GuiUtils.getCurrentScreen();
 			if (state == false) {
@@ -249,6 +329,10 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 						mc.getNetworkHandler().sendPacket(new SelectMerchantTradeC2SPacket(i));
 						AutoTrade.sold += offer.getMaxUses();
 						try {
+							/*
+							 * if (slot.hasStack()) { System.out.println("buy " +
+							 * slot.getStack().getCount()); }
+							 */
 							mc.interactionManager.clickSlot(handler.syncId, slot.id, 0, SlotActionType.QUICK_MOVE,
 									mc.player);
 						} catch (Exception e) {
@@ -263,6 +347,10 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 						AutoTrade.bought += offer.getMaxUses();
 						mc.getNetworkHandler().sendPacket(new SelectMerchantTradeC2SPacket(i));
 						try {
+							/*
+							 * if (slot.hasStack()) { System.out.println("sell " +
+							 * slot.getStack().getCount()); }
+							 */
 							mc.interactionManager.clickSlot(handler.syncId, slot.id, 0, SlotActionType.QUICK_MOVE,
 									mc.player);
 						} catch (Exception e) {
