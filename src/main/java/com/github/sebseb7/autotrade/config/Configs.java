@@ -54,7 +54,7 @@ public class Configs implements IConfigHandler {
 				"delay in ticks for void trading");
 		public static final ConfigBoolean VOID_TRADING_DELAY_AFTER_TELEPORT = new ConfigBoolean("delayAfterTeleport",
 				true,
-				"true: Start the delay after the villager was unloaded; false: Start the delay after the trade has been completed");
+				"true: Start the delay after the villager was unloaded; false: Start the delay after the trade has been initiated");
 
 		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ITEM_FRAME, GLASS_BLOCK,
 				SELECTOR_OFFSET, ENABLE_SELL, SELL_ITEM, SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS,
