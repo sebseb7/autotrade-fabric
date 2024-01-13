@@ -43,7 +43,8 @@ if you can't access settings via the keybind, try modmenu https://modrinth.com/m
 - https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.2/AutoTradeDemo_WDL.zip
 - Setup required for the Demo World Download:
 
-![image](https://github.com/sebseb7/autotrade-fabric/assets/677956/486c76e0-6c17-4cd9-8ca4-c0eaab71e7cc)
+<img width="570" alt="image" src="https://github.com/sebseb7/autotrade-fabric/assets/677956/4e6f8311-96a8-4952-bad7-3eab5e812828">
+
 
 # Demo Video
 
