@@ -238,10 +238,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			int playerY = (int) mc.player.getPos().getY();
 
 			int selectorOffset = Configs.Generic.SELECTOR_OFFSET.getIntegerValue();
+			int absSelectorOffset = Math.abs(selectorOffset);
 
-			for (int x = playerX - (selectorOffset + 3); x < playerX + (selectorOffset + 3); x += 1) {
-				for (int z = playerZ - (selectorOffset + 3); z < playerZ + (selectorOffset + 3); z += 1) {
-					for (int y = playerY - (selectorOffset + 3); y < playerY + (selectorOffset + 3); y += 1) {
+			for (int x = playerX - (absSelectorOffset + 3); x < playerX + (absSelectorOffset + 3); x += 1) {
+				for (int z = playerZ - (absSelectorOffset + 3); z < playerZ + (absSelectorOffset + 3); z += 1) {
+					for (int y = playerY - (absSelectorOffset + 3); y < playerY + (absSelectorOffset + 3); y += 1) {
 						BlockPos pos = new BlockPos(x, y, z);
 						if (mc.player.clientWorld.getBlockState(pos).isOf(Blocks.RED_STAINED_GLASS)) {
 							if ((x != Configs.Generic.INPUT_CONTAINER_X.getIntegerValue())
