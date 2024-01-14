@@ -8,6 +8,7 @@
 3. [Known Issues](#known-issues)
 4. [Possible Setup](#possible-setup)
 5. [Void Trading Example & Settings](#void-trading-example--settings)
+6. [WDL](#wdl)
 
 ### Description
 
@@ -75,3 +76,6 @@ https://youtu.be/ZbxkZqb-VsU
 https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.10/void_trader_outer_island.litematic
 https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.10/void_trader_central_island.litematic
 
+### WDL
+
+https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.10/AutoTradeDemoWDL.zip
