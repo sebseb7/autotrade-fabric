@@ -10,6 +10,8 @@
 5. [Void Trading Example & Settings](#void-trading-example--settings)
 6. [WDL](#wdl)
 
+feel free to ask questions: https://github.com/sebseb7/autotrade-fabric/discussions
+
 ### Description
 
 Allows you to AFK trade with villagers.
