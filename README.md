@@ -65,6 +65,13 @@ if you can't access settings via the keybind, try modmenu https://modrinth.com/m
 
 https://youtu.be/ZbxkZqb-VsU
 
-# Void Trading
+# Void Trading Example & Settings
 
-For void trading support see: https://github.com/sebseb7/autotrade-fabric/issues/1
+- selectUsingGlassBlock: true
+- selectionOffset: -3
+- voidTradingDelay: 50
+- delayAfterTeleport: true
+
+https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.10/void_trader_outer_island.litematic
+https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.10/void_trader_central_island.litematic
+
