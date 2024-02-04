@@ -2,6 +2,18 @@
 
 # AutoTrade-fabric
 
+## Table of contents
+1. [Description](#description)
+2. [Build](#build-for-1203--1204)
+3. [Known Issues](#known-issues)
+4. [Possible Setup](#possible-setup)
+5. [Void Trading Example & Settings](#void-trading-example--settings)
+6. [WDL](#wdl)
+
+feel free to ask questions: https://github.com/sebseb7/autotrade-fabric/discussions
+
+### Description
+
 Allows you to AFK trade with villagers.
 
 Player movement is not part of this mod. You have to move between villagers and input and output containers using minecart, water stream or other methods. Use a light sensor to trade only once per day per villager to keep prices from climbing.
@@ -12,17 +24,17 @@ Beginning with version v0.0.10 you can select the sell/buy items using nametagge
 
 if you can't access settings via the keybind, try modmenu https://modrinth.com/mod/modmenu
 
-# Supported Version:
+#### Supported Version:
 
 - Minecraft 1.19.4 - 1.20.4
 
-# Build for 1.20.3 / 1.20.4
+### Build for 1.20.3 / 1.20.4
 
 ```
 ./gradlew build
 ```
 
-# Build for older minecraft versions:
+#### Build for older minecraft versions:
 
 ```
 ./gradlew build -Pminecraft_version_out=1.20.2 -Pminecraft_version=1.20.2 -Pminecraft_version_min=1.20.2 -Pmalilib_version=0.17.0 -Pmod_menu_version=8.0.1 -Pmappings_version=1.20.2+build.4
@@ -30,24 +42,15 @@ if you can't access settings via the keybind, try modmenu https://modrinth.com/m
 ./gradlew build -Pminecraft_version_out=1.19.4 -Pminecraft_version=1.19.4 -Pminecraft_version_min=1.19.4 -Pmalilib_version=0.15.2 -Pmod_menu_version=6.1.0 -Pmappings_version=1.19.4+build.2
 ```
 
-# Requires:
+#### Requires:
 
 - malilib 
 
-# Known Issues:
+### Known Issues
 
 - itemscroller trade favorites break trading
 
-# Demo World Download
-
-- https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.2/AutoTradeDemo_WDL.zip
-- Setup required for the Demo World Download:
-
-# Settings Screen
-
-<img width="570" alt="image" src="https://github.com/sebseb7/autotrade-fabric/assets/677956/4e6f8311-96a8-4952-bad7-3eab5e812828">
-
-# Possible Setup
+### Possible Setup
 
 - shulker unloader presenter for input
 - shulker loader presenter for output
@@ -61,10 +64,20 @@ if you can't access settings via the keybind, try modmenu https://modrinth.com/m
 
 - on 2b2t water stream for player movement doesn't work somehow, minecart circuit works.
 
-# Demo Video
+#### Demo Video
 
 https://youtu.be/ZbxkZqb-VsU
 
-# Void Trading
+### Void Trading Example & Settings
 
-For void trading support see: https://github.com/sebseb7/autotrade-fabric/issues/1
+- selectUsingGlassBlock: true
+- selectionOffset: -3
+- voidTradingDelay: 50
+- delayAfterTeleport: true
+
+https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.10/void_trader_outer_island.litematic
+https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.10/void_trader_central_island.litematic
+
+### WDL
+
+https://github.com/sebseb7/autotrade-fabric/releases/download/v0.0.10/AutoTradeDemoWDL.zip
