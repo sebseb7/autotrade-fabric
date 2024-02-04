@@ -59,6 +59,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 	private boolean outputOpened = false;
 	private int tickCount = 0;
 	private int voidDelay = 0;
+	private int containerDelay = 0;
 	private int screenOpened = 0;
 
 	public static KeybindCallbacks getInstance() {
@@ -227,6 +228,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			return;
 		}
 
+		if (containerDelay > 0) {
+
+			containerDelay--;
+		}
+
 		if (this.functionalityEnabled() == false || mc.player == null) {
 			return;
 		}
@@ -371,11 +377,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 		if (GuiUtils.getCurrentScreen() instanceof ShulkerBoxScreen) {
 			ShulkerBoxScreen screen = (ShulkerBoxScreen) GuiUtils.getCurrentScreen();
 			ShulkerBoxScreenHandler handler = screen.getScreenHandler();
-			if (inputOpened) {
+			if ((containerDelay == 0) && inputOpened) {
 				processInput(handler);
 				screen.close();
 			}
-			if (outputOpened) {
+			if ((containerDelay == 0) && outputOpened) {
 				processOutput(handler);
 				screen.close();
 			}
@@ -383,11 +389,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 		if (GuiUtils.getCurrentScreen() instanceof GenericContainerScreen) {
 			GenericContainerScreen screen = (GenericContainerScreen) GuiUtils.getCurrentScreen();
 			GenericContainerScreenHandler handler = screen.getScreenHandler();
-			if (inputOpened) {
+			if ((containerDelay == 0) && inputOpened) {
 				processInput(handler);
 				screen.close();
 			}
-			if (outputOpened) {
+			if ((containerDelay == 0) && outputOpened) {
 				processOutput(handler);
 				screen.close();
 			}
@@ -437,6 +443,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			inputInRange = true;
 			ActionResult result = mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
 					new BlockHitResult(input.toCenterPos(), Direction.UP, input, false));
+			containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
 			inputOpened = true;
 			return;
 		}
@@ -444,6 +451,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			outputInRange = true;
 			ActionResult result = mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
 					new BlockHitResult(output.toCenterPos(), Direction.UP, output, false));
+			containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
 			outputOpened = true;
 			return;
 		}
