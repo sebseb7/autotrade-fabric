@@ -29,8 +29,12 @@
 	"mixins": [
 	],
 
+	"suggests": {
+		"modmenu": "*"
+	},
+
 	"depends": {
-		"minecraft": ">=${minecraft_version_min}",
-		"malilib": ">=${malilib_version}"
+		"minecraft": "~1.21.5",
+		"malilib": "0.24.2"
 	}
 }

@@ -1,16 +1,15 @@
 plugins {
-	id 'fabric-loom' version '1.4-SNAPSHOT'
+	id 'fabric-loom' version "${loom_version}"
 	id 'com.diffplug.spotless' version '6.19.0'
 	id "com.modrinth.minotaur" version "2.+"
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_18
-	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
-	maven { url 'https://masa.dy.fi/maven' }
 	maven { url 'https://maven.terraformersmc.com/releases/' }
 	maven { url 'https://jitpack.io' }
 	flatDir {
@@ -20,15 +19,19 @@ repositories {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.mappings_version}:v2"
+	mappings "net.fabricmc:yarn:${project.yarn_version}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
-	modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.minecraft_version_out}:${project.malilib_version}"
+	modImplementation "com.github.sakura-ryoko:malilib:${project.minecraft_version}-${project.malilib_version}"
 	modCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
+
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modApi "com.terraformersmc:modmenu:14.0.0-rc.2"
 }
 
 group = project.group + "." + project.mod_id
+
 base {
-	archivesName = project.mod_file_name + '-' + project.minecraft_version_out
+	archivesName = project.mod_file_name + '-' + project.minecraft_version
 }
 version = project.mod_version
 
@@ -42,7 +45,6 @@ processResources {
 	filesMatching("fabric.mod.json") {
 		expand([
 				"mod_version"          : project.version,
-				"minecraft_version_min": project.property("minecraft_version_min"),
 				"malilib_version"   : project.property("malilib_version")
 		])
 	}
@@ -50,7 +52,7 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
-	it.options.release = 17
+	it.options.release = 21
 }
 
 spotless {
@@ -69,7 +71,7 @@ modrinth {
 	syncBodyFrom = rootProject.file("README.md").text
 	projectId = 'C1naQCmt'
 	uploadFile = remapJar
-	gameVersions = ['1.20.3','1.20.4']
+	gameVersions = ['1.21.5']
 	loaders = ['fabric']
 	dependencies = []
 }

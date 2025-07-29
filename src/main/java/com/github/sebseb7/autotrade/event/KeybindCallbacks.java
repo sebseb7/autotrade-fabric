@@ -26,7 +26,6 @@ import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.passive.WanderingTraderEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
@@ -36,6 +35,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -192,12 +192,12 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 			}
 		} else if (key == Hotkeys.SET_BUY_KEY.getKeybind()) {
 
-			String buyItem = Registries.ITEM.getId(mc.player.getInventory().getMainHandStack().getItem()).toString();
+			String buyItem = Registries.ITEM.getId(mc.player.getInventory().getSelectedStack().getItem()).toString();
 			InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.buy_item_set", buyItem);
 			Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
 		} else if (key == Hotkeys.SET_SELL_KEY.getKeybind()) {
 
-			String sellItem = Registries.ITEM.getId(mc.player.getInventory().getMainHandStack().getItem()).toString();
+			String sellItem = Registries.ITEM.getId(mc.player.getInventory().getSelectedStack().getItem()).toString();
 			InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.sell_item_set", sellItem);
 			Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
 		}
@@ -287,31 +287,31 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 							mc.player.getPos().getZ() + 3),
 					EntityPredicates.VALID_ENTITY)) {
 				ItemStack stack = entity.getHeldItemStack();
-				if (stack.hasNbt()) {
-					NbtCompound tag = stack.getNbt();
-					NbtCompound elem = tag.getCompound("display");
-					if (elem != null) {
-						if (elem.getString("Name").equals("\"sell\"")) {
-							String sellItem = Registries.ITEM.getId(stack.getItem()).toString();
-							if (!Configs.Generic.SELL_ITEM.getStringValue().equals(sellItem)) {
-								InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
-										"autotrade.message.sell_item_set", sellItem);
-								Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
-								break;
-							}
+
+				Text customName = stack.getCustomName();
+				if (customName != null) {
+					String nameString = customName.getString();
+
+					if (nameString.equals("sell")) {
+						String sellItem = Registries.ITEM.getId(stack.getItem()).toString();
+						if (!Configs.Generic.SELL_ITEM.getStringValue().equals(sellItem)) {
+							InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
+									"autotrade.message.sell_item_set", sellItem);
+							Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
+							break;
 						}
-						if (elem.getString("Name").equals("\"buy\"")) {
-							String buyItem = Registries.ITEM.getId(stack.getItem()).toString();
-							if (!Configs.Generic.BUY_ITEM.getStringValue().equals(buyItem)) {
-								InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
-										"autotrade.message.buy_item_set", buyItem);
-								Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
-								break;
-							}
+					}
+
+					if (nameString.equals("buy")) {
+						String buyItem = Registries.ITEM.getId(stack.getItem()).toString();
+						if (!Configs.Generic.BUY_ITEM.getStringValue().equals(buyItem)) {
+							InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.buy_item_set",
+									buyItem);
+							Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
+							break;
 						}
 					}
 				}
-
 			}
 		}
 
@@ -326,7 +326,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 				for (int i = 0; i < offers.size(); i++) {
 					TradeOffer offer = offers.get(i);
 					ItemStack sellItem = offer.getSellItem();
-					ItemStack buyItem = offer.getAdjustedFirstBuyItem();
+					ItemStack buyItem = offer.getDisplayedFirstBuyItem();
 					String sellId = Registries.ITEM.getId(sellItem.getItem()).toString();
 					String buyId = Registries.ITEM.getId(buyItem.getItem()).toString();
 

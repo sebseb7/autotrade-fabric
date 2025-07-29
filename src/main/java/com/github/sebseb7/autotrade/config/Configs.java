@@ -65,7 +65,7 @@ public class Configs implements IConfigHandler {
 	}
 
 	public static void loadFromFile() {
-		File configFile = new File(FileUtils.getConfigDirectory(), CONFIG_FILE_NAME);
+		File configFile = new File(FileUtils.getConfigDirectoryAsPath().toString(), CONFIG_FILE_NAME);
 
 		if (configFile.exists() && configFile.isFile() && configFile.canRead()) {
 			JsonElement element = JsonUtils.parseJsonFile(configFile);
@@ -80,7 +80,7 @@ public class Configs implements IConfigHandler {
 	}
 
 	public static void saveToFile() {
-		File dir = FileUtils.getConfigDirectory();
+		File dir = FileUtils.getConfigDirectoryAsPath().toFile();
 
 		if ((dir.exists() && dir.isDirectory()) || dir.mkdirs()) {
 			JsonObject root = new JsonObject();
