@@ -26,7 +26,6 @@ import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.passive.WanderingTraderEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
@@ -36,7 +35,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -60,7 +58,6 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 	private int tickCount = 0;
 	private int voidDelay = 0;
 	private int containerDelay = 0;
-	private int screenOpened = 0;
 
 	public static KeybindCallbacks getInstance() {
 		return INSTANCE;
@@ -191,13 +188,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 						blockHit.getBlockPos().getX(), blockHit.getBlockPos().getY(), blockHit.getBlockPos().getZ());
 			}
 		} else if (key == Hotkeys.SET_BUY_KEY.getKeybind()) {
-
-			String buyItem = Registries.ITEM.getId(mc.player.getInventory().getMainHandStack().getItem()).toString();
+			String buyItem = Registries.ITEM.getId(mc.player.getMainHandStack().getItem()).toString();
 			InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.buy_item_set", buyItem);
 			Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
 		} else if (key == Hotkeys.SET_SELL_KEY.getKeybind()) {
-
-			String sellItem = Registries.ITEM.getId(mc.player.getInventory().getMainHandStack().getItem()).toString();
+			String sellItem = Registries.ITEM.getId(mc.player.getMainHandStack().getItem()).toString();
 			InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.sell_item_set", sellItem);
 			Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
 		}
@@ -212,7 +207,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 
 			if (Configs.Generic.VOID_TRADING_DELAY_AFTER_TELEPORT.getBooleanValue()) {
 				boolean found = false;
-				for (Entity entity : mc.player.clientWorld.getEntities()) {
+				for (Entity entity : mc.world.getEntities()) {
 					if (entity.getId() == villagerActive) {
 						found = true;
 					}
@@ -239,9 +234,9 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 
 		if (Configs.Generic.GLASS_BLOCK.getBooleanValue()) {
 
-			int playerX = (int) mc.player.getPos().getX();
-			int playerZ = (int) mc.player.getPos().getZ();
-			int playerY = (int) mc.player.getPos().getY();
+			int playerX = (int) mc.player.getX();
+			int playerZ = (int) mc.player.getZ();
+			int playerY = (int) mc.player.getY();
 
 			int selectorOffset = Configs.Generic.SELECTOR_OFFSET.getIntegerValue();
 			int absSelectorOffset = Math.abs(selectorOffset);
@@ -250,7 +245,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 				for (int z = playerZ - (absSelectorOffset + 3); z < playerZ + (absSelectorOffset + 3); z += 1) {
 					for (int y = playerY - (absSelectorOffset + 3); y < playerY + (absSelectorOffset + 3); y += 1) {
 						BlockPos pos = new BlockPos(x, y, z);
-						if (mc.player.clientWorld.getBlockState(pos).isOf(Blocks.RED_STAINED_GLASS)) {
+						if (mc.world.getBlockState(pos).isOf(Blocks.RED_STAINED_GLASS)) {
 							if ((x != Configs.Generic.INPUT_CONTAINER_X.getIntegerValue())
 									|| ((y - selectorOffset) != Configs.Generic.INPUT_CONTAINER_Y.getIntegerValue())
 									|| (z != Configs.Generic.INPUT_CONTAINER_Z.getIntegerValue())) {
@@ -262,7 +257,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 							}
 							break;
 						}
-						if (mc.player.clientWorld.getBlockState(pos).isOf(Blocks.BLUE_STAINED_GLASS)) {
+						if (mc.world.getBlockState(pos).isOf(Blocks.BLUE_STAINED_GLASS)) {
 							if ((x != Configs.Generic.OUTPUT_CONTAINER_X.getIntegerValue())
 									|| ((y - selectorOffset) != Configs.Generic.OUTPUT_CONTAINER_Y.getIntegerValue())
 									|| (z != Configs.Generic.OUTPUT_CONTAINER_Z.getIntegerValue())) {
@@ -281,34 +276,28 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 
 		if (Configs.Generic.ITEM_FRAME.getBooleanValue()) {
 
-			for (ItemFrameEntity entity : mc.player.clientWorld.getEntitiesByClass(ItemFrameEntity.class,
-					new Box(mc.player.getPos().getX() - 3, mc.player.getPos().getY() - 3, mc.player.getPos().getZ() - 3,
-							mc.player.getPos().getX() + 3, mc.player.getPos().getY() + 3,
-							mc.player.getPos().getZ() + 3),
+			for (ItemFrameEntity entity : mc.world.getEntitiesByClass(
+					ItemFrameEntity.class, new Box(mc.player.getX() - 3, mc.player.getY() - 3, mc.player.getZ() - 3,
+							mc.player.getX() + 3, mc.player.getY() + 3, mc.player.getZ() + 3),
 					EntityPredicates.VALID_ENTITY)) {
 				ItemStack stack = entity.getHeldItemStack();
-				if (stack.hasNbt()) {
-					NbtCompound tag = stack.getNbt();
-					NbtCompound elem = tag.getCompound("display");
-					if (elem != null) {
-						if (elem.getString("Name").equals("\"sell\"")) {
-							String sellItem = Registries.ITEM.getId(stack.getItem()).toString();
-							if (!Configs.Generic.SELL_ITEM.getStringValue().equals(sellItem)) {
-								InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
-										"autotrade.message.sell_item_set", sellItem);
-								Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
-								break;
-							}
-						}
-						if (elem.getString("Name").equals("\"buy\"")) {
-							String buyItem = Registries.ITEM.getId(stack.getItem()).toString();
-							if (!Configs.Generic.BUY_ITEM.getStringValue().equals(buyItem)) {
-								InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
-										"autotrade.message.buy_item_set", buyItem);
-								Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
-								break;
-							}
-						}
+				String customName = stack.getName().getString();
+				if ("sell".equalsIgnoreCase(customName) || "\"sell\"".equals(customName)) {
+					String sellItem = Registries.ITEM.getId(stack.getItem()).toString();
+					if (!Configs.Generic.SELL_ITEM.getStringValue().equals(sellItem)) {
+						InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.sell_item_set",
+								sellItem);
+						Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
+						break;
+					}
+				}
+				if ("buy".equalsIgnoreCase(customName) || "\"buy\"".equals(customName)) {
+					String buyItem = Registries.ITEM.getId(stack.getItem()).toString();
+					if (!Configs.Generic.BUY_ITEM.getStringValue().equals(buyItem)) {
+						InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.buy_item_set",
+								buyItem);
+						Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
+						break;
 					}
 				}
 
@@ -326,7 +315,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 				for (int i = 0; i < offers.size(); i++) {
 					TradeOffer offer = offers.get(i);
 					ItemStack sellItem = offer.getSellItem();
-					ItemStack buyItem = offer.getAdjustedFirstBuyItem();
+					ItemStack buyItem = offer.getDisplayedFirstBuyItem();
 					String sellId = Registries.ITEM.getId(sellItem.getItem()).toString();
 					String buyId = Registries.ITEM.getId(buyItem.getItem()).toString();
 
@@ -336,7 +325,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 						handler.switchTo(i);
 						handler.setRecipeIndex(i);
 						mc.getNetworkHandler().sendPacket(new SelectMerchantTradeC2SPacket(i));
-						AutoTrade.sold += offer.getMaxUses();
+						AutoTrade.bought += offer.getMaxUses();
 						try {
 							/*
 							 * if (slot.hasStack()) { System.out.println("buy " +
@@ -353,7 +342,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 						Slot slot = handler.getSlot(2);
 						handler.switchTo(i);
 						handler.setRecipeIndex(i);
-						AutoTrade.bought += offer.getMaxUses();
+						AutoTrade.sold += offer.getMaxUses();
 						mc.getNetworkHandler().sendPacket(new SelectMerchantTradeC2SPacket(i));
 						try {
 							/*
@@ -403,9 +392,9 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 
 		Vector<Entity> newVillagersInRange = new Vector<Entity>(villagersInRange);
 
-		for (Entity entity : mc.player.clientWorld.getEntities()) {
+		for (Entity entity : mc.world.getEntities()) {
 			if (entity instanceof VillagerEntity || entity instanceof WanderingTraderEntity) {
-				if (entity.getPos().distanceTo(mc.player.getPos()) < 2.5f) {
+				if (entity.squaredDistanceTo(mc.player) < (2.5f * 2.5f)) {
 					if (found == false) {
 						if (newVillagersInRange.contains(entity) == false) {
 							found = true;
@@ -422,7 +411,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 		}
 
 		for (Entity entity : villagersInRange) {
-			if ((entity.getPos().distanceTo(mc.player.getPos()) < 4) == false) {
+			if ((entity.squaredDistanceTo(mc.player) < 16.0D) == false) {
 				newVillagersInRange.remove(entity);
 			}
 		}
@@ -439,28 +428,28 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 				Configs.Generic.OUTPUT_CONTAINER_Y.getIntegerValue(),
 				Configs.Generic.OUTPUT_CONTAINER_Z.getIntegerValue());
 
-		if ((input.toCenterPos().distanceTo(mc.player.getPos()) < 4) && (inputInRange == false)) {
+		if ((mc.player.squaredDistanceTo(input.toCenterPos()) < 16.0D) && (inputInRange == false)) {
 			inputInRange = true;
-			ActionResult result = mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
+			mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
 					new BlockHitResult(input.toCenterPos(), Direction.UP, input, false));
 			containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
 			inputOpened = true;
 			return;
 		}
-		if ((output.toCenterPos().distanceTo(mc.player.getPos()) < 4) && (outputInRange == false)) {
+		if ((mc.player.squaredDistanceTo(output.toCenterPos()) < 16.0D) && (outputInRange == false)) {
 			outputInRange = true;
-			ActionResult result = mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
+			mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
 					new BlockHitResult(output.toCenterPos(), Direction.UP, output, false));
 			containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
 			outputOpened = true;
 			return;
 		}
 
-		if (input.toCenterPos().distanceTo(mc.player.getPos()) > 5) {
+		if (mc.player.squaredDistanceTo(input.toCenterPos()) > 25.0D) {
 			inputOpened = false;
 			inputInRange = false;
 		}
-		if (output.toCenterPos().distanceTo(mc.player.getPos()) > 5) {
+		if (mc.player.squaredDistanceTo(output.toCenterPos()) > 25.0D) {
 			outputOpened = false;
 			outputInRange = false;
 		}

@@ -34,12 +34,12 @@ public class InitHandler implements IInitializationHandler {
 			if (config == Configs.Generic.SELL_ITEM) {
 				if (Configs.Generic.SELL_ITEM.getStringValue().equals("minecraft:emerald")) {
 					Configs.Generic.SELL_ITEM.setValueFromString("");
-				} ;
+				}
 			}
 			if (config == Configs.Generic.BUY_ITEM) {
 				if (Configs.Generic.BUY_ITEM.getStringValue().equals("minecraft:emerald")) {
 					Configs.Generic.BUY_ITEM.setValueFromString("");
-				} ;
+				}
 			}
 		}
 	}

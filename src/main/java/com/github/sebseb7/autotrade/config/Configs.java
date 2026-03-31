@@ -10,9 +10,9 @@ import fi.dy.masa.malilib.config.IConfigValue;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.config.options.ConfigString;
-import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.JsonUtils;
 import java.io.File;
+import net.fabricmc.loader.api.FabricLoader;
 
 public class Configs implements IConfigHandler {
 	private static final String CONFIG_FILE_NAME = Reference.MOD_ID + ".json";
@@ -65,7 +65,7 @@ public class Configs implements IConfigHandler {
 	}
 
 	public static void loadFromFile() {
-		File configFile = new File(FileUtils.getConfigDirectory(), CONFIG_FILE_NAME);
+		File configFile = new File(getConfigDirectory(), CONFIG_FILE_NAME);
 
 		if (configFile.exists() && configFile.isFile() && configFile.canRead()) {
 			JsonElement element = JsonUtils.parseJsonFile(configFile);
@@ -80,7 +80,7 @@ public class Configs implements IConfigHandler {
 	}
 
 	public static void saveToFile() {
-		File dir = FileUtils.getConfigDirectory();
+		File dir = getConfigDirectory();
 
 		if ((dir.exists() && dir.isDirectory()) || dir.mkdirs()) {
 			JsonObject root = new JsonObject();
@@ -100,5 +100,9 @@ public class Configs implements IConfigHandler {
 	@Override
 	public void save() {
 		saveToFile();
+	}
+
+	private static File getConfigDirectory() {
+		return FabricLoader.getInstance().getConfigDir().toFile();
 	}
 }
