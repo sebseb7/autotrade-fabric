@@ -19,14 +19,6 @@ jobs:
     - run: mkdir staging && cp build/libs/*.jar staging
     - run: cd build/libs && md5sum *.jar > ../../md5sum.txt
     - run: echo "filename=`ls build/libs/*.jar |xargs basename`" >> $GITHUB_ENV
-    - uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.filename }}
-        path: staging
-    - uses: actions/upload-artifact@v3
-      with:
-        name: md5sum.txt
-        path: md5sum.txt
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
