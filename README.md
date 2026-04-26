@@ -26,7 +26,7 @@ if you can't access settings via the keybind, try modmenu https://modrinth.com/m
 
 #### Supported Version:
 
-- Minecraft 1.19.4 - 1.20.4
+- Minecraft 1.19.4 - 1.20.4 , 1.21.11, 26.1.2
 
 ### Build for 1.20.3 / 1.20.4
 
