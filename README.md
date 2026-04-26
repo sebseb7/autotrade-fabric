@@ -22,6 +22,8 @@ Default keybind for options GUI: Right-Shift+T
 
 Beginning with version v0.0.10 you can select the sell/buy items using nametagged items in items frames and the input/output containers by placing colored glass blocks nearby.
 
+From v0.0.13, those selections (and the set-buy / set-sell hotkeys) store exact enchantments when the stack is enchanted, so you can target a specific book or tool; a plain item id in config still matches any enchantment variant of that item.
+
 if you can't access settings via the keybind, try modmenu https://modrinth.com/mod/modmenu
 
 #### Supported Version:
