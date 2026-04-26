@@ -4,6 +4,14 @@ pluginManagement {
 			name = 'Fabric'
 			url = 'https://maven.fabricmc.net/'
 		}
+		mavenCentral()
 		gradlePluginPortal()
 	}
 }
+
+// Lets Gradle 21 run the build while a JDK 25 toolchain is used to compile (required by 26.1 Mod Menu, etc.)
+plugins {
+	id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'autotrade-fabric'

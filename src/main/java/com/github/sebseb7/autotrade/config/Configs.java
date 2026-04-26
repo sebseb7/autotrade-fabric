@@ -68,7 +68,7 @@ public class Configs implements IConfigHandler {
 		File configFile = new File(getConfigDirectory(), CONFIG_FILE_NAME);
 
 		if (configFile.exists() && configFile.isFile() && configFile.canRead()) {
-			JsonElement element = JsonUtils.parseJsonFile(configFile);
+			JsonElement element = JsonUtils.parseJsonFile(configFile.toPath());
 
 			if (element != null && element.isJsonObject()) {
 				JsonObject root = element.getAsJsonObject();
@@ -88,7 +88,7 @@ public class Configs implements IConfigHandler {
 			ConfigUtils.writeConfigBase(root, "Generic", Generic.OPTIONS);
 			ConfigUtils.writeConfigBase(root, "Hotkeys", Hotkeys.HOTKEY_LIST);
 
-			JsonUtils.writeJsonToFile(root, new File(dir, CONFIG_FILE_NAME));
+			JsonUtils.writeJsonToFile(root, new File(dir, CONFIG_FILE_NAME).toPath());
 		}
 	}
 
