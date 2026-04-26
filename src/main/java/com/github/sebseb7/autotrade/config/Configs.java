@@ -28,13 +28,13 @@ public class Configs implements IConfigHandler {
 		public static final ConfigBoolean ENABLE_SELL = new ConfigBoolean("enableSell", false,
 				"Enable selling (if disabled emeralds are taken from the input container)");
 		public static final ConfigString SELL_ITEM = new ConfigString("sellItem", "minecraft:gold_ingot",
-				"The item to sell for emerald.");
+				"The item to sell for emerald. Optional suffix #enc1=lv&enc2=lv (enchantment registry ids) matches exact enchantments, e.g. enchanted books.");
 		public static final ConfigInteger SELL_LIMIT = new ConfigInteger("sellLimit", 64, 1, 64,
 				"max price to sell for");
 		public static final ConfigBoolean ENABLE_BUY = new ConfigBoolean("enableBuy", false,
 				"Enable buying (if disabled emeralds are placed in the output container)");
 		public static final ConfigString BUY_ITEM = new ConfigString("buyItem", "minecraft:redstone",
-				"The item to buy using emerald.");
+				"The item to buy using emerald. Optional suffix #enc1=lv&enc2=lv matches exact enchantments (use set-buy hotkey with the book in hand).");
 		public static final ConfigInteger BUY_LIMIT = new ConfigInteger("buyLimit", 64, 1, 64, "max price to buy for");
 		public static final ConfigInteger MAX_INPUT_ITEMS = new ConfigInteger("maxInputStacks", 9, 1, 35,
 				"stacks to take from input container (or emerald container in buy-only mode)");
