@@ -270,6 +270,8 @@ final class AutoTradeClientTick {
 					menu.setSelectionHint(i);
 					mc.player.connection.send(new ServerboundSelectTradePacket(i));
 					AutoTrade.bought += offer.getMaxUses();
+					InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.trade_bought",
+							formatItemCountAndName(offer.getResult()), formatOfferPrice(offer));
 					try {
 						ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
 					} catch (Exception e) {
@@ -283,6 +285,9 @@ final class AutoTradeClientTick {
 					menu.setSelectionHint(i);
 					AutoTrade.sold += offer.getMaxUses();
 					mc.player.connection.send(new ServerboundSelectTradePacket(i));
+					InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.trade_sold",
+							formatItemCountAndName(offer.getCostA()) + formatOptionalSecondCost(offer),
+							formatItemCountAndName(offer.getResult()));
 					try {
 						ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
 					} catch (Exception e) {
@@ -292,5 +297,28 @@ final class AutoTradeClientTick {
 			}
 		}
 		screen.onClose();
+	}
+
+	/** e.g. "3× Book" */
+	private static String formatItemCountAndName(ItemStack stack) {
+		return stack.getCount() + "× " + stack.getHoverName().getString();
+	}
+
+	/** For buying: the stacks you pay (first + optional second slot). */
+	private static String formatOfferPrice(MerchantOffer offer) {
+		String a = offer.getCostA().isEmpty() ? null : formatItemCountAndName(offer.getCostA());
+		if (offer.getCostB().isEmpty()) {
+			return a != null ? a : "—";
+		}
+		String b = formatItemCountAndName(offer.getCostB());
+		return a == null ? b : a + " + " + b;
+	}
+
+	/** If the trade has a second input item, show it with " + " */
+	private static String formatOptionalSecondCost(MerchantOffer offer) {
+		if (offer.getCostB().isEmpty()) {
+			return "";
+		}
+		return " + " + formatItemCountAndName(offer.getCostB());
 	}
 }

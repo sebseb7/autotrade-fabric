@@ -11,5 +11,12 @@
     "autotrade.message.sell_item_set": "Item to sell: %s",
     "autotrade.message.buy_item_set": "Item to buy: %s",
     "autotrade.message.input_container_set": "Input Container now at: %d %d %d",
-    "autotrade.message.output_container_set": "Output Container now at: %d %d %d"
+    "autotrade.message.output_container_set": "Output Container now at: %d %d %d",
+
+    "autotrade.message.trade_bought": "Bought %s (price: %s)",
+    "autotrade.message.trade_sold": "Sold %s for %s",
+
+    "autotrade.message.moved_bought_to_output": "To output: moved %s from player",
+    "autotrade.message.moved_excess_to_output": "To output: moved excess %s",
+    "autotrade.message.moved_from_input": "To inventory: took %s from input"
 }

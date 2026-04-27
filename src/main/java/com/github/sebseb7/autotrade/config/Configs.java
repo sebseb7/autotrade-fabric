@@ -24,7 +24,8 @@ public class Configs implements IConfigHandler {
 				"Select buy/sell items with item frames (max. distance 3) with items nametagged \"buy\" or \"sell\"");
 		public static final ConfigBoolean GLASS_BLOCK = new ConfigBoolean("selectUsingGlassBlock", false,
 				"Select input and output containers by placing red (input) and blue (output) stained glass blocks <selectionBlockOffset> blocks above them (or below if negative)");
-		public static final ConfigInteger SELECTOR_OFFSET = new ConfigInteger("selectionBlockOffset", 3, -10, 10, "");
+		public static final ConfigInteger SELECTOR_OFFSET = new ConfigInteger("selectionBlockOffset", 3, -10, 10,
+				"x Blocks below a red stained glass block will be input container, x Blocks below a blue stained glass block will be output container (or above, if x is negative)");
 		public static final ConfigBoolean ENABLE_SELL = new ConfigBoolean("enableSell", false,
 				"Enable selling (if disabled emeralds are taken from the input container)");
 		public static final ConfigString SELL_ITEM = new ConfigString("sellItem", "minecraft:gold_ingot",
@@ -37,7 +38,7 @@ public class Configs implements IConfigHandler {
 				"The item to buy using emerald. Optional suffix #enc1=lv&enc2=lv matches exact enchantments (use set-buy hotkey with the book in hand).");
 		public static final ConfigInteger BUY_LIMIT = new ConfigInteger("buyLimit", 64, 1, 64, "max price to buy for");
 		public static final ConfigInteger MAX_INPUT_ITEMS = new ConfigInteger("maxInputStacks", 9, 1, 35,
-				"stacks to take from input container (or emerald container in buy-only mode)");
+				"stacks to take from input container (or emerald container in buy-only mode), also the max amount of input and emerald kept.");
 		public static final ConfigInteger INPUT_CONTAINER_X = new ConfigInteger("inputContainerX", 0, -30000000,
 				30000000, "Input container X (not used when sell disabled)");
 		public static final ConfigInteger INPUT_CONTAINER_Y = new ConfigInteger("inputContainerY", 0, -64, 320,
