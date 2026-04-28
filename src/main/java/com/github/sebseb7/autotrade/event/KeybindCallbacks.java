@@ -8,6 +8,7 @@ import fi.dy.masa.malilib.hotkeys.IKeybind;
 import fi.dy.masa.malilib.hotkeys.KeyAction;
 import fi.dy.masa.malilib.interfaces.IClientTickHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.Entity;
 
 public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 	private static final KeybindCallbacks INSTANCE = new KeybindCallbacks();
@@ -29,6 +30,18 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 
 	public boolean functionalityEnabled() {
 		return Configs.Generic.ENABLED.getBooleanValue();
+	}
+
+	public Entity getTraderHighlightEntity(Minecraft mc) {
+		return clientTick.getTraderGlowEntityForRender(mc);
+	}
+
+	public int getInputContainerHighlightTicks() {
+		return clientTick.getInputContainerHighlightTicks();
+	}
+
+	public int getOutputContainerHighlightTicks() {
+		return clientTick.getOutputContainerHighlightTicks();
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package com.github.sebseb7.autotrade;
 import com.github.sebseb7.autotrade.config.Configs;
 import com.github.sebseb7.autotrade.event.InputHandler;
 import com.github.sebseb7.autotrade.event.KeybindCallbacks;
+import com.github.sebseb7.autotrade.render.TraderHighlightRenderer;
 import fi.dy.masa.malilib.config.ConfigManager;
 import fi.dy.masa.malilib.config.options.ConfigString;
 import fi.dy.masa.malilib.event.InputEventHandler;
@@ -14,6 +15,8 @@ public class InitHandler implements IInitializationHandler {
 	@Override
 	public void registerModHandlers() {
 		ConfigManager.getInstance().registerConfigHandler(Reference.MOD_ID, new Configs());
+
+		TraderHighlightRenderer.register();
 
 		InputHandler handler = new InputHandler();
 		InputEventHandler.getKeybindManager().registerKeybindProvider(handler);

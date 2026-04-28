@@ -21,6 +21,7 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.ShulkerBoxMenu;
@@ -47,7 +48,32 @@ final class AutoTradeClientTick {
 	private int voidDelay = 0;
 	private int containerDelay = 0;
 
+	/**
+	 * 1 second at 20 TPS — client wireframe highlight (see
+	 * {@code TraderHighlightRenderer}).
+	 */
+	private static final int TRADER_HIGHLIGHT_TICKS = 20;
+
+	private int traderGlowTicksRemaining = 0;
+	private int traderGlowEntityId = -1;
+
+	private int inputContainerHighlightTicks = 0;
+	private int outputContainerHighlightTicks = 0;
+
+	/**
+	 * Entity to draw in-world highlight for; {@code null} when inactive or unknown
+	 * id.
+	 */
+	Entity getTraderGlowEntityForRender(Minecraft mc) {
+		if (traderGlowTicksRemaining <= 0 || traderGlowEntityId < 0 || mc.level == null) {
+			return null;
+		}
+		return findEntityById(mc, traderGlowEntityId);
+	}
+
 	void tick(Minecraft mc) {
+		tickTraderGlow(mc);
+		tickContainerHighlights(mc);
 		if (voidDelay > 0) {
 			if (Configs.Generic.VOID_TRADING_DELAY_AFTER_TELEPORT.getBooleanValue()) {
 				boolean found = false;
@@ -152,6 +178,7 @@ final class AutoTradeClientTick {
 					new BlockHitResult(ic, Direction.UP, input, false));
 			containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
 			inputOpened = true;
+			inputContainerHighlightTicks = TRADER_HIGHLIGHT_TICKS;
 			return;
 		}
 		if ((mc.player.distanceToSqr(oc) < 16.0D) && (outputInRange == false)) {
@@ -160,6 +187,7 @@ final class AutoTradeClientTick {
 					new BlockHitResult(oc, Direction.UP, output, false));
 			containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
 			outputOpened = true;
+			outputContainerHighlightTicks = TRADER_HIGHLIGHT_TICKS;
 			return;
 		}
 		if (mc.player.distanceToSqr(ic) > 25.0D) {
@@ -173,7 +201,6 @@ final class AutoTradeClientTick {
 		tickCount++;
 		if (tickCount > 200) {
 			tickCount = 0;
-			villagersInRange.clear();
 			inputInRange = false;
 			outputInRange = false;
 			var cur = GuiUtils.getCurrentScreen();
@@ -264,61 +291,177 @@ final class AutoTradeClientTick {
 			MerchantOffers offers = menu.getOffers();
 			for (int i = 0; i < offers.size(); i++) {
 				MerchantOffer offer = offers.get(i);
+				int tradesLeft = offer.getMaxUses() - offer.getUses();
 				if (TradeItemSpec.matches(offer.getResult(), buyItemStr) && Configs.Generic.ENABLE_BUY.getBooleanValue()
 						&& offer.getResult().getCount() <= Configs.Generic.BUY_LIMIT.getIntegerValue()) {
-					Slot slot = menu.getSlot(2);
-					menu.setSelectionHint(i);
-					mc.player.connection.send(new ServerboundSelectTradePacket(i));
-					AutoTrade.bought += offer.getMaxUses();
-					InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.trade_bought",
-							formatItemCountAndName(offer.getResult()), formatOfferPrice(offer));
-					try {
-						ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
-					} catch (Exception e) {
-						System.out.println("err " + e);
+					if (tradesLeft > 0 && playerHasMerchantCosts(mc.player, offer)) {
+						Slot slot = menu.getSlot(2);
+						menu.setSelectionHint(i);
+						mc.player.connection.send(new ServerboundSelectTradePacket(i));
+						AutoTrade.bought += offer.getMaxUses();
+						InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.trade_bought",
+								formatItemCountNameForTrades(offer.getResult(), tradesLeft),
+								formatOfferPriceForTrades(offer, tradesLeft));
+						try {
+							ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
+						} catch (Exception e) {
+							System.out.println("err " + e);
+						}
 					}
 				}
 				if (TradeItemSpec.matches(offer.getCostA(), sellItemStr)
 						&& Configs.Generic.ENABLE_SELL.getBooleanValue()
 						&& offer.getCostA().getCount() <= Configs.Generic.SELL_LIMIT.getIntegerValue()) {
-					Slot slot = menu.getSlot(2);
-					menu.setSelectionHint(i);
-					AutoTrade.sold += offer.getMaxUses();
-					mc.player.connection.send(new ServerboundSelectTradePacket(i));
-					InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.trade_sold",
-							formatItemCountAndName(offer.getCostA()) + formatOptionalSecondCost(offer),
-							formatItemCountAndName(offer.getResult()));
-					try {
-						ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
-					} catch (Exception e) {
-						System.out.println("err " + e);
+					if (tradesLeft > 0 && playerHasMerchantCosts(mc.player, offer)) {
+						Slot slot = menu.getSlot(2);
+						menu.setSelectionHint(i);
+						AutoTrade.sold += offer.getMaxUses();
+						mc.player.connection.send(new ServerboundSelectTradePacket(i));
+						InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.trade_sold",
+								formatItemCountNameForTrades(offer.getCostA(), tradesLeft)
+										+ formatOptionalSecondCostForTrades(offer, tradesLeft),
+								formatItemCountNameForTrades(offer.getResult(), tradesLeft));
+						try {
+							ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
+						} catch (Exception e) {
+							System.out.println("err " + e);
+						}
 					}
 				}
 			}
 		}
 		screen.onClose();
+		startTraderGlow(mc, villagerActive);
 	}
 
-	/** e.g. "3× Book" */
+	private void tickTraderGlow(Minecraft mc) {
+		if (mc.level == null || traderGlowTicksRemaining <= 0) {
+			return;
+		}
+		traderGlowTicksRemaining--;
+		if (traderGlowTicksRemaining == 0) {
+			traderGlowEntityId = -1;
+		}
+	}
+
+	private void tickContainerHighlights(Minecraft mc) {
+		if (mc.level == null) {
+			return;
+		}
+		if (inputContainerHighlightTicks > 0) {
+			inputContainerHighlightTicks--;
+		}
+		if (outputContainerHighlightTicks > 0) {
+			outputContainerHighlightTicks--;
+		}
+	}
+
+	int getInputContainerHighlightTicks() {
+		return inputContainerHighlightTicks;
+	}
+
+	int getOutputContainerHighlightTicks() {
+		return outputContainerHighlightTicks;
+	}
+
+	private void startTraderGlow(Minecraft mc, int entityId) {
+		if (mc.level == null) {
+			return;
+		}
+		if (findEntityById(mc, entityId) == null) {
+			traderGlowTicksRemaining = 0;
+			traderGlowEntityId = -1;
+			return;
+		}
+		traderGlowEntityId = entityId;
+		traderGlowTicksRemaining = TRADER_HIGHLIGHT_TICKS;
+	}
+
+	private static Entity findEntityById(Minecraft mc, int entityId) {
+		for (Entity e : mc.level.entitiesForRendering()) {
+			if (e.getId() == entityId) {
+				return e;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Same stack rules as the merchant menu: player must have enough of each
+	 * non-empty cost before we fire packets or show a trade toast.
+	 */
+	private static boolean playerHasMerchantCosts(Player player, MerchantOffer offer) {
+		if (!costRequirementMet(player.getInventory(), offer.getCostA())) {
+			return false;
+		}
+		return costRequirementMet(player.getInventory(), offer.getCostB());
+	}
+
+	private static boolean costRequirementMet(Inventory inv, ItemStack required) {
+		if (required.isEmpty()) {
+			return true;
+		}
+		int need = required.getCount();
+		int have = 0;
+		for (int s = 0; s < inv.getContainerSize(); s++) {
+			ItemStack st = inv.getItem(s);
+			if (ItemStack.isSameItemSameComponents(st, required)) {
+				have += st.getCount();
+				if (have >= need) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/** e.g. "3× Book" (one villager use). */
 	private static String formatItemCountAndName(ItemStack stack) {
 		return stack.getCount() + "× " + stack.getHoverName().getString();
 	}
 
-	/** For buying: the stacks you pay (first + optional second slot). */
-	private static String formatOfferPrice(MerchantOffer offer) {
-		String a = offer.getCostA().isEmpty() ? null : formatItemCountAndName(offer.getCostA());
+	/**
+	 * Per-trade count × how many of this offer remain before the trade, e.g. 1
+	 * iron/trade × 12 runs → "12× …".
+	 */
+	private static String formatItemCountNameForTrades(ItemStack perTrade, int remainingOfferUses) {
+		if (remainingOfferUses <= 0) {
+			return formatItemCountAndName(perTrade);
+		}
+		return (perTrade.getCount() * remainingOfferUses) + "× " + perTrade.getHoverName().getString();
+	}
+
+	/** For buying: the stacks you pay, scaled to how many of this offer remain. */
+	private static String formatOfferPriceForTrades(MerchantOffer offer, int t) {
+		if (t <= 0) {
+			String a = offer.getCostA().isEmpty() ? null : formatItemCountAndName(offer.getCostA());
+			if (offer.getCostB().isEmpty()) {
+				return a != null ? a : "—";
+			}
+			String b = formatItemCountAndName(offer.getCostB());
+			return a == null ? b : a + " + " + b;
+		}
+		String a = offer.getCostA().isEmpty()
+				? null
+				: (offer.getCostA().getCount() * t) + "× " + offer.getCostA().getHoverName().getString();
 		if (offer.getCostB().isEmpty()) {
 			return a != null ? a : "—";
 		}
-		String b = formatItemCountAndName(offer.getCostB());
+		String b = (offer.getCostB().getCount() * t) + "× " + offer.getCostB().getHoverName().getString();
 		return a == null ? b : a + " + " + b;
 	}
 
-	/** If the trade has a second input item, show it with " + " */
-	private static String formatOptionalSecondCost(MerchantOffer offer) {
+	/**
+	 * If the trade has a second cost item, " + 2× …" scaled to remaining offer
+	 * uses.
+	 */
+	private static String formatOptionalSecondCostForTrades(MerchantOffer offer, int t) {
 		if (offer.getCostB().isEmpty()) {
 			return "";
 		}
-		return " + " + formatItemCountAndName(offer.getCostB());
+		if (t <= 0) {
+			return " + " + formatItemCountAndName(offer.getCostB());
+		}
+		return " + " + (offer.getCostB().getCount() * t) + "× " + offer.getCostB().getHoverName().getString();
 	}
 }

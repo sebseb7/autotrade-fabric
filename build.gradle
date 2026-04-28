@@ -32,6 +32,8 @@ repositories {
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
+	// Official 26.1 template uses `implementation` for fabric-api (not modImplementation).
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 	implementation "maven.modrinth:malilib:${project.malilib_version}"
 	compileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }
