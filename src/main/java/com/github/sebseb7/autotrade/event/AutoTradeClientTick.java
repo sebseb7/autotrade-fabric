@@ -2,6 +2,7 @@ package com.github.sebseb7.autotrade.event;
 
 import com.github.sebseb7.autotrade.AutoTrade;
 import com.github.sebseb7.autotrade.config.Configs;
+import com.github.sebseb7.autotrade.render.VillagerTradeCache;
 import com.github.sebseb7.autotrade.util.TradeItemSpec;
 import fi.dy.masa.malilib.gui.Message;
 import fi.dy.masa.malilib.util.GuiUtils;
@@ -289,6 +290,12 @@ final class AutoTradeClientTick {
 			state = true;
 			MerchantMenu menu = screen.getMenu();
 			MerchantOffers offers = menu.getOffers();
+
+			// Cache offers for the in-world trade overlay.
+			Entity activeEntity = findEntityById(mc, villagerActive);
+			if (activeEntity != null && offers != null && !offers.isEmpty()) {
+				VillagerTradeCache.put(activeEntity.getUUID(), offers);
+			}
 			for (int i = 0; i < offers.size(); i++) {
 				MerchantOffer offer = offers.get(i);
 				int tradesLeft = offer.getMaxUses() - offer.getUses();
