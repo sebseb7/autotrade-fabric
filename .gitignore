@@ -1,3 +1,24 @@
-.gradle
+# Gradle
+.gradle/
 build/
+
+# Local JDK / toolchain installs (optional per-machine)
 .jdk21/
+
+# Fabric Loom – dev client / game output
+run/
+runs/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & local scratch
+*.log
+out.txt
+full_build.txt
+compile_err.txt

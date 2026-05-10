@@ -4,13 +4,13 @@
 
 ## Table of contents
 1. [Description](#description)
-2. [Build](#build-for-1203--1204)
+2. [Build](#build)
 3. [Known Issues](#known-issues)
 4. [Possible Setup](#possible-setup)
 5. [Void Trading Example & Settings](#void-trading-example--settings)
 6. [WDL](#wdl)
 
-feel free to ask questions: https://github.com/sebseb7/autotrade-fabric/discussions
+Feel free to ask questions: https://github.com/sebseb7/autotrade-fabric/discussions
 
 ### Description
 
@@ -24,29 +24,51 @@ Beginning with version v0.0.10 you can select the sell/buy items using nametagge
 
 From v0.0.13, those selections (and the set-buy / set-sell hotkeys) store exact enchantments when the stack is enchanted, so you can target a specific book or tool; a plain item id in config still matches any enchantment variant of that item.
 
-if you can't access settings via the keybind, try modmenu https://modrinth.com/mod/modmenu
+If you can't access settings via the keybind, try Mod Menu https://modrinth.com/mod/modmenu
 
-#### Supported Version:
+#### Supported versions (this branch)
 
-- Minecraft 1.19.4 - 1.20.4 , 1.21.11, 26.1.2
+Fabric targets maintained in-tree ([Stonecutter](https://stonecutter.kikugie.dev/) + [Modstitch](https://github.com/modunion/modstitch)):
 
-### Build for 1.20.3 / 1.20.4
+- **Minecraft 1.21.10** (`:1.21.10-fabric`)
+- **Minecraft 1.21.11** (`:1.21.11-fabric`)
+- **Minecraft 26.1.2** (`:26.1.2-fabric`)
 
+Older Minecraft releases (for example 1.19.x–1.20.x) are not built from this multi-target setup; use an older release tag or branch if you need those versions.
+
+### Build
+
+Requirements: a JDK suitable for the target (the build uses Java **21** for 1.21.x and **25** for 26.x via Gradle toolchains).
+
+Build **every** configured game version (recommended before you commit):
+
+```bash
+./gradlew chiseledBuild
 ```
-./gradlew build
+
+If the parallel build is flaky, try:
+
+```bash
+./gradlew chiseledBuild --max-workers=1
 ```
 
-#### Build for older minecraft versions:
+Build **one** Fabric target (jar ends up under that version subproject, e.g. `versions/1.21.11-fabric/build/libs/`):
 
+```bash
+./gradlew :1.21.10-fabric:build
+./gradlew :1.21.11-fabric:build
+./gradlew :26.1.2-fabric:build
 ```
-./gradlew build -Pminecraft_version_out=1.20.2 -Pminecraft_version=1.20.2 -Pminecraft_version_min=1.20.2 -Pmalilib_version=0.17.0 -Pmod_menu_version=8.0.1 -Pmappings_version=1.20.2+build.4
-./gradlew build -Pminecraft_version_out=1.20.1 -Pminecraft_version=1.20.1 -Pminecraft_version_min=1.20 -Pmalilib_version=0.16.1 -Pmod_menu_version=7.0.1 -Pmappings_version=1.20.1+build.10
-./gradlew build -Pminecraft_version_out=1.19.4 -Pminecraft_version=1.19.4 -Pminecraft_version_min=1.19.4 -Pmalilib_version=0.15.2 -Pmod_menu_version=6.1.0 -Pmappings_version=1.19.4+build.2
+
+When using Stonecutter’s active-project workflow, reset it before committing:
+
+```bash
+./gradlew resetActiveProject
 ```
 
-#### Requires:
+#### Requires
 
-- malilib 
+- malilib
 
 ### Known Issues
 

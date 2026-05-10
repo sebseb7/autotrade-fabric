@@ -3,6 +3,7 @@ package com.github.sebseb7.autotrade;
 import com.github.sebseb7.autotrade.config.Configs;
 import com.github.sebseb7.autotrade.event.InputHandler;
 import com.github.sebseb7.autotrade.event.KeybindCallbacks;
+import com.github.sebseb7.autotrade.gui.MerchantScreenButtonInjector;
 import com.github.sebseb7.autotrade.render.TraderHighlightRenderer;
 import com.github.sebseb7.autotrade.render.VillagerTradeOverlayRenderer;
 import fi.dy.masa.malilib.config.ConfigManager;
@@ -19,6 +20,7 @@ public class InitHandler implements IInitializationHandler {
 
 		TraderHighlightRenderer.register();
 		VillagerTradeOverlayRenderer.register();
+		MerchantScreenButtonInjector.register();
 
 		InputHandler handler = new InputHandler();
 		InputEventHandler.getKeybindManager().registerKeybindProvider(handler);

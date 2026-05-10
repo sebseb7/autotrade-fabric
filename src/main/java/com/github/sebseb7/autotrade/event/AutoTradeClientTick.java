@@ -19,8 +19,14 @@ import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ItemFrame;
+//? if npcSplit {
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
+//?}
+//? if npcFlat {
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.WanderingTrader;
+//?}
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -33,7 +39,9 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+//? if mc26 {
 import net.minecraft.world.phys.EntityHitResult;
+//?}
 import net.minecraft.world.phys.Vec3;
 
 final class AutoTradeClientTick {
@@ -144,8 +152,12 @@ final class AutoTradeClientTick {
 						if (!newVillagersInRange.contains(entity)) {
 							found = true;
 							newVillagersInRange.add(entity);
+							//? if mc26 {
 							EntityHitResult ehr = new EntityHitResult(entity, entity.position());
 							mc.gameMode.interact(mc.player, entity, ehr, InteractionHand.MAIN_HAND);
+							//?} else {
+							mc.gameMode.interact(mc.player, entity, InteractionHand.MAIN_HAND);
+							//?}
 							voidDelay = Configs.Generic.VOID_TRADING_DELAY.getIntegerValue();
 							villagerActive = entity.getId();
 							state = false;
@@ -338,6 +350,7 @@ final class AutoTradeClientTick {
 			}
 		}
 		screen.onClose();
+		ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
 		startTraderGlow(mc, villagerActive);
 	}
 

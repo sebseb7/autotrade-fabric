@@ -2,16 +2,21 @@ package com.github.sebseb7.autotrade.config;
 
 import com.github.sebseb7.autotrade.Reference;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import fi.dy.masa.malilib.config.ConfigUtils;
 import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.config.IConfigValue;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.config.options.ConfigString;
-import fi.dy.masa.malilib.util.JsonUtils;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class Configs implements IConfigHandler {
@@ -60,25 +65,32 @@ public class Configs implements IConfigHandler {
 				30000000, "delay in ticks; to get signal from trapped chest");
 		public static final ConfigBoolean SHOW_TRADES = new ConfigBoolean("showTrades", true,
 				"Display villager/wandering-trader trades above their heads (requires trading with them once to cache the offers)");
+		public static final ConfigString SELECTED_ENCHANTMENTS = new ConfigString("selectedEnchantments", "",
+				"Comma-separated list of selected enchantment IDs (set via the \"Select Enchantments\" button on a librarian's trade screen)");
 
 		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ITEM_FRAME, GLASS_BLOCK,
 				SELECTOR_OFFSET, ENABLE_SELL, SELL_ITEM, SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS,
 				INPUT_CONTAINER_X, INPUT_CONTAINER_Y, INPUT_CONTAINER_Z, OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y,
 				OUTPUT_CONTAINER_Z, VOID_TRADING_DELAY, VOID_TRADING_DELAY_AFTER_TELEPORT, CONTAINER_CLOSE_DELAY,
-				SHOW_TRADES);
+				SHOW_TRADES, SELECTED_ENCHANTMENTS);
 	}
 
 	public static void loadFromFile() {
 		File configFile = new File(getConfigDirectory(), CONFIG_FILE_NAME);
 
 		if (configFile.exists() && configFile.isFile() && configFile.canRead()) {
-			JsonElement element = JsonUtils.parseJsonFile(configFile.toPath());
+			try {
+				String json = Files.readString(configFile.toPath(), StandardCharsets.UTF_8);
+				JsonElement element = JsonParser.parseString(json);
 
-			if (element != null && element.isJsonObject()) {
-				JsonObject root = element.getAsJsonObject();
+				if (element != null && element.isJsonObject()) {
+					JsonObject root = element.getAsJsonObject();
 
-				ConfigUtils.readConfigBase(root, "Generic", Generic.OPTIONS);
-				ConfigUtils.readConfigBase(root, "Hotkeys", Hotkeys.HOTKEY_LIST);
+					ConfigUtils.readConfigBase(root, "Generic", Generic.OPTIONS);
+					ConfigUtils.readConfigBase(root, "Hotkeys", Hotkeys.HOTKEY_LIST);
+				}
+			} catch (IOException ignored) {
+				// Malformed or unreadable config; defaults stay active.
 			}
 		}
 	}
@@ -87,12 +99,16 @@ public class Configs implements IConfigHandler {
 		File dir = getConfigDirectory();
 
 		if ((dir.exists() && dir.isDirectory()) || dir.mkdirs()) {
-			JsonObject root = new JsonObject();
+			try {
+				JsonObject root = new JsonObject();
 
-			ConfigUtils.writeConfigBase(root, "Generic", Generic.OPTIONS);
-			ConfigUtils.writeConfigBase(root, "Hotkeys", Hotkeys.HOTKEY_LIST);
+				ConfigUtils.writeConfigBase(root, "Generic", Generic.OPTIONS);
+				ConfigUtils.writeConfigBase(root, "Hotkeys", Hotkeys.HOTKEY_LIST);
 
-			JsonUtils.writeJsonToFile(root, new File(dir, CONFIG_FILE_NAME).toPath());
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				Files.writeString(new File(dir, CONFIG_FILE_NAME).toPath(), gson.toJson(root), StandardCharsets.UTF_8);
+			} catch (IOException ignored) {
+			}
 		}
 	}
 

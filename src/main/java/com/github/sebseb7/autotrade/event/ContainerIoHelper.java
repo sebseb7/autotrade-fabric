@@ -9,7 +9,11 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+//? if mc26 {
 import net.minecraft.world.inventory.ContainerInput;
+//?} else {
+import net.minecraft.world.inventory.ClickType;
+//?}
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -20,7 +24,28 @@ final class ContainerIoHelper {
 
 	static void quickMoveResultSlot(Minecraft mc, AbstractContainerMenu menu, int slotIndex) {
 		Slot slot = menu.getSlot(slotIndex);
+		//? if mc26 {
 		mc.gameMode.handleContainerInput(menu.containerId, slot.index, 0, ContainerInput.QUICK_MOVE, mc.player);
+		//?} else {
+		mc.gameMode.handleInventoryMouseClick(menu.containerId, slot.index, 0, ClickType.QUICK_MOVE, mc.player);
+		//?}
+	}
+
+	/**
+	 * After automated merchant packets (select trade + shift-clicks), client-side
+	 * prediction can drift from the server. Flush the carried/cursor stack and run
+	 * again on the next tick so pending slot updates have landed.
+	 */
+	static void syncPlayerInventoryAfterMerchant(Minecraft mc) {
+		if (mc.player == null || mc.gameMode == null) {
+			return;
+		}
+		mc.gameMode.ensureHasSentCarriedItem();
+		mc.execute(() -> {
+			if (mc.player != null && mc.gameMode != null) {
+				mc.gameMode.ensureHasSentCarriedItem();
+			}
+		});
 	}
 
 	private static final String EMERALD_SPEC = "minecraft:emerald";

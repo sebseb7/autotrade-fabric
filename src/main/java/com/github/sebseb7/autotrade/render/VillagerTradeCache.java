@@ -9,7 +9,8 @@ import net.minecraft.world.item.trading.MerchantOffers;
  * Client-side cache of villager/wandering-trader trade offers, keyed by entity
  * UUID.
  *
- * <p>Populated by {@code AutoTradeClientTick} when the mod opens a merchant
+ * <p>
+ * Populated by {@code AutoTradeClientTick} when the mod opens a merchant
  * screen; consumed by {@link VillagerTradeOverlayRenderer} to draw trade labels
  * above each villager's head.
  */
@@ -24,7 +25,10 @@ public final class VillagerTradeCache {
 		CACHE.put(entityUuid, offers);
 	}
 
-	/** Retrieve cached offers, or {@code null} if we haven't seen this entity trade yet. */
+	/**
+	 * Retrieve cached offers, or {@code null} if we haven't seen this entity trade
+	 * yet.
+	 */
 	public static MerchantOffers get(UUID entityUuid) {
 		return CACHE.get(entityUuid);
 	}

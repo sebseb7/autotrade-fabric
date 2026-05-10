@@ -1,5 +1,6 @@
 package com.github.sebseb7.autotrade.render;
 
+//? if mc26 {
 import com.github.sebseb7.autotrade.config.Configs;
 import com.github.sebseb7.autotrade.event.KeybindCallbacks;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
+//?}
 
 /**
  * Client wireframe highlights: last-traded villager, and input/output container
@@ -23,6 +25,17 @@ import net.minecraft.world.phys.shapes.Shapes;
  * boxes).
  */
 public final class TraderHighlightRenderer {
+
+	private TraderHighlightRenderer() {
+	}
+
+	public static void register() {
+		//? if mc26 {
+		LevelRenderEvents.AFTER_SOLID_FEATURES.register(TraderHighlightRenderer::renderLevel);
+		//?}
+	}
+
+	//? if mc26 {
 	private static final ShapeRenderer SHAPE_RENDERER = new ShapeRenderer();
 
 	private static final int TRADER_OUTLINE_COLOR = 0xFF66FF66;
@@ -31,14 +44,7 @@ public final class TraderHighlightRenderer {
 
 	private static final float LINE_WIDTH = 2.5F;
 
-	private TraderHighlightRenderer() {
-	}
-
-	public static void register() {
-		LevelRenderEvents.AFTER_SOLID_FEATURES.register(TraderHighlightRenderer::render);
-	}
-
-	private static void render(LevelRenderContext context) {
+	private static void renderLevel(LevelRenderContext context) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.level == null) {
 			return;
@@ -57,14 +63,18 @@ public final class TraderHighlightRenderer {
 		Vec3 camera = mc.gameRenderer.getMainCamera().position();
 		float tickDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
+		renderBoxes(mc, drawPose, consumer, camera, tickDelta, trader, inTicks, outTicks);
+	}
+
+	private static void renderBoxes(Minecraft mc, PoseStack drawPose, VertexConsumer consumer, Vec3 camera,
+			float tickDelta, Entity trader, int inTicks, int outTicks) {
 		if (trader != null) {
 			double offX = Mth.lerp(tickDelta, trader.xOld, trader.getX()) - trader.getX();
 			double offY = Mth.lerp(tickDelta, trader.yOld, trader.getY()) - trader.getY();
 			double offZ = Mth.lerp(tickDelta, trader.zOld, trader.getZ()) - trader.getZ();
 			AABB worldBox = trader.getBoundingBox().move(offX, offY, offZ);
 			AABB cameraRelative = worldBox.move(-camera.x, -camera.y, -camera.z);
-			SHAPE_RENDERER.renderShape(drawPose, consumer, Shapes.create(cameraRelative), 0.0D, 0.0D, 0.0D,
-					TRADER_OUTLINE_COLOR, LINE_WIDTH);
+			renderShape(drawPose, consumer, cameraRelative, TRADER_OUTLINE_COLOR);
 		}
 
 		if (inTicks > 0) {
@@ -86,7 +96,12 @@ public final class TraderHighlightRenderer {
 			int color) {
 		AABB world = AABB.encapsulatingFullBlocks(pos, pos);
 		AABB cameraRelative = world.move(-camera.x, -camera.y, -camera.z);
+		renderShape(drawPose, consumer, cameraRelative, color);
+	}
+
+	private static void renderShape(PoseStack drawPose, VertexConsumer consumer, AABB cameraRelative, int color) {
 		SHAPE_RENDERER.renderShape(drawPose, consumer, Shapes.create(cameraRelative), 0.0D, 0.0D, 0.0D, color,
 				LINE_WIDTH);
 	}
+	//?}
 }

@@ -2,33 +2,35 @@ package com.github.sebseb7.autotrade.render;
 
 import com.github.sebseb7.autotrade.config.Configs;
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.ArrayList;
-import java.util.List;
+//? if mc26 {
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+//?}
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+//? if mc26 {
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
+//?}
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Renders a compact summary of each villager's known trades above their head.
  *
- * <p>Trade data comes from {@link VillagerTradeCache}, which is populated when
- * the mod opens a merchant screen.  Villagers whose trades haven't been seen
- * yet show nothing.
+ * <p>
+ * Trade data comes from {@link VillagerTradeCache}, which is populated when the
+ * mod opens a merchant screen. Villagers whose trades haven't been seen yet
+ * show nothing.
  */
 public final class VillagerTradeOverlayRenderer {
-
-	/** Vertical gap between successive trade lines (in world-space blocks). */
-	private static final float LINE_SPACING = 0.25F;
 
 	/** World-space scale of the text (vanilla name-tags use ~0.025). */
 	private static final float TEXT_SCALE = 0.02F;
@@ -46,10 +48,13 @@ public final class VillagerTradeOverlayRenderer {
 	}
 
 	public static void register() {
-		LevelRenderEvents.AFTER_SOLID_FEATURES.register(VillagerTradeOverlayRenderer::render);
+		//? if mc26 {
+		LevelRenderEvents.COLLECT_SUBMITS.register(VillagerTradeOverlayRenderer::renderLevel);
+		//?}
 	}
 
-	private static void render(LevelRenderContext context) {
+	//? if mc26 {
+	private static void renderLevel(LevelRenderContext context) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.level == null || mc.player == null) {
 			return;
@@ -59,7 +64,6 @@ public final class VillagerTradeOverlayRenderer {
 		}
 
 		Font font = mc.font;
-		MultiBufferSource.BufferSource bufferSource = context.bufferSource();
 		Vec3 camera = mc.gameRenderer.getMainCamera().position();
 		float tickDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
@@ -67,7 +71,6 @@ public final class VillagerTradeOverlayRenderer {
 			if (!(entity instanceof Villager) && !(entity instanceof WanderingTrader)) {
 				continue;
 			}
-			// Only render for villagers within a reasonable distance.
 			if (entity.distanceToSqr(mc.player) > 64.0 * 64.0) {
 				continue;
 			}
@@ -77,29 +80,24 @@ public final class VillagerTradeOverlayRenderer {
 				continue;
 			}
 
-			// Build compact trade lines: "CostA [+ CostB] → Result  (uses/max)"
 			List<TradeLineEntry> lines = buildTradeLines(offers);
 			if (lines.isEmpty()) {
 				continue;
 			}
 
-			// Interpolated entity position relative to camera.
 			double x = Mth.lerp(tickDelta, entity.xOld, entity.getX()) - camera.x;
 			double y = Mth.lerp(tickDelta, entity.yOld, entity.getY()) - camera.y;
 			double z = Mth.lerp(tickDelta, entity.zOld, entity.getZ()) - camera.z;
 
-			// Place the first line above the entity's head (entity height + small gap).
 			float baseY = entity.getBbHeight() + 0.6F;
 
 			PoseStack poseStack = new PoseStack();
 			poseStack.pushPose();
 			poseStack.translate(x, y + baseY, z);
 
-			// Face the camera (billboard).
 			poseStack.mulPose(mc.gameRenderer.getMainCamera().rotation());
 			poseStack.scale(-TEXT_SCALE, -TEXT_SCALE, TEXT_SCALE);
 
-			// Draw lines from top (highest index) to bottom (index 0).
 			for (int i = 0; i < lines.size(); i++) {
 				TradeLineEntry entry = lines.get(i);
 				float lineOffsetY = -(lines.size() - 1 - i) * (font.lineHeight + 2);
@@ -111,17 +109,16 @@ public final class VillagerTradeOverlayRenderer {
 				int textWidth = font.width(entry.text);
 				float textX = -textWidth / 2.0F;
 
-				// Background
-				font.drawInBatch(entry.text, textX, 0, entry.color, false, matrix, bufferSource,
-						Font.DisplayMode.SEE_THROUGH, BG_COLOR, 0xF000F0);
-				// Foreground
-				font.drawInBatch(entry.text, textX, 0, entry.color, false, matrix, bufferSource,
-						Font.DisplayMode.NORMAL, 0, 0xF000F0);
+				context.submitNodeCollector().submitText(poseStack, textX, 0,
+						net.minecraft.network.chat.Component.literal(entry.text).getVisualOrderText(), false,
+						Font.DisplayMode.NORMAL, entry.color, 0xF000F0, BG_COLOR, 0);
 			}
 
 			poseStack.popPose();
 		}
 	}
+
+	//?}
 
 	private static List<TradeLineEntry> buildTradeLines(MerchantOffers offers) {
 		List<TradeLineEntry> lines = new ArrayList<>();
@@ -129,28 +126,21 @@ public final class VillagerTradeOverlayRenderer {
 			MerchantOffer offer = offers.get(i);
 			StringBuilder sb = new StringBuilder();
 
-			// Cost A
 			if (!offer.getCostA().isEmpty()) {
-				sb.append(offer.getCostA().getCount()).append("× ")
-						.append(offer.getCostA().getHoverName().getString());
+				sb.append(offer.getCostA().getCount()).append("× ").append(offer.getCostA().getHoverName().getString());
 			}
 
-			// Cost B (optional)
 			if (!offer.getCostB().isEmpty()) {
 				if (sb.length() > 0) {
 					sb.append(" + ");
 				}
-				sb.append(offer.getCostB().getCount()).append("× ")
-						.append(offer.getCostB().getHoverName().getString());
+				sb.append(offer.getCostB().getCount()).append("× ").append(offer.getCostB().getHoverName().getString());
 			}
 
 			sb.append(" → ");
 
-			// Result
-			sb.append(offer.getResult().getCount()).append("× ")
-					.append(offer.getResult().getHoverName().getString());
+			sb.append(offer.getResult().getCount()).append("× ").append(offer.getResult().getHoverName().getString());
 
-			// Remaining uses
 			int remaining = offer.getMaxUses() - offer.getUses();
 			sb.append("  (").append(remaining).append("/").append(offer.getMaxUses()).append(")");
 
