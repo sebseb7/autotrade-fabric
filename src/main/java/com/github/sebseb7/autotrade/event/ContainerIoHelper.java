@@ -1,6 +1,7 @@
 package com.github.sebseb7.autotrade.event;
 
 import com.github.sebseb7.autotrade.config.Configs;
+import com.github.sebseb7.autotrade.mixin.MultiPlayerGameModeInvoker;
 import com.github.sebseb7.autotrade.util.TradeItemSpec;
 import fi.dy.masa.malilib.gui.Message;
 import fi.dy.masa.malilib.util.InfoUtils;
@@ -32,18 +33,17 @@ final class ContainerIoHelper {
 	}
 
 	/**
-	 * After automated merchant packets (select trade + shift-clicks), client-side
-	 * prediction can drift from the server. Flush the carried/cursor stack and run
-	 * again on the next tick so pending slot updates have landed.
+	 * After automated merchant packets, flush cursor/carried prediction so it matches the server.
+	 * Implemented via {@link MultiPlayerGameModeInvoker} because {@code ensureHasSentCarriedItem()} is private.
 	 */
 	static void syncPlayerInventoryAfterMerchant(Minecraft mc) {
 		if (mc.player == null || mc.gameMode == null) {
 			return;
 		}
-		mc.gameMode.ensureHasSentCarriedItem();
+		((MultiPlayerGameModeInvoker) mc.gameMode).invokeEnsureHasSentCarriedItem();
 		mc.execute(() -> {
 			if (mc.player != null && mc.gameMode != null) {
-				mc.gameMode.ensureHasSentCarriedItem();
+				((MultiPlayerGameModeInvoker) mc.gameMode).invokeEnsureHasSentCarriedItem();
 			}
 		});
 	}

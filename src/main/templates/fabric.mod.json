@@ -27,6 +27,7 @@
 	},
 
 	"mixins": [
+		"autotrade.mixins.json"
 	],
 
 	"depends": {
