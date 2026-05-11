@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Vector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
 import net.minecraft.core.BlockPos;
@@ -48,7 +49,6 @@ final class AutoTradeClientTick {
 	private final Vector<Entity> villagersInRange = new Vector<>();
 	private int villagerActive = 0;
 
-	private boolean state = false;
 	private boolean inputInRange = false;
 	private boolean inputOpened = false;
 	private boolean outputInRange = false;
@@ -68,6 +68,7 @@ final class AutoTradeClientTick {
 
 	private int inputContainerHighlightTicks = 0;
 	private int outputContainerHighlightTicks = 0;
+	private int postMerchantInventorySyncTicks = 0;
 
 	/**
 	 * Entity to draw in-world highlight for; {@code null} when inactive or unknown
@@ -102,7 +103,14 @@ final class AutoTradeClientTick {
 		if (containerDelay > 0) {
 			containerDelay--;
 		}
-		if (!Configs.Generic.ENABLED.getBooleanValue() || mc.player == null) {
+		if (mc.player == null) {
+			return;
+		}
+		if (postMerchantInventorySyncTicks > 0) {
+			postMerchantInventorySyncTicks--;
+			ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
+		}
+		if (!Configs.Generic.ENABLED.getBooleanValue()) {
 			return;
 		}
 		Inventory plInv = mc.player.getInventory();
@@ -158,9 +166,9 @@ final class AutoTradeClientTick {
 							//?} else {
 							mc.gameMode.interact(mc.player, entity, InteractionHand.MAIN_HAND);
 							//?}
+							postMerchantInventorySyncTicks = 0;
 							voidDelay = Configs.Generic.VOID_TRADING_DELAY.getIntegerValue();
 							villagerActive = entity.getId();
-							state = false;
 							break;
 						}
 					}
@@ -296,62 +304,99 @@ final class AutoTradeClientTick {
 	}
 
 	private void tickMerchantScreen(Minecraft mc, MerchantScreen screen) {
-		if (!state) {
-			String sellItemStr = Configs.Generic.SELL_ITEM.getStringValue();
-			String buyItemStr = Configs.Generic.BUY_ITEM.getStringValue();
-			state = true;
-			MerchantMenu menu = screen.getMenu();
-			MerchantOffers offers = menu.getOffers();
+		MerchantMenu menu = screen.getMenu();
+		MerchantOffers offers = menu.getOffers();
 
-			// Cache offers for the in-world trade overlay.
-			Entity activeEntity = findEntityById(mc, villagerActive);
-			if (activeEntity != null && offers != null && !offers.isEmpty()) {
-				VillagerTradeCache.put(activeEntity.getUUID(), offers);
-			}
-			for (int i = 0; i < offers.size(); i++) {
-				MerchantOffer offer = offers.get(i);
-				int tradesLeft = offer.getMaxUses() - offer.getUses();
-				if (TradeItemSpec.matches(offer.getResult(), buyItemStr) && Configs.Generic.ENABLE_BUY.getBooleanValue()
-						&& offer.getResult().getCount() <= Configs.Generic.BUY_LIMIT.getIntegerValue()) {
-					if (tradesLeft > 0 && playerHasMerchantCosts(mc.player, offer)) {
-						Slot slot = menu.getSlot(2);
-						menu.setSelectionHint(i);
-						mc.player.connection.send(new ServerboundSelectTradePacket(i));
-						AutoTrade.bought += offer.getMaxUses();
-						InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.trade_bought",
-								formatItemCountNameForTrades(offer.getResult(), tradesLeft),
-								formatOfferPriceForTrades(offer, tradesLeft));
-						try {
-							ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
-						} catch (Exception e) {
-							System.out.println("err " + e);
-						}
+		Entity activeEntity = findEntityById(mc, villagerActive);
+		if (activeEntity != null && offers != null && !offers.isEmpty()) {
+			VillagerTradeCache.put(activeEntity.getUUID(), offers);
+		}
+
+		if (tryExecuteOneMerchantTrade(mc, screen)) {
+			ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
+			return;
+		}
+
+		finishMerchantSession(mc, screen);
+	}
+
+	/**
+	 * Runs at most <strong>one</strong> trade per tick so the server can answer before the next
+	 * packet — avoids inventory slot ghosts from batched select-trade + shift-clicks.
+	 */
+	private boolean tryExecuteOneMerchantTrade(Minecraft mc, MerchantScreen screen) {
+		MerchantMenu menu = screen.getMenu();
+		MerchantOffers offers = menu.getOffers();
+		if (offers == null || offers.isEmpty()) {
+			return false;
+		}
+		String sellItemStr = Configs.Generic.SELL_ITEM.getStringValue();
+		String buyItemStr = Configs.Generic.BUY_ITEM.getStringValue();
+
+		for (int i = 0; i < offers.size(); i++) {
+			MerchantOffer offer = offers.get(i);
+			int tradesLeft = offer.getMaxUses() - offer.getUses();
+
+			if (TradeItemSpec.matches(offer.getResult(), buyItemStr) && Configs.Generic.ENABLE_BUY.getBooleanValue()
+					&& offer.getResult().getCount() <= Configs.Generic.BUY_LIMIT.getIntegerValue()) {
+				if (tradesLeft > 0 && playerHasMerchantCosts(mc.player, offer)) {
+					Slot slot = menu.getSlot(2);
+					menu.setSelectionHint(i);
+					mc.player.connection.send(new ServerboundSelectTradePacket(i));
+					AutoTrade.bought += offer.getMaxUses();
+					showTradeNotice(mc, "autotrade.message.trade_bought",
+							Component.literal(formatItemCountNameForTrades(offer.getResult(), tradesLeft)),
+							Component.literal(formatOfferPriceForTrades(offer, tradesLeft)));
+					try {
+						ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
+					} catch (Exception e) {
+						System.out.println("err " + e);
 					}
+					return true;
 				}
-				if (TradeItemSpec.matches(offer.getCostA(), sellItemStr)
-						&& Configs.Generic.ENABLE_SELL.getBooleanValue()
-						&& offer.getCostA().getCount() <= Configs.Generic.SELL_LIMIT.getIntegerValue()) {
-					if (tradesLeft > 0 && playerHasMerchantCosts(mc.player, offer)) {
-						Slot slot = menu.getSlot(2);
-						menu.setSelectionHint(i);
-						AutoTrade.sold += offer.getMaxUses();
-						mc.player.connection.send(new ServerboundSelectTradePacket(i));
-						InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.trade_sold",
-								formatItemCountNameForTrades(offer.getCostA(), tradesLeft)
-										+ formatOptionalSecondCostForTrades(offer, tradesLeft),
-								formatItemCountNameForTrades(offer.getResult(), tradesLeft));
-						try {
-							ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
-						} catch (Exception e) {
-							System.out.println("err " + e);
-						}
+			}
+
+			if (TradeItemSpec.matches(offer.getCostA(), sellItemStr)
+					&& Configs.Generic.ENABLE_SELL.getBooleanValue()
+					&& offer.getCostA().getCount() <= Configs.Generic.SELL_LIMIT.getIntegerValue()) {
+				if (tradesLeft > 0 && playerHasMerchantCosts(mc.player, offer)) {
+					Slot slot = menu.getSlot(2);
+					menu.setSelectionHint(i);
+					mc.player.connection.send(new ServerboundSelectTradePacket(i));
+					AutoTrade.sold += offer.getMaxUses();
+					showTradeNotice(mc, "autotrade.message.trade_sold",
+							Component.literal(formatItemCountNameForTrades(offer.getCostA(), tradesLeft)
+									+ formatOptionalSecondCostForTrades(offer, tradesLeft)),
+							Component.literal(formatItemCountNameForTrades(offer.getResult(), tradesLeft)));
+					try {
+						ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
+					} catch (Exception e) {
+						System.out.println("err " + e);
 					}
+					return true;
 				}
 			}
 		}
+		return false;
+	}
+
+	private void finishMerchantSession(Minecraft mc, MerchantScreen screen) {
+		ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
 		screen.onClose();
 		ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
+		postMerchantInventorySyncTicks = 15;
 		startTraderGlow(mc, villagerActive);
+	}
+
+	/**
+	 * Malilib's {@code showGuiOrInGameMessage} routes to multiple HUD targets; trade spam looked like 3× duplication.
+	 * Vanilla overlay is a single on-screen line (same idea as vanilla toast-adjacent hints).
+	 */
+	private static void showTradeNotice(Minecraft mc, String translationKey, Component arg1, Component arg2) {
+		if (mc.gui == null) {
+			return;
+		}
+		mc.gui.setOverlayMessage(Component.translatable(translationKey, arg1, arg2), false);
 	}
 
 	private void tickTraderGlow(Minecraft mc) {

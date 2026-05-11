@@ -3,7 +3,7 @@ import java.time.format.DateTimeFormatter
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 
 plugins {
-	id("dev.isxander.modstitch.base") version "0.8.4"
+	id("dev.isxander.modstitch.base") version "0.8.5"
 	id("com.modrinth.minotaur") version "2.+"
 }
 
@@ -84,6 +84,12 @@ stonecutter {
 		"forge" to loader.equals("forge", ignoreCase = true),
 		"vanilla" to loader.equals("vanilla", ignoreCase = true),
 		"mc26" to (minecraft == "26.1.2"),
+		// TraderHighlightRenderer: MC 26 uses Fabric LevelRenderEvents; 1.21.x uses WorldRenderEvents (v1.world).
+		"traderWireframeRender" to (minecraft == "26.1.2" || minecraft == "1.21.11" || minecraft == "1.21.10"),
+		"traderWireframeMc26" to (minecraft == "26.1.2"),
+		"traderWireframe121" to (minecraft == "1.21.10" || minecraft == "1.21.11"),
+		"traderWireframe12110" to (minecraft == "1.21.10"),
+		"traderWireframe12111" to (minecraft == "1.21.11"),
 		"npcSplit" to (minecraft == "26.1.2" || minecraft == "1.21.11"),
 		"npcFlat" to (minecraft == "1.21.10"),
 	)
