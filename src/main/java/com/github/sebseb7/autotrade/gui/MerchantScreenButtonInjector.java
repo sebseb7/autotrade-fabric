@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.network.chat.Component;
@@ -48,36 +49,55 @@ public final class MerchantScreenButtonInjector {
 		// Position buttons safely to the right of the merchant GUI (276 px wide, centered).
 		int x = scaledWidth / 2 + 140;
 		int y = scaledHeight / 2 - 83;
-		int w = 160;
+		int bw = 160;
+		int lw = 110;
 		int h = 20;
 		int gap = 2;
+		int labelX = x + bw + 4;
 
 		Button openSettings = Button
-				.builder(Component.literal("Open Settings"), btn -> GuiBase.openGui(new GuiConfigs()))
-				.bounds(x, y, w, h).build();
+				.builder(Component.literal("Open Settings"), btn -> {
+					// vanilla Screen.onClose -> setScreen(null) sends the container-close
+					// packet; switching the screen out from under the merchant GUI via
+					// GuiBase.openGui skips that path, so the server still thinks we are
+					// trading with this villager and rejects the next interact packet.
+					if (client.player != null) {
+						client.player.closeContainer();
+					}
+					GuiBase.openGui(new GuiConfigs());
+				})
+				.bounds(x, y, bw, h).build();
 
 		Button selectSell = Button
-				.builder(sellButtonLabel(), btn -> applySelectedTradeAsSell(client, merchantScreen))
-				.bounds(x, y + (h + gap), w, h).build();
+				.builder(sellButtonLabel(null), btn -> onSellButton(client, merchantScreen))
+				.bounds(x, y + (h + gap), bw, h).build();
+		StringWidget sellCurrent = new StringWidget(labelX, y + (h + gap), lw, h,
+				currentSellLabel(), client.font);
 
 		Button selectBuy = Button
-				.builder(buyButtonLabel(), btn -> applySelectedTradeAsBuy(client, merchantScreen))
-				.bounds(x, y + 2 * (h + gap), w, h).build();
+				.builder(buyButtonLabel(null), btn -> onBuyButton(client, merchantScreen))
+				.bounds(x, y + 2 * (h + gap), bw, h).build();
+		StringWidget buyCurrent = new StringWidget(labelX, y + 2 * (h + gap), lw, h,
+				currentBuyLabel(), client.font);
 
 		Button enableAutotrade = Button
 				.builder(autotradeButtonLabel(), btn -> toggleAutotrade(btn))
-				.bounds(x, y + 3 * (h + gap), w, h).build();
+				.bounds(x, y + 3 * (h + gap), bw, h).build();
 
 		Screen asScreen = merchantScreen;
 		//? if mc26 {
 		Screens.getWidgets(asScreen).add(openSettings);
 		Screens.getWidgets(asScreen).add(selectSell);
+		Screens.getWidgets(asScreen).add(sellCurrent);
 		Screens.getWidgets(asScreen).add(selectBuy);
+		Screens.getWidgets(asScreen).add(buyCurrent);
 		Screens.getWidgets(asScreen).add(enableAutotrade);
 		//?} else {
 		Screens.getButtons(asScreen).add(openSettings);
 		Screens.getButtons(asScreen).add(selectSell);
+		Screens.getButtons(asScreen).add(sellCurrent);
 		Screens.getButtons(asScreen).add(selectBuy);
+		Screens.getButtons(asScreen).add(buyCurrent);
 		Screens.getButtons(asScreen).add(enableAutotrade);
 		//?}
 
@@ -93,12 +113,47 @@ public final class MerchantScreenButtonInjector {
 			}
 
 			MerchantOffer current = currentSelectedOffer(merchantScreen);
-			selectSell.active = current != null && isSellOffer(current);
-			selectBuy.active = current != null && isBuyOffer(current);
-			selectSell.setMessage(sellButtonLabel());
-			selectBuy.setMessage(buyButtonLabel());
+			MerchantOffer sellOffer = (current != null && isSellOffer(current)) ? current : null;
+			MerchantOffer buyOffer = (current != null && isBuyOffer(current)) ? current : null;
+			boolean sellOn = Configs.Generic.ENABLE_SELL.getBooleanValue();
+			boolean buyOn = Configs.Generic.ENABLE_BUY.getBooleanValue();
+			// Button doubles as a "Disable" toggle when no applicable trade is selected
+			// but the corresponding ENABLE flag is currently on — so the user can turn
+			// it off without leaving the merchant screen.
+			selectSell.active = sellOffer != null || sellOn;
+			selectBuy.active = buyOffer != null || buyOn;
+			selectSell.setMessage(sellOffer != null ? sellButtonLabel(sellOffer)
+					: (sellOn ? Component.literal("Disable sell") : sellButtonLabel(null)));
+			selectBuy.setMessage(buyOffer != null ? buyButtonLabel(buyOffer)
+					: (buyOn ? Component.literal("Disable buy") : buyButtonLabel(null)));
+			sellCurrent.setMessage(currentSellLabel());
+			buyCurrent.setMessage(currentBuyLabel());
 			enableAutotrade.setMessage(autotradeButtonLabel());
 		});
+	}
+
+	private static void onSellButton(Minecraft client, MerchantScreen screen) {
+		MerchantOffer offer = currentSelectedOffer(screen);
+		if (offer != null && isSellOffer(offer)) {
+			applySelectedTradeAsSell(client, screen);
+			return;
+		}
+		if (Configs.Generic.ENABLE_SELL.getBooleanValue()) {
+			Configs.Generic.ENABLE_SELL.setBooleanValue(false);
+			Configs.saveToFile();
+		}
+	}
+
+	private static void onBuyButton(Minecraft client, MerchantScreen screen) {
+		MerchantOffer offer = currentSelectedOffer(screen);
+		if (offer != null && isBuyOffer(offer)) {
+			applySelectedTradeAsBuy(client, screen);
+			return;
+		}
+		if (Configs.Generic.ENABLE_BUY.getBooleanValue()) {
+			Configs.Generic.ENABLE_BUY.setBooleanValue(false);
+			Configs.saveToFile();
+		}
 	}
 
 	private static Component autotradeButtonLabel() {
@@ -106,14 +161,26 @@ public final class MerchantScreenButtonInjector {
 		return Component.literal(on ? "Disable Autotrade" : "Enable Autotrade");
 	}
 
-	private static Component sellButtonLabel() {
-		String enabled = Configs.Generic.ENABLE_SELL.getBooleanValue() ? "" : " (off)";
-		return Component.literal("Sell: " + describeSpec(Configs.Generic.SELL_ITEM.getStringValue()) + enabled);
+	/** Button label previews the item that would be written if clicked. */
+	private static Component sellButtonLabel(MerchantOffer offer) {
+		String item = offer == null ? "-" : describeSpec(TradeItemSpec.encodeFromStack(offer.getCostA()));
+		return Component.literal("Set " + item + " as sell item");
 	}
 
-	private static Component buyButtonLabel() {
-		String enabled = Configs.Generic.ENABLE_BUY.getBooleanValue() ? "" : " (off)";
-		return Component.literal("Buy: " + describeSpec(Configs.Generic.BUY_ITEM.getStringValue()) + enabled);
+	private static Component buyButtonLabel(MerchantOffer offer) {
+		String item = offer == null ? "-" : describeSpec(TradeItemSpec.encodeFromStack(offer.getResult()));
+		return Component.literal("Set " + item + " as buy item");
+	}
+
+	/** Side-label shows the currently-configured sell/buy item from config. */
+	private static Component currentSellLabel() {
+		String off = Configs.Generic.ENABLE_SELL.getBooleanValue() ? "" : " (off)";
+		return Component.literal(describeSpec(Configs.Generic.SELL_ITEM.getStringValue()) + off);
+	}
+
+	private static Component currentBuyLabel() {
+		String off = Configs.Generic.ENABLE_BUY.getBooleanValue() ? "" : " (off)";
+		return Component.literal(describeSpec(Configs.Generic.BUY_ITEM.getStringValue()) + off);
 	}
 
 	/**

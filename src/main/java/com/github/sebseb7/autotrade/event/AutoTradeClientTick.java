@@ -37,10 +37,12 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 final class AutoTradeClientTick {
@@ -67,6 +69,16 @@ final class AutoTradeClientTick {
 	private int inputContainerHighlightTicks = 0;
 	private int outputContainerHighlightTicks = 0;
 	private int postMerchantInventorySyncTicks = 0;
+
+	/**
+	 * Entity we have already snapped the camera onto and are waiting for line of
+	 * sight to clear on. Prevents re-rotating to the same villager every tick
+	 * while a block briefly obstructs the view; reset once we interact (or after
+	 * a timeout) so the next villager can be acquired.
+	 */
+	private int rotatingTargetId = -1;
+	private int rotatingTargetTicks = 0;
+	private static final int LOS_TIMEOUT_TICKS = 60;
 
 	/**
 	 * Entity to draw in-world highlight for; {@code null} when inactive or unknown
@@ -157,20 +169,38 @@ final class AutoTradeClientTick {
 					if (!found) {
 						if (!newVillagersInRange.contains(entity)) {
 							found = true;
-							newVillagersInRange.add(entity);
 							// Paper/Folia rejects entity-interact packets unless the player is
-							// actually facing the entity, so align the look vector first and
-							// mirror vanilla's full INTERACT_AT + INTERACT + swing sequence.
-							Vec3 eyePos = mc.player.getEyePosition();
-							Vec3 targetEye = entity.getEyePosition();
-							Vec3 delta = targetEye.subtract(eyePos);
-							double horiz = Math.sqrt(delta.x * delta.x + delta.z * delta.z);
-							float yaw = (float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90.0);
-							float pitch = (float) -Math.toDegrees(Math.atan2(delta.y, horiz));
-							mc.player.setYRot(yaw);
-							mc.player.setXRot(pitch);
-							mc.player.yHeadRot = yaw;
-							EntityHitResult ehr = new EntityHitResult(entity, targetEye);
+							// actually facing a visible part of the entity hitbox. Aim at any
+							// point we have a clean line of sight to (eyes, head, chest, feet);
+							// if none of them are visible yet, wait without flooding the camera
+							// with re-rotations every tick.
+							Vec3 aimPoint = firstVisiblePoint(mc, entity);
+							if (rotatingTargetId != entity.getId()) {
+								rotatingTargetId = entity.getId();
+								rotatingTargetTicks = 0;
+								Vec3 lookAt = aimPoint != null ? aimPoint : entity.getEyePosition();
+								Vec3 eyePos = mc.player.getEyePosition();
+								Vec3 delta = lookAt.subtract(eyePos);
+								double horiz = Math.sqrt(delta.x * delta.x + delta.z * delta.z);
+								float yaw = (float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90.0);
+								float pitch = (float) -Math.toDegrees(Math.atan2(delta.y, horiz));
+								mc.player.setYRot(yaw);
+								mc.player.setXRot(pitch);
+								mc.player.yHeadRot = yaw;
+							} else {
+								rotatingTargetTicks++;
+							}
+							if (aimPoint == null) {
+								if (rotatingTargetTicks > LOS_TIMEOUT_TICKS) {
+									// Give up so the player can move past this villager.
+									newVillagersInRange.add(entity);
+									rotatingTargetId = -1;
+								}
+								break;
+							}
+							newVillagersInRange.add(entity);
+							rotatingTargetId = -1;
+							EntityHitResult ehr = new EntityHitResult(entity, aimPoint);
 							AutoTrade.autoInteracting = true;
 							try {
 								//? if mc26 {
@@ -457,6 +487,38 @@ final class AutoTradeClientTick {
 		}
 		traderGlowEntityId = entityId;
 		traderGlowTicksRemaining = TRADER_HIGHLIGHT_TICKS;
+	}
+
+	/**
+	 * Returns the first point on {@code target}'s bounding box (eyes, head,
+	 * chest, feet, or one of the four upper corners) that has an unobstructed
+	 * block ray-cast from the player's eyes; {@code null} when the entire body
+	 * is occluded.
+	 */
+	private static Vec3 firstVisiblePoint(Minecraft mc, Entity target) {
+		Vec3 eye = mc.player.getEyePosition();
+		AABB box = target.getBoundingBox();
+		double cx = (box.minX + box.maxX) * 0.5;
+		double cz = (box.minZ + box.maxZ) * 0.5;
+		Vec3[] candidates = {
+				target.getEyePosition(),
+				new Vec3(cx, (box.minY + box.maxY) * 0.5, cz),
+				new Vec3(cx, box.maxY - 0.05, cz),
+				new Vec3(cx, box.minY + 0.1, cz),
+				new Vec3(box.minX + 0.05, box.maxY - 0.2, box.minZ + 0.05),
+				new Vec3(box.maxX - 0.05, box.maxY - 0.2, box.minZ + 0.05),
+				new Vec3(box.minX + 0.05, box.maxY - 0.2, box.maxZ - 0.05),
+				new Vec3(box.maxX - 0.05, box.maxY - 0.2, box.maxZ - 0.05),
+		};
+		for (Vec3 p : candidates) {
+			BlockHitResult hit = mc.level.clip(new ClipContext(eye, p, ClipContext.Block.COLLIDER,
+					ClipContext.Fluid.NONE, mc.player));
+			if (hit.getType() == HitResult.Type.MISS
+					|| eye.distanceToSqr(hit.getLocation()) >= eye.distanceToSqr(p) - 1.0E-4) {
+				return p;
+			}
+		}
+		return null;
 	}
 
 	private static Entity findEntityById(Minecraft mc, int entityId) {
