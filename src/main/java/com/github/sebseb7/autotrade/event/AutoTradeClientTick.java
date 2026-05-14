@@ -171,12 +171,17 @@ final class AutoTradeClientTick {
 							mc.player.setXRot(pitch);
 							mc.player.yHeadRot = yaw;
 							EntityHitResult ehr = new EntityHitResult(entity, targetEye);
-							//? if mc26 {
-							mc.gameMode.interact(mc.player, entity, ehr, InteractionHand.MAIN_HAND);
-							//?} else {
-							mc.gameMode.interactAt(mc.player, entity, ehr, InteractionHand.MAIN_HAND);
-							mc.gameMode.interact(mc.player, entity, InteractionHand.MAIN_HAND);
-							//?}
+							AutoTrade.autoInteracting = true;
+							try {
+								//? if mc26 {
+								mc.gameMode.interact(mc.player, entity, ehr, InteractionHand.MAIN_HAND);
+								//?} else {
+								mc.gameMode.interactAt(mc.player, entity, ehr, InteractionHand.MAIN_HAND);
+								mc.gameMode.interact(mc.player, entity, InteractionHand.MAIN_HAND);
+								//?}
+							} finally {
+								AutoTrade.autoInteracting = false;
+							}
 							mc.player.swing(InteractionHand.MAIN_HAND);
 							postMerchantInventorySyncTicks = 0;
 							voidDelay = Configs.Generic.VOID_TRADING_DELAY.getIntegerValue();

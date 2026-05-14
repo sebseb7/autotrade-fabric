@@ -11,6 +11,13 @@ public class AutoTrade implements ModInitializer {
 	public static int sold = 0;
 	public static int bought = 0;
 
+	/**
+	 * Set to {@code true} while the auto-trader is firing its synthetic
+	 * villager interact packets so {@link InitHandler}'s {@code UseEntityCallback}
+	 * can tell automated clicks apart from a real player right-click.
+	 */
+	public static boolean autoInteracting = false;
+
 	@Override
 	public void onInitialize() {
 		InitializationHandler.getInstance().registerInitializationHandler(new InitHandler());
