@@ -40,9 +40,7 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-//? if mc26 {
 import net.minecraft.world.phys.EntityHitResult;
-//?}
 import net.minecraft.world.phys.Vec3;
 
 final class AutoTradeClientTick {
@@ -160,12 +158,26 @@ final class AutoTradeClientTick {
 						if (!newVillagersInRange.contains(entity)) {
 							found = true;
 							newVillagersInRange.add(entity);
+							// Paper/Folia rejects entity-interact packets unless the player is
+							// actually facing the entity, so align the look vector first and
+							// mirror vanilla's full INTERACT_AT + INTERACT + swing sequence.
+							Vec3 eyePos = mc.player.getEyePosition();
+							Vec3 targetEye = entity.getEyePosition();
+							Vec3 delta = targetEye.subtract(eyePos);
+							double horiz = Math.sqrt(delta.x * delta.x + delta.z * delta.z);
+							float yaw = (float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90.0);
+							float pitch = (float) -Math.toDegrees(Math.atan2(delta.y, horiz));
+							mc.player.setYRot(yaw);
+							mc.player.setXRot(pitch);
+							mc.player.yHeadRot = yaw;
+							EntityHitResult ehr = new EntityHitResult(entity, targetEye);
 							//? if mc26 {
-							EntityHitResult ehr = new EntityHitResult(entity, entity.position());
 							mc.gameMode.interact(mc.player, entity, ehr, InteractionHand.MAIN_HAND);
 							//?} else {
+							mc.gameMode.interactAt(mc.player, entity, ehr, InteractionHand.MAIN_HAND);
 							mc.gameMode.interact(mc.player, entity, InteractionHand.MAIN_HAND);
 							//?}
+							mc.player.swing(InteractionHand.MAIN_HAND);
 							postMerchantInventorySyncTicks = 0;
 							voidDelay = Configs.Generic.VOID_TRADING_DELAY.getIntegerValue();
 							villagerActive = entity.getId();
