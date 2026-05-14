@@ -4,7 +4,8 @@
 	"package": "com.github.sebseb7.autotrade.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"MultiPlayerGameModeInvoker"
+		"MultiPlayerGameModeInvoker",
+		"MerchantMenuAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

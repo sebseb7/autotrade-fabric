@@ -10,8 +10,20 @@ import fi.dy.masa.malilib.config.ConfigManager;
 import fi.dy.masa.malilib.config.options.ConfigString;
 import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.event.TickHandler;
+import fi.dy.masa.malilib.gui.Message;
 import fi.dy.masa.malilib.interfaces.IInitializationHandler;
 import fi.dy.masa.malilib.interfaces.IValueChangeCallback;
+import fi.dy.masa.malilib.util.InfoUtils;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+//? if npcSplit {
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
+//?}
+//? if npcFlat {
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.WanderingTrader;
+//?}
+import net.minecraft.world.InteractionResult;
 
 public class InitHandler implements IInitializationHandler {
 	@Override
@@ -28,6 +40,20 @@ public class InitHandler implements IInitializationHandler {
 		TickHandler.getInstance().registerClientTickHandler(KeybindCallbacks.getInstance());
 
 		KeybindCallbacks.getInstance().setCallbacks();
+
+		// A real right-click on a villager/wandering trader cancels the global
+		// auto-trade switch — but skip the synthetic interact packets the mod
+		// itself emits in AutoTradeClientTick (guarded by AutoTrade.autoInteracting).
+		UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+			if (!AutoTrade.autoInteracting && player.level().isClientSide()
+					&& (entity instanceof Villager || entity instanceof WanderingTrader)
+					&& Configs.Generic.ENABLED.getBooleanValue()) {
+				Configs.Generic.ENABLED.setBooleanValue(false);
+				InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.toggled_mod_off");
+				Configs.saveToFile();
+			}
+			return InteractionResult.PASS;
+		});
 
 		ValueChangeCallback valueChangeCallback = new ValueChangeCallback();
 		Configs.Generic.SELL_ITEM.setValueChangeCallback(valueChangeCallback);
