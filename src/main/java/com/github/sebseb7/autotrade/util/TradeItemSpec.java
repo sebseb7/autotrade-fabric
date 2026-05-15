@@ -3,7 +3,6 @@ package com.github.sebseb7.autotrade.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,12 +14,23 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
  * item. For enchanted books (and other enchanted items), holding the item when
  * binding the hotkey stores
  * {@code minecraft:enchanted_book#minecraft:sharpness=4&minecraft:unbreaking=3}
- * so only that exact enchantment set is matched.
+ * so only that exact enchantment set is matched (same ids and levels as on the stack).
  */
 public final class TradeItemSpec {
 	private static final char SPEC_SEP = '#';
 
 	private TradeItemSpec() {
+	}
+
+	private static String normalizeEnchantId(String id) {
+		String t = id.trim();
+		if (t.isEmpty()) {
+			return t;
+		}
+		if (t.indexOf(':') < 0) {
+			return "minecraft:" + t;
+		}
+		return t;
 	}
 
 	public static String encodeFromStack(ItemStack stack) {
@@ -29,9 +39,9 @@ public final class TradeItemSpec {
 		if (enchants == null || enchants.isEmpty()) {
 			return base;
 		}
-		List<String> parts = new ArrayList<>();
+		ArrayList<String> parts = new ArrayList<>();
 		for (var e : enchants.entrySet()) {
-			String name = e.getKey().getRegisteredName();
+			String name = normalizeEnchantId(e.getKey().getRegisteredName());
 			parts.add(name + "=" + e.getIntValue());
 		}
 		Collections.sort(parts);
@@ -50,15 +60,16 @@ public final class TradeItemSpec {
 		if (stack.isEmpty()) {
 			return false;
 		}
-		int sep = spec.indexOf(SPEC_SEP);
-		String itemPart = sep < 0 ? spec : spec.substring(0, sep);
+		String trimmed = spec.trim();
+		int sep = trimmed.indexOf(SPEC_SEP);
+		String itemPart = (sep < 0 ? trimmed : trimmed.substring(0, sep)).trim();
 		if (!BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().equals(itemPart)) {
 			return false;
 		}
 		if (sep < 0) {
 			return true;
 		}
-		Map<String, Integer> expected = parseEnchantSection(spec.substring(sep + 1));
+		Map<String, Integer> expected = parseEnchantSection(trimmed.substring(sep + 1));
 		if (expected == null) {
 			return false;
 		}
@@ -70,7 +81,7 @@ public final class TradeItemSpec {
 			return false;
 		}
 		for (var e : actual.entrySet()) {
-			String name = e.getKey().getRegisteredName();
+			String name = normalizeEnchantId(e.getKey().getRegisteredName());
 			int level = e.getIntValue();
 			Integer want = expected.get(name);
 			if (want == null || want != level) {
@@ -89,27 +100,29 @@ public final class TradeItemSpec {
 	}
 
 	private static Map<String, Integer> parseEnchantSection(String section) {
-		if (section.isEmpty()) {
+		String s = section.trim();
+		if (s.isEmpty()) {
 			return Map.of();
 		}
 		Map<String, Integer> out = new HashMap<>();
-		for (String piece : section.split("&")) {
-			if (piece.isEmpty()) {
+		for (String piece : s.split("&")) {
+			String p = piece.trim();
+			if (p.isEmpty()) {
 				return null;
 			}
-			int eq = piece.lastIndexOf('=');
-			if (eq <= 0 || eq == piece.length() - 1) {
+			int eq = p.lastIndexOf('=');
+			if (eq <= 0 || eq == p.length() - 1) {
 				return null;
 			}
-			String enchantId = piece.substring(0, eq);
-			String levelStr = piece.substring(eq + 1);
+			String enchantId = p.substring(0, eq).trim();
+			String levelStr = p.substring(eq + 1).trim();
 			int level;
 			try {
 				level = Integer.parseInt(levelStr);
 			} catch (NumberFormatException e) {
 				return null;
 			}
-			out.put(enchantId, level);
+			out.put(normalizeEnchantId(enchantId), level);
 		}
 		return out;
 	}

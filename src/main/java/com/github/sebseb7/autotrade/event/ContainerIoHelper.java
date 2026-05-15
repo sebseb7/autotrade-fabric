@@ -9,15 +9,18 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 //? if mc26 {
 import net.minecraft.world.inventory.ContainerInput;
 //?} else {
 import net.minecraft.world.inventory.ClickType;
 //?}
+import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 final class ContainerIoHelper {
 	private ContainerIoHelper() {
@@ -25,11 +28,67 @@ final class ContainerIoHelper {
 
 	static void quickMoveResultSlot(Minecraft mc, AbstractContainerMenu menu, int slotIndex) {
 		Slot slot = menu.getSlot(slotIndex);
+		ItemStack stack = slot.getItem();
+		if (menu instanceof MerchantMenu && stack.is(Items.ENCHANTED_BOOK)) {
+			moveMerchantResultWithPickup(mc, menu, slot);
+			return;
+		}
 		//? if mc26 {
 		mc.gameMode.handleContainerInput(menu.containerId, slot.index, 0, ContainerInput.QUICK_MOVE, mc.player);
 		//?} else {
 		mc.gameMode.handleInventoryMouseClick(menu.containerId, slot.index, 0, ClickType.QUICK_MOVE, mc.player);
 		//?}
+	}
+
+	/**
+	 * For {@link MerchantMenu} result stacks that are {@linkplain Items#ENCHANTED_BOOK enchanted books} only:
+	 * vanilla shift-click can chain every book row; use two {@code PICKUP} clicks instead.
+	 * Other merchant results (e.g. emeralds) still use {@code QUICK_MOVE}.
+	 */
+	private static void moveMerchantResultWithPickup(Minecraft mc, AbstractContainerMenu menu, Slot resultSlot) {
+		if (mc.player == null || mc.gameMode == null) {
+			return;
+		}
+		if (resultSlot.getItem().isEmpty()) {
+			return;
+		}
+		((MultiPlayerGameModeInvoker) mc.gameMode).invokeEnsureHasSentCarriedItem();
+		containerPickupClick(mc, menu, resultSlot.index, 0);
+		ItemStack carried = menu.getCarried();
+		if (carried.isEmpty()) {
+			return;
+		}
+		int depositSlotId = findMerchantDepositSlot(menu, mc.player, carried);
+		if (depositSlotId < 0) {
+			return;
+		}
+		containerPickupClick(mc, menu, depositSlotId, 0);
+	}
+
+	private static void containerPickupClick(Minecraft mc, AbstractContainerMenu menu, int slotId, int button) {
+		//? if mc26 {
+		mc.gameMode.handleContainerInput(menu.containerId, slotId, button, ContainerInput.PICKUP, mc.player);
+		//?} else {
+		mc.gameMode.handleInventoryMouseClick(menu.containerId, slotId, button, ClickType.PICKUP, mc.player);
+		//?}
+	}
+
+	/** First player inventory slot in this menu that can accept {@code carried} (merge or empty). */
+	private static int findMerchantDepositSlot(AbstractContainerMenu menu, Player player, ItemStack carried) {
+		for (int i = 0; i < menu.slots.size(); i++) {
+			Slot s = menu.getSlot(i);
+			if (s.container != player.getInventory()) {
+				continue;
+			}
+			ItemStack inSlot = s.getItem();
+			if (inSlot.isEmpty()) {
+				return s.index;
+			}
+			if (ItemStack.isSameItemSameComponents(inSlot, carried) && inSlot.getCount() < s.getMaxStackSize()) {
+				return s.index;
+			}
+		}
+		return -1;
 	}
 
 	/**
