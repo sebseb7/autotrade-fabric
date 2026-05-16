@@ -11,8 +11,7 @@ import net.minecraft.world.item.trading.MerchantOffers;
  *
  * <p>
  * Populated by {@code AutoTradeClientTick} when the mod opens a merchant
- * screen; consumed by {@link VillagerTradeOverlayRenderer} to draw trade labels
- * above each villager's head.
+ * screen.
  */
 public final class VillagerTradeCache {
 	private static final Map<UUID, MerchantOffers> CACHE = new ConcurrentHashMap<>();
