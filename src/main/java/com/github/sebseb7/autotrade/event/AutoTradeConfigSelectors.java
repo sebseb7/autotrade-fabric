@@ -4,64 +4,12 @@ import com.github.sebseb7.autotrade.config.Configs;
 import fi.dy.masa.malilib.gui.Message.MessageType;
 import fi.dy.masa.malilib.util.InfoUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 final class AutoTradeConfigSelectors {
 
     private AutoTradeConfigSelectors() {}
-
-    static void tickGlassBlockSelection(Minecraft mc) {
-        if (!Configs.Generic.GLASS_BLOCK.getBooleanValue()) return;
-        int playerX = (int) mc.player.getX();
-        int playerZ = (int) mc.player.getZ();
-        int playerY = (int) mc.player.getY();
-        int selectorOffset = Configs.Generic.SELECTOR_OFFSET.getIntegerValue();
-        int absSelectorOffset = Math.abs(selectorOffset);
-        var redGlass = net.minecraft.world.level.block.Blocks.RED_STAINED_GLASS;
-        var blueGlass = net.minecraft.world.level.block.Blocks.BLUE_STAINED_GLASS;
-
-        for (int x = playerX - (absSelectorOffset + 3); x < playerX + (absSelectorOffset + 3); x++) {
-            for (int z = playerZ - (absSelectorOffset + 3); z < playerZ + (absSelectorOffset + 3); z++) {
-                for (int y = playerY - (absSelectorOffset + 3); y < playerY + (absSelectorOffset + 3); y++) {
-                    BlockPos pos = new BlockPos(x, y, z);
-                    if (mc.level.getBlockState(pos).getBlock() == redGlass) {
-                        updateInputContainerPos(x, y, z, selectorOffset);
-                        break;
-                    }
-                    if (mc.level.getBlockState(pos).getBlock() == blueGlass) {
-                        updateOutputContainerPos(x, y, z, selectorOffset);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    private static void updateInputContainerPos(int x, int y, int z, int selectorOffset) {
-        if (x != Configs.Generic.INPUT_CONTAINER_X.getIntegerValue()
-                || (y - selectorOffset) != Configs.Generic.INPUT_CONTAINER_Y.getIntegerValue()
-                || z != Configs.Generic.INPUT_CONTAINER_Z.getIntegerValue()) {
-            Configs.Generic.INPUT_CONTAINER_X.setIntegerValue(x);
-            Configs.Generic.INPUT_CONTAINER_Y.setIntegerValue(y - selectorOffset);
-            Configs.Generic.INPUT_CONTAINER_Z.setIntegerValue(z);
-            InfoUtils.showGuiOrInGameMessage(MessageType.INFO,
-                    "autotrade.message.input_container_set", x, y - selectorOffset, z);
-        }
-    }
-
-    private static void updateOutputContainerPos(int x, int y, int z, int selectorOffset) {
-        if (x != Configs.Generic.OUTPUT_CONTAINER_X.getIntegerValue()
-                || (y - selectorOffset) != Configs.Generic.OUTPUT_CONTAINER_Y.getIntegerValue()
-                || z != Configs.Generic.OUTPUT_CONTAINER_Z.getIntegerValue()) {
-            Configs.Generic.OUTPUT_CONTAINER_X.setIntegerValue(x);
-            Configs.Generic.OUTPUT_CONTAINER_Y.setIntegerValue(y - selectorOffset);
-            Configs.Generic.OUTPUT_CONTAINER_Z.setIntegerValue(z);
-            InfoUtils.showGuiOrInGameMessage(MessageType.INFO,
-                    "autotrade.message.output_container_set", x, y - selectorOffset, z);
-        }
-    }
 
     static void tickItemFrameSelection(Minecraft mc) {
         if (!Configs.Generic.ITEM_FRAME.getBooleanValue()) return;

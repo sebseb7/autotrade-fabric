@@ -43,7 +43,6 @@ final class AutoTradeClientTick {
 			return;
 		}
 
-		AutoTradeConfigSelectors.tickGlassBlockSelection(mc);
 		AutoTradeConfigSelectors.tickItemFrameSelection(mc);
 
 		merchantScreenTick.tickDeferredResultQuickMove(mc);

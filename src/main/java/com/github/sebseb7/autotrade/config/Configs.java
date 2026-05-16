@@ -27,10 +27,7 @@ public class Configs implements IConfigHandler {
 				"Do auto trading with villagers in range");
 		public static final ConfigBoolean ITEM_FRAME = new ConfigBoolean("selectUsingItemFrame", true,
 				"Select buy/sell items with item frames (max. distance 3) with items nametagged \"buy\" or \"sell\"");
-		public static final ConfigBoolean GLASS_BLOCK = new ConfigBoolean("selectUsingGlassBlock", false,
-				"Select input and output containers by placing red (input) and blue (output) stained glass blocks <selectionBlockOffset> blocks above them (or below if negative)");
-		public static final ConfigInteger SELECTOR_OFFSET = new ConfigInteger("selectionBlockOffset", 3, -10, 10,
-				"x Blocks below a red stained glass block will be input container, x Blocks below a blue stained glass block will be output container (or above, if x is negative)");
+
 		public static final ConfigBoolean ENABLE_SELL = new ConfigBoolean("enableSell", false,
 				"Enable selling (if disabled emeralds are taken from the input container)");
 		public static final ConfigString SELL_ITEM = new ConfigString("sellItem", "minecraft:gold_ingot",
@@ -68,8 +65,8 @@ public class Configs implements IConfigHandler {
 		public static final ConfigString SELECTED_ENCHANTMENTS = new ConfigString("selectedEnchantments", "",
 				"Comma-separated list of selected enchantment IDs (set via the \"Select Enchantments\" button on a librarian's trade screen)");
 
-		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ITEM_FRAME, GLASS_BLOCK,
-				SELECTOR_OFFSET, ENABLE_SELL, SELL_ITEM, SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS,
+		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ITEM_FRAME,
+			ENABLE_SELL, SELL_ITEM, SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS,
 				INPUT_CONTAINER_X, INPUT_CONTAINER_Y, INPUT_CONTAINER_Z, OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y,
 				OUTPUT_CONTAINER_Z, VOID_TRADING_DELAY, VOID_TRADING_DELAY_AFTER_TELEPORT, CONTAINER_CLOSE_DELAY,
 				SHOW_TRADES, SELECTED_ENCHANTMENTS);
