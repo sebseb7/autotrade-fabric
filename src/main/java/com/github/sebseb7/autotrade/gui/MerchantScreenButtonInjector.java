@@ -14,9 +14,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
+import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 //? if npcSplit {
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
@@ -41,11 +46,39 @@ public final class MerchantScreenButtonInjector {
 		ScreenEvents.AFTER_INIT.register(MerchantScreenButtonInjector::onScreenInit);
 	}
 
-	private static void onScreenInit(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
-		if (!(screen instanceof MerchantScreen merchantScreen)) {
-			return;
+	/**
+	 * Try to get the block position from a screen's menu.
+	 * Supports MerchantScreen (villager/trader), ShulkerBoxScreen, and ContainerScreen (chests).
+	 */
+	private static BlockPos getContainerPos(Screen screen) {
+		if (screen instanceof MerchantScreen) {
+			// For merchant screens, we don't have a block position in the same way
+			// Return null - the merchant screen buttons don't need this
+			return null;
 		}
+		// For container screens, try to get the block position from the player's last block hit result
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.BLOCK) {
+			BlockHitResult blockHit = (BlockHitResult) mc.hitResult;
+			return blockHit.getBlockPos();
+		}
+		return null;
+	}
 
+	private static void onScreenInit(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
+		// Determine screen type and set up appropriate buttons
+		if (screen instanceof MerchantScreen merchantScreen) {
+			addMerchantScreenButtons(client, merchantScreen, scaledWidth, scaledHeight);
+		} else if (screen instanceof ShulkerBoxScreen shulkerScreen) {
+			addContainerScreenButtons(client, shulkerScreen, scaledWidth, scaledHeight, "Shulker Box");
+		} else if (screen instanceof ContainerScreen) {
+			// Add buttons for chest and other container screens
+			addContainerScreenButtons(client, (ContainerScreen) screen, scaledWidth, scaledHeight, "Chest");
+		}
+	}
+
+	/** Add buttons to merchant (villager/trader) screens. */
+	private static void addMerchantScreenButtons(Minecraft client, MerchantScreen merchantScreen, int scaledWidth, int scaledHeight) {
 		// Position buttons safely to the right of the merchant GUI (276 px wide, centered).
 		int x = scaledWidth / 2 + 140;
 		int y = scaledHeight / 2 - 83;
@@ -130,6 +163,69 @@ public final class MerchantScreenButtonInjector {
 			buyCurrent.setMessage(currentBuyLabel());
 			enableAutotrade.setMessage(autotradeButtonLabel());
 		});
+	}
+
+	/** Add buttons to container screens (shulker boxes and chests). */
+	private static void addContainerScreenButtons(Minecraft client, Screen screen, int scaledWidth, int scaledHeight, String containerName) {
+		// Position buttons to the right of the container GUI
+		int x = scaledWidth / 2 + 140;
+		int y = scaledHeight / 2 - 83;
+		int bw = 160;
+		int h = 20;
+		int gap = 2;
+
+		Button openSettings = Button
+				.builder(Component.literal("Open Settings"), btn -> {
+					if (client.player != null) {
+						client.player.closeContainer();
+					}
+					GuiBase.openGui(new GuiConfigs());
+				})
+				.bounds(x, y, bw, h).build();
+
+		Button setAsInput = Button
+				.builder(Component.literal("Set as Autotrade Input"), btn -> {
+					BlockPos pos = getContainerPos(screen);
+					if (pos != null) {
+						Configs.Generic.INPUT_CONTAINER_X.setIntegerValue(pos.getX());
+						Configs.Generic.INPUT_CONTAINER_Y.setIntegerValue(pos.getY());
+						Configs.Generic.INPUT_CONTAINER_Z.setIntegerValue(pos.getZ());
+						Configs.saveToFile();
+						InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
+								"autotrade.message.input_container_set", containerName, pos.toShortString());
+					} else {
+						InfoUtils.showGuiOrInGameMessage(Message.MessageType.ERROR,
+								"autotrade.message.container_pos_error");
+					}
+				})
+				.bounds(x, y + (h + gap), bw, h).build();
+
+		Button setAsOutput = Button
+				.builder(Component.literal("Set as Autotrade Output"), btn -> {
+					BlockPos pos = getContainerPos(screen);
+					if (pos != null) {
+						Configs.Generic.OUTPUT_CONTAINER_X.setIntegerValue(pos.getX());
+						Configs.Generic.OUTPUT_CONTAINER_Y.setIntegerValue(pos.getY());
+						Configs.Generic.OUTPUT_CONTAINER_Z.setIntegerValue(pos.getZ());
+						Configs.saveToFile();
+						InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
+								"autotrade.message.output_container_set", containerName, pos.toShortString());
+					} else {
+						InfoUtils.showGuiOrInGameMessage(Message.MessageType.ERROR,
+								"autotrade.message.container_pos_error");
+					}
+				})
+				.bounds(x, y + 2 * (h + gap), bw, h).build();
+
+		//? if mc26 {
+		Screens.getWidgets(screen).add(openSettings);
+		Screens.getWidgets(screen).add(setAsInput);
+		Screens.getWidgets(screen).add(setAsOutput);
+		//?} else {
+		Screens.getButtons(screen).add(openSettings);
+		Screens.getButtons(screen).add(setAsInput);
+		Screens.getButtons(screen).add(setAsOutput);
+		//?}
 	}
 
 	private static void onSellButton(Minecraft client, MerchantScreen screen) {
