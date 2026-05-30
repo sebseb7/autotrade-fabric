@@ -9,7 +9,6 @@ import net.minecraft.world.entity.Entity;
 final class AutoTradeTickState {
 	static final int TRADER_HIGHLIGHT_TICKS = 20;
 
-	int tickCount;
 	int voidDelay;
 	int containerDelay;
 	int postMerchantInventorySyncTicks;

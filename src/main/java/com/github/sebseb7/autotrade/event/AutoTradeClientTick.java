@@ -57,9 +57,7 @@ final class AutoTradeClientTick {
 
 		if (traderInteractor.findAndInteract(mc)) return;
 
-		if (containerFlow.handleContainerProximity(mc)) return;
-
-		containerFlow.tickPeriodicReset();
+		containerFlow.handleContainerProximity(mc);
 	}
 
 	private void tickPostMerchantSync(Minecraft mc) {

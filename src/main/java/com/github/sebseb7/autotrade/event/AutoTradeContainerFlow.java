@@ -77,19 +77,6 @@ final class AutoTradeContainerFlow {
         return false;
     }
 
-    void tickPeriodicReset() {
-        state.tickCount++;
-        if (state.tickCount > 200) {
-            state.tickCount = 0;
-            state.inputInRange = false;
-            state.outputInRange = false;
-            var cur = GuiUtils.getCurrentScreen();
-            if (cur != null && isContainerScreen(cur)) {
-                cur.onClose();
-            }
-        }
-    }
-
     private void processContainerIo(Object screen, AbstractContainerMenu menu, Inventory plInv) {
         boolean closed = false;
         if (state.containerDelay == 0 && state.inputOpened) {
@@ -109,11 +96,5 @@ final class AutoTradeContainerFlow {
         if (screen instanceof MerchantScreen s) s.onClose();
         else if (screen instanceof ShulkerBoxScreen s) s.onClose();
         else if (screen instanceof ContainerScreen s) s.onClose();
-    }
-
-    private static boolean isContainerScreen(Object screen) {
-        return screen instanceof MerchantScreen
-                || screen instanceof ShulkerBoxScreen
-                || screen instanceof ContainerScreen;
     }
 }
