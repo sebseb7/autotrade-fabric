@@ -1,6 +1,7 @@
 package com.github.sebseb7.autotrade.event;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 
 /**
@@ -20,6 +21,8 @@ final class AutoTradeTickState {
 	boolean inputOpened;
 	boolean outputInRange;
 	boolean outputOpened;
+	/** Block autotrade opened for the current pending input/output transfer. */
+	BlockPos pendingContainerPos;
 
 	int traderGlowTicksRemaining;
 	int traderGlowEntityId = -1;

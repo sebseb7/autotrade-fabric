@@ -3,14 +3,16 @@ package com.github.sebseb7.autotrade.event;
 import com.github.sebseb7.autotrade.config.Configs;
 import fi.dy.masa.malilib.util.GuiUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
-import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 final class AutoTradeContainerFlow {
@@ -21,10 +23,18 @@ final class AutoTradeContainerFlow {
     }
 
     void processOpenContainers(Minecraft mc, Inventory plInv) {
-        if (GuiUtils.getCurrentScreen() instanceof ShulkerBoxScreen sbs) {
-            processContainerIo(sbs, sbs.getMenu(), plInv);
-        } else if (GuiUtils.getCurrentScreen() instanceof ContainerScreen cs) {
-            processContainerIo(cs, cs.getMenu(), plInv);
+        if (!state.inputOpened && !state.outputOpened) {
+            return;
+        }
+
+        Screen screen = GuiUtils.getCurrentScreen();
+        if (screen instanceof ShulkerBoxScreen sbs) {
+            processContainerIo(mc, sbs, sbs.getMenu(), plInv);
+        } else if (screen instanceof ContainerScreen cs) {
+            processContainerIo(mc, cs, cs.getMenu(), plInv);
+        } else if (state.containerDelay <= 0) {
+            state.inputOpened = false;
+            state.outputOpened = false;
         }
     }
 
@@ -51,6 +61,7 @@ final class AutoTradeContainerFlow {
                     new BlockHitResult(ic, net.minecraft.core.Direction.UP, input, false));
             state.containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
             state.inputOpened = true;
+            state.pendingContainerPos = input;
             state.inputContainerHighlightTicks = AutoTradeTickState.TRADER_HIGHLIGHT_TICKS;
             return true;
         }
@@ -61,6 +72,7 @@ final class AutoTradeContainerFlow {
                     new BlockHitResult(oc, net.minecraft.core.Direction.UP, output, false));
             state.containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
             state.outputOpened = true;
+            state.pendingContainerPos = output;
             state.outputContainerHighlightTicks = AutoTradeTickState.TRADER_HIGHLIGHT_TICKS;
             return true;
         }
@@ -73,28 +85,46 @@ final class AutoTradeContainerFlow {
             state.outputOpened = false;
             state.outputInRange = false;
         }
+        if (!state.inputOpened && !state.outputOpened) {
+            state.pendingContainerPos = null;
+        }
 
         return false;
     }
 
-    private void processContainerIo(Object screen, AbstractContainerMenu menu, Inventory plInv) {
-        boolean closed = false;
-        if (state.containerDelay == 0 && state.inputOpened) {
+    private void processContainerIo(Minecraft mc, AbstractContainerScreen<?> screen, AbstractContainerMenu menu,
+            Inventory plInv) {
+        if (state.containerDelay > 0) {
+            return;
+        }
+
+        BlockPos openPos = containerBlockPos(mc, screen);
+        if (state.pendingContainerPos != null && openPos != null
+                && !state.pendingContainerPos.equals(openPos)) {
+            return;
+        }
+
+        boolean didIo = false;
+        if (state.inputOpened) {
             state.inputOpened = false;
             ContainerIoHelper.processInput(menu, plInv);
-            closeScreen(screen);
-            closed = true;
+            didIo = true;
         }
-        if (state.containerDelay == 0 && state.outputOpened) {
+        if (state.outputOpened) {
             state.outputOpened = false;
             ContainerIoHelper.processOutput(menu, plInv);
-            if (!closed) closeScreen(screen);
+            didIo = true;
+        }
+        if (didIo) {
+            state.pendingContainerPos = null;
+            screen.onClose();
         }
     }
 
-    private static void closeScreen(Object screen) {
-        if (screen instanceof MerchantScreen s) s.onClose();
-        else if (screen instanceof ShulkerBoxScreen s) s.onClose();
-        else if (screen instanceof ContainerScreen s) s.onClose();
+    private static BlockPos containerBlockPos(Minecraft mc, AbstractContainerScreen<?> screen) {
+        if (mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.BLOCK) {
+            return ((BlockHitResult) mc.hitResult).getBlockPos();
+        }
+        return null;
     }
 }
