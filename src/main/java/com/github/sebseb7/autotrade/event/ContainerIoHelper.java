@@ -132,7 +132,9 @@ final class ContainerIoHelper {
 			}
 			movedBought.flush("autotrade.message.moved_bought_to_output");
 		}
-		quickMovePlayerExcessOverCap(mc, menu, playerInv, EMERALD_SPEC, maxKeep);
+		if (!Configs.Generic.ENABLE_BUY.getBooleanValue()) {
+			quickMovePlayerExcessOverCap(mc, menu, playerInv, EMERALD_SPEC, 0);
+		}
 		if (Configs.Generic.ENABLE_SELL.getBooleanValue()) {
 			quickMovePlayerExcessOverCap(mc, menu, playerInv, Configs.Generic.SELL_ITEM.getStringValue(), maxKeep);
 		}
