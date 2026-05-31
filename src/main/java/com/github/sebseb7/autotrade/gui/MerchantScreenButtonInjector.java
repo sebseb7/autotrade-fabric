@@ -15,6 +15,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
 import net.minecraft.core.BlockPos;
@@ -75,6 +76,8 @@ public final class MerchantScreenButtonInjector {
 		} else if (screen instanceof ContainerScreen) {
 			addContainerScreenButtons(client, (ContainerScreen) screen, scaledWidth, scaledHeight,
 					"autotrade.gui.container.chest");
+		} else if (screen instanceof InventoryScreen inventoryScreen) {
+			addInventoryScreenButtons(client, inventoryScreen, scaledWidth, scaledHeight);
 		}
 	}
 
@@ -119,21 +122,12 @@ public final class MerchantScreenButtonInjector {
 				.bounds(x, y + 3 * (h + gap), bw, h).build();
 
 		Screen asScreen = merchantScreen;
-		//? if mc26 {
-		Screens.getWidgets(asScreen).add(openSettings);
-		Screens.getWidgets(asScreen).add(selectSell);
-		Screens.getWidgets(asScreen).add(sellCurrent);
-		Screens.getWidgets(asScreen).add(selectBuy);
-		Screens.getWidgets(asScreen).add(buyCurrent);
-		Screens.getWidgets(asScreen).add(enableAutotrade);
-		//?} else {
-		Screens.getButtons(asScreen).add(openSettings);
-		Screens.getButtons(asScreen).add(selectSell);
-		Screens.getButtons(asScreen).add(sellCurrent);
-		Screens.getButtons(asScreen).add(selectBuy);
-		Screens.getButtons(asScreen).add(buyCurrent);
-		Screens.getButtons(asScreen).add(enableAutotrade);
-		//?}
+		addScreenButton(asScreen, openSettings);
+		addScreenButton(asScreen, selectSell);
+		addScreenWidget(asScreen, sellCurrent);
+		addScreenButton(asScreen, selectBuy);
+		addScreenWidget(asScreen, buyCurrent);
+		addScreenButton(asScreen, enableAutotrade);
 
 		// Offers arrive via a server packet after the screen opens.
 		// Register a per-screen tick handler to wait for offers, cache them,
@@ -220,15 +214,52 @@ public final class MerchantScreenButtonInjector {
 				})
 				.bounds(x, y + 2 * (h + gap), bw, h).build();
 
+		Button enableAutotrade = Button
+				.builder(autotradeButtonLabel(), btn -> toggleAutotrade(btn))
+				.bounds(x, y + 3 * (h + gap), bw, h).build();
+
+		addScreenButton(screen, openSettings);
+		addScreenButton(screen, setAsInput);
+		addScreenButton(screen, setAsOutput);
+		addScreenButton(screen, enableAutotrade);
+
+		registerAutotradeToggleRefresh(screen, enableAutotrade);
+	}
+
+	/** Player inventory (E) — enable/disable only; no block container to assign. */
+	private static void addInventoryScreenButtons(Minecraft client, InventoryScreen screen, int scaledWidth,
+			int scaledHeight) {
+		int x = scaledWidth / 2 + 140;
+		int y = scaledHeight / 2 - 83;
+		int bw = 160;
+		int h = 20;
+
+		Button enableAutotrade = Button
+				.builder(autotradeButtonLabel(), btn -> toggleAutotrade(btn))
+				.bounds(x, y, bw, h).build();
+
+		addScreenButton(screen, enableAutotrade);
+		registerAutotradeToggleRefresh(screen, enableAutotrade);
+	}
+
+	private static void addScreenButton(Screen screen, Button button) {
 		//? if mc26 {
-		Screens.getWidgets(screen).add(openSettings);
-		Screens.getWidgets(screen).add(setAsInput);
-		Screens.getWidgets(screen).add(setAsOutput);
+		Screens.getWidgets(screen).add(button);
 		//?} else {
-		Screens.getButtons(screen).add(openSettings);
-		Screens.getButtons(screen).add(setAsInput);
-		Screens.getButtons(screen).add(setAsOutput);
+		Screens.getButtons(screen).add(button);
 		//?}
+	}
+
+	private static void addScreenWidget(Screen screen, StringWidget widget) {
+		//? if mc26 {
+		Screens.getWidgets(screen).add(widget);
+		//?} else {
+		Screens.getButtons(screen).add(widget);
+		//?}
+	}
+
+	private static void registerAutotradeToggleRefresh(Screen screen, Button enableAutotrade) {
+		ScreenEvents.afterTick(screen).register(s -> enableAutotrade.setMessage(autotradeButtonLabel()));
 	}
 
 	private static void onSellButton(Minecraft client, MerchantScreen screen) {
