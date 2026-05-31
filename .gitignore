@@ -22,3 +22,4 @@ Thumbs.db
 out.txt
 full_build.txt
 compile_err.txt
+malilib*

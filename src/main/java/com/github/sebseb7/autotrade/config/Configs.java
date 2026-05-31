@@ -23,48 +23,65 @@ public class Configs implements IConfigHandler {
 	private static final String CONFIG_FILE_NAME = Reference.MOD_ID + ".json";
 
 	public static class Generic {
-		public static final ConfigBoolean ENABLED = new ConfigBoolean("enabled", false,
-				"Do auto trading with villagers in range");
-		public static final ConfigBoolean ITEM_FRAME = new ConfigBoolean("selectUsingItemFrame", true,
-				"Select buy/sell items with item frames (max. distance 3) with items nametagged \"buy\" or \"sell\"");
-		public static final ConfigBoolean SELECT_BY_NAMETAG = new ConfigBoolean("selectByNameTag", true,
-				"Select input/output containers via item frame on the block: put a nametagged chest item (\"input\" / \"output\") in the frame (max. distance 3)");
+		private static final String GENERIC_KEY = Reference.MOD_ID + ".config.generic";
 
-		public static final ConfigBoolean ENABLE_SELL = new ConfigBoolean("enableSell", false,
-				"Enable selling (if disabled emeralds are taken from the input container)");
-		public static final ConfigString SELL_ITEM = new ConfigString("sellItem", "minecraft:gold_ingot",
-				"The item to sell for emerald. Optional suffix #enc1=lv&enc2=lv (enchantment registry ids) matches exact enchantments, e.g. enchanted books.");
-		public static final ConfigInteger SELL_LIMIT = new ConfigInteger("sellLimit", 64, 1, 64,
-				"max price to sell for");
-		public static final ConfigBoolean ENABLE_BUY = new ConfigBoolean("enableBuy", false,
-				"Enable buying (if disabled emeralds are placed in the output container)");
-		public static final ConfigString BUY_ITEM = new ConfigString("buyItem", "minecraft:redstone",
-				"The item to buy using emerald. Optional suffix #enc1=lv&enc2=lv matches exact enchantments (use set-buy hotkey with the book in hand).");
-		public static final ConfigInteger BUY_LIMIT = new ConfigInteger("buyLimit", 64, 1, 64, "max price to buy for");
-		public static final ConfigInteger MAX_INPUT_ITEMS = new ConfigInteger("maxInputStacks", 9, 1, 35,
-				"stacks to take from input container (or emerald container in buy-only mode), also the max amount of input and emerald kept.");
-		public static final ConfigInteger INPUT_CONTAINER_X = new ConfigInteger("inputContainerX", 0, -30000000,
-				30000000, "Input container X (not used when sell disabled)");
-		public static final ConfigInteger INPUT_CONTAINER_Y = new ConfigInteger("inputContainerY", 0, -64, 320,
-				"Input container Y (not used when sell disabled)");
-		public static final ConfigInteger INPUT_CONTAINER_Z = new ConfigInteger("inputContainerZ", 0, -30000000,
-				30000000, "Input container Z (not used when sell disabled)");
-		public static final ConfigInteger OUTPUT_CONTAINER_X = new ConfigInteger("outputContainerX", 0, -30000000,
-				30000000, "Output container X (not used when buy disabled)");
-		public static final ConfigInteger OUTPUT_CONTAINER_Y = new ConfigInteger("outputContainerY", 0, -64, 320,
-				"Output container Y (not used when buy disabled)");
-		public static final ConfigInteger OUTPUT_CONTAINER_Z = new ConfigInteger("outputContainerZ", 0, -30000000,
-				30000000, "Output container Z (not used when buy disabled)");
-		public static final ConfigInteger VOID_TRADING_DELAY = new ConfigInteger("voidTradingDelay", 0, 0, 30000000,
-				"delay in ticks for void trading");
-		public static final ConfigBoolean VOID_TRADING_DELAY_AFTER_TELEPORT = new ConfigBoolean("delayAfterTeleport",
+		private static ConfigBoolean i18n(ConfigBoolean config) {
+			return config.apply(GENERIC_KEY)
+					.translatedName(GENERIC_KEY + ".prettyName." + config.getName());
+		}
+
+		private static ConfigInteger i18n(ConfigInteger config) {
+			return config.apply(GENERIC_KEY)
+					.translatedName(GENERIC_KEY + ".prettyName." + config.getName());
+		}
+
+		private static ConfigString i18n(ConfigString config) {
+			return config.apply(GENERIC_KEY)
+					.translatedName(GENERIC_KEY + ".prettyName." + config.getName());
+		}
+
+		public static final ConfigBoolean ENABLED = i18n(new ConfigBoolean("enabled", false,
+				"Do auto trading with villagers in range"));
+		public static final ConfigBoolean ITEM_FRAME = i18n(new ConfigBoolean("selectUsingItemFrame", true,
+				"Select buy/sell items with item frames (max. distance 3) with items nametagged \"buy\" or \"sell\""));
+		public static final ConfigBoolean SELECT_BY_NAMETAG = i18n(new ConfigBoolean("selectByNameTag", true,
+				"Select input/output containers via item frame on the block: put a nametagged chest item (\"input\" / \"output\") in the frame (max. distance 3)"));
+
+		public static final ConfigBoolean ENABLE_SELL = i18n(new ConfigBoolean("enableSell", false,
+				"Enable selling (if disabled emeralds are taken from the input container)"));
+		public static final ConfigString SELL_ITEM = i18n(new ConfigString("sellItem", "minecraft:gold_ingot",
+				"The item to sell for emerald. Optional suffix #enc1=lv&enc2=lv (enchantment registry ids) matches exact enchantments, e.g. enchanted books."));
+		public static final ConfigInteger SELL_LIMIT = i18n(new ConfigInteger("sellLimit", 64, 1, 64,
+				"max price to sell for"));
+		public static final ConfigBoolean ENABLE_BUY = i18n(new ConfigBoolean("enableBuy", false,
+				"Enable buying (if disabled emeralds are placed in the output container)"));
+		public static final ConfigString BUY_ITEM = i18n(new ConfigString("buyItem", "minecraft:redstone",
+				"The item to buy using emerald. Optional suffix #enc1=lv&enc2=lv matches exact enchantments (use set-buy hotkey with the book in hand)."));
+		public static final ConfigInteger BUY_LIMIT = i18n(new ConfigInteger("buyLimit", 64, 1, 64, "max price to buy for"));
+		public static final ConfigInteger MAX_INPUT_ITEMS = i18n(new ConfigInteger("maxInputStacks", 9, 1, 35,
+				"stacks to take from input container (or emerald container in buy-only mode), also the max amount of input and emerald kept."));
+		public static final ConfigInteger INPUT_CONTAINER_X = i18n(new ConfigInteger("inputContainerX", 0, -30000000,
+				30000000, "Input container X (not used when sell disabled)"));
+		public static final ConfigInteger INPUT_CONTAINER_Y = i18n(new ConfigInteger("inputContainerY", 0, -64, 320,
+				"Input container Y (not used when sell disabled)"));
+		public static final ConfigInteger INPUT_CONTAINER_Z = i18n(new ConfigInteger("inputContainerZ", 0, -30000000,
+				30000000, "Input container Z (not used when sell disabled)"));
+		public static final ConfigInteger OUTPUT_CONTAINER_X = i18n(new ConfigInteger("outputContainerX", 0, -30000000,
+				30000000, "Output container X (not used when buy disabled)"));
+		public static final ConfigInteger OUTPUT_CONTAINER_Y = i18n(new ConfigInteger("outputContainerY", 0, -64, 320,
+				"Output container Y (not used when buy disabled)"));
+		public static final ConfigInteger OUTPUT_CONTAINER_Z = i18n(new ConfigInteger("outputContainerZ", 0, -30000000,
+				30000000, "Output container Z (not used when buy disabled)"));
+		public static final ConfigInteger VOID_TRADING_DELAY = i18n(new ConfigInteger("voidTradingDelay", 0, 0, 30000000,
+				"delay in ticks for void trading"));
+		public static final ConfigBoolean VOID_TRADING_DELAY_AFTER_TELEPORT = i18n(new ConfigBoolean("delayAfterTeleport",
 				true,
-				"true: Start the delay after the villager was unloaded; false: Start the delay after the trade has been initiated");
-		public static final ConfigInteger CONTAINER_CLOSE_DELAY = new ConfigInteger("containerCloseDelay", 0, 0,
-				30000000, "delay in ticks; to get signal from trapped chest");
+				"true: Start the delay after the villager was unloaded; false: Start the delay after the trade has been initiated"));
+		public static final ConfigInteger CONTAINER_CLOSE_DELAY = i18n(new ConfigInteger("containerCloseDelay", 0, 0,
+				30000000, "delay in ticks; to get signal from trapped chest"));
 
-		public static final ConfigString SELECTED_ENCHANTMENTS = new ConfigString("selectedEnchantments", "",
-				"Comma-separated list of selected enchantment IDs (set via the \"Select Enchantments\" button on a librarian's trade screen)");
+		public static final ConfigString SELECTED_ENCHANTMENTS = i18n(new ConfigString("selectedEnchantments", "",
+				"Comma-separated list of selected enchantment IDs (set via the \"Select Enchantments\" button on a librarian's trade screen)"));
 
 		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ITEM_FRAME, SELECT_BY_NAMETAG,
 			ENABLE_SELL, SELL_ITEM, SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS,
