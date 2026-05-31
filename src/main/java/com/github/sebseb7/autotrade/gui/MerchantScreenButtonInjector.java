@@ -1,6 +1,7 @@
 package com.github.sebseb7.autotrade.gui;
 
 import com.github.sebseb7.autotrade.config.Configs;
+import com.github.sebseb7.autotrade.mixin.AbstractContainerScreenAccessor;
 import com.github.sebseb7.autotrade.mixin.MerchantMenuAccessor;
 import com.github.sebseb7.autotrade.render.VillagerTradeCache;
 import com.github.sebseb7.autotrade.util.TradeItemSpec;
@@ -77,7 +78,7 @@ public final class MerchantScreenButtonInjector {
 			addContainerScreenButtons(client, (ContainerScreen) screen, scaledWidth, scaledHeight,
 					"autotrade.gui.container.chest");
 		} else if (screen instanceof InventoryScreen inventoryScreen) {
-			addInventoryScreenButtons(client, inventoryScreen, scaledWidth, scaledHeight);
+			addInventoryScreenButtons(client, inventoryScreen);
 		}
 	}
 
@@ -227,10 +228,7 @@ public final class MerchantScreenButtonInjector {
 	}
 
 	/** Player inventory (E) — settings and enable/disable; no block container to assign. */
-	private static void addInventoryScreenButtons(Minecraft client, InventoryScreen screen, int scaledWidth,
-			int scaledHeight) {
-		int x = scaledWidth / 2 + 140;
-		int y = scaledHeight / 2 - 83;
+	private static void addInventoryScreenButtons(Minecraft client, InventoryScreen screen) {
 		int bw = 160;
 		int h = 20;
 		int gap = 2;
@@ -242,15 +240,15 @@ public final class MerchantScreenButtonInjector {
 					}
 					GuiBase.openGui(new GuiConfigs());
 				})
-				.bounds(x, y, bw, h).build();
+				.bounds(0, 0, bw, h).build();
 
 		Button enableAutotrade = Button
 				.builder(autotradeButtonLabel(), btn -> toggleAutotrade(btn))
-				.bounds(x, y + (h + gap), bw, h).build();
+				.bounds(0, 0, bw, h).build();
 
 		addScreenButton(screen, openSettings);
 		addScreenButton(screen, enableAutotrade);
-		registerAutotradeToggleRefresh(screen, enableAutotrade);
+		registerInventoryButtonLayout(screen, openSettings, enableAutotrade, h, gap);
 	}
 
 	private static void addScreenButton(Screen screen, Button button) {
@@ -271,6 +269,22 @@ public final class MerchantScreenButtonInjector {
 
 	private static void registerAutotradeToggleRefresh(Screen screen, Button enableAutotrade) {
 		ScreenEvents.afterTick(screen).register(s -> enableAutotrade.setMessage(autotradeButtonLabel()));
+	}
+
+	/**
+	 * Anchor buttons to the right of the inventory panel so opening the recipe book
+	 * (which shifts {@code leftPos}) does not cover them.
+	 */
+	private static void registerInventoryButtonLayout(InventoryScreen screen, Button openSettings,
+			Button enableAutotrade, int h, int gap) {
+		ScreenEvents.afterTick(screen).register(s -> {
+			AbstractContainerScreenAccessor gui = (AbstractContainerScreenAccessor) screen;
+			int x = gui.getLeftPos() + gui.getImageWidth() + 4;
+			int y = gui.getTopPos() + 4;
+			openSettings.setPosition(x, y);
+			enableAutotrade.setPosition(x, y + h + gap);
+			enableAutotrade.setMessage(autotradeButtonLabel());
+		});
 	}
 
 	private static void onSellButton(Minecraft client, MerchantScreen screen) {
