@@ -8,7 +8,7 @@ import com.github.sebseb7.autotrade.util.TradeItemSpec;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.Message;
 import fi.dy.masa.malilib.hotkeys.IKeybind;
-import fi.dy.masa.malilib.util.InfoUtils;
+import com.github.sebseb7.autotrade.util.AutotradeInfoUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -27,7 +27,7 @@ final class HotkeyActions {
 			Configs.Generic.ENABLED.toggleBooleanValue();
 			boolean enabled = Configs.Generic.ENABLED.getBooleanValue();
 			String msg = enabled ? "autotrade.message.toggled_mod_on" : "autotrade.message.toggled_mod_off";
-			InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, msg);
+			AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, msg);
 			if (enabled) {
 				AutoTrade.sold = 0;
 				AutoTrade.bought = 0;
@@ -44,7 +44,7 @@ final class HotkeyActions {
 				Configs.Generic.INPUT_CONTAINER_X.setIntegerValue(p.getX());
 				Configs.Generic.INPUT_CONTAINER_Y.setIntegerValue(p.getY());
 				Configs.Generic.INPUT_CONTAINER_Z.setIntegerValue(p.getZ());
-				InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.input_container_set",
+				AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.input_container_set",
 						p.getX(), p.getY(), p.getZ());
 			}
 		} else if (key == Hotkeys.SET_OUTPUT_KEY.getKeybind()) {
@@ -55,16 +55,16 @@ final class HotkeyActions {
 				Configs.Generic.OUTPUT_CONTAINER_X.setIntegerValue(p.getX());
 				Configs.Generic.OUTPUT_CONTAINER_Y.setIntegerValue(p.getY());
 				Configs.Generic.OUTPUT_CONTAINER_Z.setIntegerValue(p.getZ());
-				InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.output_container_set",
+				AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.output_container_set",
 						p.getX(), p.getY(), p.getZ());
 			}
 		} else if (key == Hotkeys.SET_BUY_KEY.getKeybind()) {
 			String buyItem = TradeItemSpec.encodeFromStack(mc.player.getItemInHand(InteractionHand.MAIN_HAND));
-			InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.buy_item_set", buyItem);
+			AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.buy_item_set", buyItem);
 			Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
 		} else if (key == Hotkeys.SET_SELL_KEY.getKeybind()) {
 			String sellItem = TradeItemSpec.encodeFromStack(mc.player.getItemInHand(InteractionHand.MAIN_HAND));
-			InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.sell_item_set", sellItem);
+			AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.sell_item_set", sellItem);
 			Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
 		}
 		return false;

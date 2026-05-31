@@ -1,8 +1,8 @@
 package com.github.sebseb7.autotrade.event;
 
 import com.github.sebseb7.autotrade.config.Configs;
+import com.github.sebseb7.autotrade.util.AutotradeInfoUtils;
 import fi.dy.masa.malilib.gui.Message.MessageType;
-import fi.dy.masa.malilib.util.InfoUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -32,7 +32,7 @@ final class AutoTradeConfigSelectors {
         if (!("sell".equalsIgnoreCase(customName) || "\"sell\"".equals(customName))) return;
         String sellItem = com.github.sebseb7.autotrade.util.TradeItemSpec.encodeFromStack(stack);
         if (!Configs.Generic.SELL_ITEM.getStringValue().equals(sellItem)) {
-            InfoUtils.showGuiOrInGameMessage(MessageType.INFO,
+            AutotradeInfoUtils.showGuiOrInGameMessage(MessageType.INFO,
                     "autotrade.message.sell_item_set", sellItem);
             Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
         }
@@ -42,7 +42,7 @@ final class AutoTradeConfigSelectors {
         if (!("buy".equalsIgnoreCase(customName) || "\"buy\"".equals(customName))) return;
         String buyItem = com.github.sebseb7.autotrade.util.TradeItemSpec.encodeFromStack(stack);
         if (!Configs.Generic.BUY_ITEM.getStringValue().equals(buyItem)) {
-            InfoUtils.showGuiOrInGameMessage(MessageType.INFO,
+            AutotradeInfoUtils.showGuiOrInGameMessage(MessageType.INFO,
                     "autotrade.message.buy_item_set", buyItem);
             Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
         }

@@ -12,7 +12,7 @@ import fi.dy.masa.malilib.event.TickHandler;
 import fi.dy.masa.malilib.gui.Message;
 import fi.dy.masa.malilib.interfaces.IInitializationHandler;
 import fi.dy.masa.malilib.interfaces.IValueChangeCallback;
-import fi.dy.masa.malilib.util.InfoUtils;
+import com.github.sebseb7.autotrade.util.AutotradeInfoUtils;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 //? if npcSplit {
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -47,7 +47,7 @@ public class InitHandler implements IInitializationHandler {
 					&& (entity instanceof Villager || entity instanceof WanderingTrader)
 					&& Configs.Generic.ENABLED.getBooleanValue()) {
 				Configs.Generic.ENABLED.setBooleanValue(false);
-				InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.toggled_mod_off");
+				AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.toggled_mod_off");
 				Configs.saveToFile();
 			}
 			return InteractionResult.PASS;

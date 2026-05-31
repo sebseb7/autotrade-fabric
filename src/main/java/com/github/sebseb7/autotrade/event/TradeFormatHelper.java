@@ -1,5 +1,7 @@
 package com.github.sebseb7.autotrade.event;
 
+import com.github.sebseb7.autotrade.util.AutotradeInfoUtils;
+import fi.dy.masa.malilib.gui.Message;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -39,14 +41,14 @@ final class TradeFormatHelper {
 	}
 
 	/**
-	 * Malilib's {@code showGuiOrInGameMessage} routes to multiple HUD targets; trade spam looked like 3× duplication.
-	 * Vanilla overlay is a single on-screen line (same idea as vanilla toast-adjacent hints).
+	 * Action-bar overlay plus the same line in chat (see {@link AutotradeInfoUtils}).
 	 */
 	static void showTradeNotice(Minecraft mc, String translationKey, Component arg1, Component arg2) {
-		if (mc.gui == null) {
-			return;
+		Component notice = Component.translatable(translationKey, arg1, arg2);
+		if (mc.gui != null) {
+			mc.gui.setOverlayMessage(notice, false);
 		}
-		mc.gui.setOverlayMessage(Component.translatable(translationKey, arg1, arg2), false);
+		AutotradeInfoUtils.postToChat(Message.MessageType.INFO, notice);
 	}
 
 	private static Component formatItemStack(ItemStack stack, int count) {

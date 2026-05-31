@@ -6,7 +6,7 @@ import com.github.sebseb7.autotrade.render.VillagerTradeCache;
 import com.github.sebseb7.autotrade.util.TradeItemSpec;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.Message;
-import fi.dy.masa.malilib.util.InfoUtils;
+import com.github.sebseb7.autotrade.util.AutotradeInfoUtils;
 import java.util.List;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
@@ -194,10 +194,10 @@ public final class MerchantScreenButtonInjector {
 						Configs.Generic.INPUT_CONTAINER_Y.setIntegerValue(pos.getY());
 						Configs.Generic.INPUT_CONTAINER_Z.setIntegerValue(pos.getZ());
 						Configs.saveToFile();
-						InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
+						AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
 								"autotrade.message.input_container_set", containerName, pos.toShortString());
 					} else {
-						InfoUtils.showGuiOrInGameMessage(Message.MessageType.ERROR,
+						AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.ERROR,
 								"autotrade.message.container_pos_error");
 					}
 				})
@@ -211,10 +211,10 @@ public final class MerchantScreenButtonInjector {
 						Configs.Generic.OUTPUT_CONTAINER_Y.setIntegerValue(pos.getY());
 						Configs.Generic.OUTPUT_CONTAINER_Z.setIntegerValue(pos.getZ());
 						Configs.saveToFile();
-						InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
+						AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO,
 								"autotrade.message.output_container_set", containerName, pos.toShortString());
 					} else {
-						InfoUtils.showGuiOrInGameMessage(Message.MessageType.ERROR,
+						AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.ERROR,
 								"autotrade.message.container_pos_error");
 					}
 				})
@@ -322,7 +322,7 @@ public final class MerchantScreenButtonInjector {
 		boolean enabled = Configs.Generic.ENABLED.getBooleanValue();
 		btn.setMessage(autotradeButtonLabel());
 		String msg = enabled ? "autotrade.message.toggled_mod_on" : "autotrade.message.toggled_mod_off";
-		InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, msg);
+		AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, msg);
 		Configs.saveToFile();
 	}
 
@@ -364,7 +364,7 @@ public final class MerchantScreenButtonInjector {
 		Configs.Generic.SELL_LIMIT.setIntegerValue(item.getCount());
 		Configs.Generic.ENABLE_SELL.setBooleanValue(true);
 		Configs.saveToFile();
-		InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.sell_item_set", spec);
+		AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.sell_item_set", spec);
 	}
 
 	private static void applySelectedTradeAsBuy(Minecraft client, MerchantScreen screen) {
@@ -378,7 +378,7 @@ public final class MerchantScreenButtonInjector {
 		Configs.Generic.BUY_LIMIT.setIntegerValue(item.getCount());
 		Configs.Generic.ENABLE_BUY.setBooleanValue(true);
 		Configs.saveToFile();
-		InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.buy_item_set", spec);
+		AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.buy_item_set", spec);
 	}
 
 	private static void cacheOffersForNearestTrader(Minecraft mc, MerchantOffers offers) {

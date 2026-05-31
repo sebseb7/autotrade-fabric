@@ -4,7 +4,7 @@ import com.github.sebseb7.autotrade.config.Configs;
 import com.github.sebseb7.autotrade.mixin.MultiPlayerGameModeInvoker;
 import com.github.sebseb7.autotrade.util.TradeItemSpec;
 import fi.dy.masa.malilib.gui.Message;
-import fi.dy.masa.malilib.util.InfoUtils;
+import com.github.sebseb7.autotrade.util.AutotradeInfoUtils;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
@@ -254,7 +254,7 @@ final class ContainerIoHelper {
 			}
 			for (Map.Entry<Item, Integer> e : counts.entrySet()) {
 				ItemStack line = new ItemStack(e.getKey(), e.getValue());
-				InfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, translationKey, formatStackForMessage(line));
+				AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, translationKey, formatStackForMessage(line));
 			}
 			counts.clear();
 		}
