@@ -17,8 +17,12 @@ import net.minecraft.world.item.trading.MerchantOffers;
  * it is an enchanted book (shift-click would chain other book trades); other results still use shift-click.
  */
 final class AutoTradeMerchantScreenTick {
-	/** First tick after a trade decrements without acting; remaining ticks wait on the server. */
-	private static final int RESULT_QUICK_MOVE_DELAY_TICKS = 3;
+	/** Ticks after {@code SelectTrade} before moving the result (server must fill slot 2). */
+	private static final int RESULT_QUICK_MOVE_DELAY_TICKS = 5;
+	private static final int RESULT_EMPTY_RETRY_TICKS = 2;
+	private static final int RESULT_EMPTY_MAX_WAITS = 15;
+	/** One trade per packet; chat/counters use this, not remaining offer uses. */
+	private static final int TRADES_PER_EXECUTION = 1;
 
 	private final AutoTradeTickState state;
 
@@ -54,21 +58,27 @@ final class AutoTradeMerchantScreenTick {
 		menu.tryMoveItems(idx);
 		var slot = menu.getSlot(2);
 		ItemStack slot2 = slot.getItem();
+		if (slot2.isEmpty()) {
+			if (state.merchantResultEmptyWaits < RESULT_EMPTY_MAX_WAITS) {
+				state.merchantResultEmptyWaits++;
+				state.merchantResultQuickMoveDelayTicks = RESULT_EMPTY_RETRY_TICKS;
+				return;
+			}
+			AutoTrade.logger.warn("[AutoTrade merchant] result slot still empty after {} waits", RESULT_EMPTY_MAX_WAITS);
+			state.clearMerchantQuickMoveDefer();
+			return;
+		}
+		state.merchantResultEmptyWaits = 0;
 		String buySpec = Configs.Generic.BUY_ITEM.getStringValue();
 		try {
 			if (state.merchantResultQuickMoveIsBuy) {
-				boolean match = !slot2.isEmpty() && TradeItemSpec.matches(slot2, buySpec);
-				if (match) {
+				if (TradeItemSpec.matches(slot2, buySpec)) {
 					ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
 				} else {
 					AutoTrade.logger.warn("[AutoTrade merchant] defer quickMove skipped: slot2 did not match buy spec");
 				}
-			} else {
-				if (!slot2.isEmpty()) {
-					ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
-				} else {
-					AutoTrade.logger.warn("[AutoTrade merchant] defer quickMove skipped: result slot empty");
-				}
+			} else if (!slot2.isEmpty()) {
+				ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
 			}
 		} catch (Exception e) {
 			AutoTrade.logger.warn("[AutoTrade merchant] defer quickMove exception", e);
@@ -88,12 +98,34 @@ final class AutoTradeMerchantScreenTick {
 			return;
 		}
 
+		if (!merchantResultSlotEmpty(menu)) {
+			moveMerchantResultToInventory(mc, menu);
+			return;
+		}
+
 		if (tryExecuteOneMerchantTrade(mc, menu, offers)) {
 			ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
 			return;
 		}
 
 		finishMerchantSession(mc, screen);
+	}
+
+	private static boolean merchantResultSlotEmpty(MerchantMenu menu) {
+		return menu.getSlot(2).getItem().isEmpty();
+	}
+
+	private static void moveMerchantResultToInventory(Minecraft mc, MerchantMenu menu) {
+		var slot = menu.getSlot(2);
+		if (slot.getItem().isEmpty()) {
+			return;
+		}
+		try {
+			ContainerIoHelper.quickMoveResultSlot(mc, menu, slot.index);
+		} catch (Exception e) {
+			AutoTrade.logger.warn("[AutoTrade merchant] move result exception", e);
+		}
+		ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
 	}
 
 	private static void cacheTraderOffers(Minecraft mc, int villagerActive, MerchantOffers offers) {
@@ -104,7 +136,7 @@ final class AutoTradeMerchantScreenTick {
 	}
 
 	private boolean tryExecuteOneMerchantTrade(Minecraft mc, MerchantMenu menu, MerchantOffers offers) {
-		if (offers == null || offers.isEmpty()) {
+		if (offers == null || offers.isEmpty() || !merchantResultSlotEmpty(menu)) {
 			return false;
 		}
 		String sellItemStr = Configs.Generic.SELL_ITEM.getStringValue();
@@ -128,13 +160,14 @@ final class AutoTradeMerchantScreenTick {
 				if (tradesLeft > 0 && costOk) {
 					menu.setSelectionHint(i);
 					mc.player.connection.send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(i));
-					AutoTrade.bought += offer.getMaxUses();
+					AutoTrade.bought += offer.getResult().getCount();
 					TradeFormatHelper.showTradeNotice(mc, "autotrade.message.trade_bought",
-							TradeFormatHelper.formatItemCountNameForTrades(offer.getResult(), tradesLeft),
-							TradeFormatHelper.formatOfferPriceForTrades(offer, tradesLeft));
+							TradeFormatHelper.formatItemCountNameForTrades(offer.getResult(), TRADES_PER_EXECUTION),
+							TradeFormatHelper.formatOfferPriceForTrades(offer, TRADES_PER_EXECUTION));
 					state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
 					state.merchantResultQuickMoveOfferIndex = i;
 					state.merchantResultQuickMoveIsBuy = true;
+					state.merchantResultEmptyWaits = 0;
 					return true;
 				}
 			}
@@ -143,13 +176,14 @@ final class AutoTradeMerchantScreenTick {
 				if (tradesLeft > 0 && costOk) {
 					menu.setSelectionHint(i);
 					mc.player.connection.send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(i));
-					AutoTrade.sold += offer.getMaxUses();
+					AutoTrade.sold += offer.getCostA().getCount();
 					TradeFormatHelper.showTradeNotice(mc, "autotrade.message.trade_sold",
-							TradeFormatHelper.formatSellCostForTrades(offer, tradesLeft),
-							TradeFormatHelper.formatItemCountNameForTrades(offer.getResult(), tradesLeft));
+							TradeFormatHelper.formatSellCostForTrades(offer, TRADES_PER_EXECUTION),
+							TradeFormatHelper.formatItemCountNameForTrades(offer.getResult(), TRADES_PER_EXECUTION));
 					state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
 					state.merchantResultQuickMoveOfferIndex = i;
 					state.merchantResultQuickMoveIsBuy = false;
+					state.merchantResultEmptyWaits = 0;
 					return true;
 				}
 			}

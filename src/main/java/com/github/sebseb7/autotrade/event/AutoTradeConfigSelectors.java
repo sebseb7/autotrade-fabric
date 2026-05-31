@@ -2,49 +2,83 @@ package com.github.sebseb7.autotrade.event;
 
 import com.github.sebseb7.autotrade.config.Configs;
 import com.github.sebseb7.autotrade.util.AutotradeInfoUtils;
+import com.github.sebseb7.autotrade.util.TradeItemSpec;
 import fi.dy.masa.malilib.gui.Message.MessageType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 
 final class AutoTradeConfigSelectors {
 
-    private AutoTradeConfigSelectors() {}
+	private AutoTradeConfigSelectors() {
+	}
 
-    static void tickItemFrameSelection(Minecraft mc) {
-        if (!Configs.Generic.ITEM_FRAME.getBooleanValue()) return;
-        Vec3 pm = new Vec3(mc.player.getX(), mc.player.getY(), mc.player.getZ());
-        var box = new net.minecraft.world.phys.AABB(pm.subtract(3, 3, 3), pm.add(3, 3, 3));
-        @SuppressWarnings("unchecked")
-        var frames = (java.util.List<net.minecraft.world.entity.decoration.ItemFrame>)
-                (java.util.List<?>) mc.level.getEntities((Entity) null, box,
-                e -> e instanceof net.minecraft.world.entity.decoration.ItemFrame && e.isAlive());
+	static void tickItemFrameSelection(Minecraft mc) {
+		if (!Configs.Generic.ITEM_FRAME.getBooleanValue() || mc.player == null || mc.level == null) {
+			return;
+		}
+		AABB box = mc.player.getBoundingBox().inflate(3.0D);
+		for (ItemFrame frame : mc.level.getEntitiesOfClass(ItemFrame.class, box, ItemFrame::isAlive)) {
+			ItemStack stack = frame.getItem();
+			if (stack.isEmpty()) {
+				continue;
+			}
+			String marker = frameMarkerName(stack);
+			if (marker == null) {
+				continue;
+			}
+			if (isMarker(marker, "sell")) {
+				handleItemFrameSell(stack);
+			} else if (isMarker(marker, "buy")) {
+				handleItemFrameBuy(stack);
+			}
+		}
+	}
 
-        for (var entity : frames) {
-            var stack = entity.getItem();
-            String customName = stack.getHoverName().getString();
-            handleItemFrameSell(stack, customName);
-            handleItemFrameBuy(stack, customName);
-        }
-    }
+	/**
+	 * Nametag on the item in the frame ({@link DataComponents#CUSTOM_NAME}), not the
+	 * item type display name (e.g. "Enchanted Book").
+	 */
+	private static String frameMarkerName(ItemStack stack) {
+		Component custom = stack.get(DataComponents.CUSTOM_NAME);
+		if (custom != null) {
+			return normalizeMarker(custom.getString());
+		}
+		return null;
+	}
 
-    private static void handleItemFrameSell(net.minecraft.world.item.ItemStack stack, String customName) {
-        if (!("sell".equalsIgnoreCase(customName) || "\"sell\"".equals(customName))) return;
-        String sellItem = com.github.sebseb7.autotrade.util.TradeItemSpec.encodeFromStack(stack);
-        if (!Configs.Generic.SELL_ITEM.getStringValue().equals(sellItem)) {
-            AutotradeInfoUtils.showGuiOrInGameMessage(MessageType.INFO,
-                    "autotrade.message.sell_item_set", sellItem);
-            Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
-        }
-    }
+	private static String normalizeMarker(String raw) {
+		String name = raw.trim();
+		if (name.length() >= 2 && name.startsWith("\"") && name.endsWith("\"")) {
+			name = name.substring(1, name.length() - 1).trim();
+		}
+		return name.isEmpty() ? null : name;
+	}
 
-    private static void handleItemFrameBuy(net.minecraft.world.item.ItemStack stack, String customName) {
-        if (!("buy".equalsIgnoreCase(customName) || "\"buy\"".equals(customName))) return;
-        String buyItem = com.github.sebseb7.autotrade.util.TradeItemSpec.encodeFromStack(stack);
-        if (!Configs.Generic.BUY_ITEM.getStringValue().equals(buyItem)) {
-            AutotradeInfoUtils.showGuiOrInGameMessage(MessageType.INFO,
-                    "autotrade.message.buy_item_set", buyItem);
-            Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
-        }
-    }
+	private static boolean isMarker(String name, String marker) {
+		return marker.equalsIgnoreCase(name);
+	}
+
+	private static void handleItemFrameSell(ItemStack stack) {
+		String sellItem = TradeItemSpec.encodeFromStack(stack);
+		if (Configs.Generic.SELL_ITEM.getStringValue().equals(sellItem)) {
+			return;
+		}
+		Configs.Generic.SELL_ITEM.setValueFromString(sellItem);
+		Configs.saveToFile();
+		AutotradeInfoUtils.showGuiOrInGameMessage(MessageType.INFO, "autotrade.message.sell_item_set", sellItem);
+	}
+
+	private static void handleItemFrameBuy(ItemStack stack) {
+		String buyItem = TradeItemSpec.encodeFromStack(stack);
+		if (Configs.Generic.BUY_ITEM.getStringValue().equals(buyItem)) {
+			return;
+		}
+		Configs.Generic.BUY_ITEM.setValueFromString(buyItem);
+		Configs.saveToFile();
+		AutotradeInfoUtils.showGuiOrInGameMessage(MessageType.INFO, "autotrade.message.buy_item_set", buyItem);
+	}
 }

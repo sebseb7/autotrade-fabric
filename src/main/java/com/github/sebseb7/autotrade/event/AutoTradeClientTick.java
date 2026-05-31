@@ -38,12 +38,12 @@ final class AutoTradeClientTick {
 		if (mc.player == null) return;
 
 		tickPostMerchantSync(mc);
+		AutoTradeConfigSelectors.tickItemFrameSelection(mc);
+
 		if (!Configs.Generic.ENABLED.getBooleanValue()) {
 			state.clearMerchantQuickMoveDefer();
 			return;
 		}
-
-		AutoTradeConfigSelectors.tickItemFrameSelection(mc);
 
 		merchantScreenTick.tickDeferredResultQuickMove(mc);
 
