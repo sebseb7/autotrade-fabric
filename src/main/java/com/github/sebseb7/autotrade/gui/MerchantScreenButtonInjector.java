@@ -226,18 +226,29 @@ public final class MerchantScreenButtonInjector {
 		registerAutotradeToggleRefresh(screen, enableAutotrade);
 	}
 
-	/** Player inventory (E) — enable/disable only; no block container to assign. */
+	/** Player inventory (E) — settings and enable/disable; no block container to assign. */
 	private static void addInventoryScreenButtons(Minecraft client, InventoryScreen screen, int scaledWidth,
 			int scaledHeight) {
 		int x = scaledWidth / 2 + 140;
 		int y = scaledHeight / 2 - 83;
 		int bw = 160;
 		int h = 20;
+		int gap = 2;
+
+		Button openSettings = Button
+				.builder(Component.translatable("autotrade.gui.button.open_settings"), btn -> {
+					if (client.player != null) {
+						client.player.closeContainer();
+					}
+					GuiBase.openGui(new GuiConfigs());
+				})
+				.bounds(x, y, bw, h).build();
 
 		Button enableAutotrade = Button
 				.builder(autotradeButtonLabel(), btn -> toggleAutotrade(btn))
-				.bounds(x, y, bw, h).build();
+				.bounds(x, y + (h + gap), bw, h).build();
 
+		addScreenButton(screen, openSettings);
 		addScreenButton(screen, enableAutotrade);
 		registerAutotradeToggleRefresh(screen, enableAutotrade);
 	}

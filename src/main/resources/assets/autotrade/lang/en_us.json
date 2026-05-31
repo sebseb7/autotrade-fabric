@@ -10,7 +10,7 @@
     "autotrade.gui.button.done": "Done",
     "autotrade.gui.enchantment_row": "%s %s",
 
-    "autotrade.gui.button.open_settings": "Open Settings",
+    "autotrade.gui.button.open_settings": "Autotrade Settings...",
     "autotrade.gui.button.disable_sell": "Disable sell",
     "autotrade.gui.button.disable_buy": "Disable buy",
     "autotrade.gui.button.set_input": "Set as Autotrade Input",
