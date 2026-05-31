@@ -6,7 +6,6 @@ import com.github.sebseb7.autotrade.render.VillagerTradeCache;
 import com.github.sebseb7.autotrade.util.TradeItemSpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
@@ -131,8 +130,8 @@ final class AutoTradeMerchantScreenTick {
 					mc.player.connection.send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(i));
 					AutoTrade.bought += offer.getMaxUses();
 					TradeFormatHelper.showTradeNotice(mc, "autotrade.message.trade_bought",
-							Component.literal(TradeFormatHelper.formatItemCountNameForTrades(offer.getResult(), tradesLeft)),
-							Component.literal(TradeFormatHelper.formatOfferPriceForTrades(offer, tradesLeft)));
+							TradeFormatHelper.formatItemCountNameForTrades(offer.getResult(), tradesLeft),
+							TradeFormatHelper.formatOfferPriceForTrades(offer, tradesLeft));
 					state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
 					state.merchantResultQuickMoveOfferIndex = i;
 					state.merchantResultQuickMoveIsBuy = true;
@@ -146,9 +145,8 @@ final class AutoTradeMerchantScreenTick {
 					mc.player.connection.send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(i));
 					AutoTrade.sold += offer.getMaxUses();
 					TradeFormatHelper.showTradeNotice(mc, "autotrade.message.trade_sold",
-							Component.literal(TradeFormatHelper.formatItemCountNameForTrades(offer.getCostA(), tradesLeft)
-									+ TradeFormatHelper.formatOptionalSecondCostForTrades(offer, tradesLeft)),
-							Component.literal(TradeFormatHelper.formatItemCountNameForTrades(offer.getResult(), tradesLeft)));
+							TradeFormatHelper.formatSellCostForTrades(offer, tradesLeft),
+							TradeFormatHelper.formatItemCountNameForTrades(offer.getResult(), tradesLeft));
 					state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
 					state.merchantResultQuickMoveOfferIndex = i;
 					state.merchantResultQuickMoveIsBuy = false;

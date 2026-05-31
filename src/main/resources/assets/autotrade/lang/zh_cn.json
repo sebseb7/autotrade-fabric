@@ -1,0 +1,53 @@
+{
+    "autotrade.mod.name": "自动交易",
+
+    "autotrade.gui.button.config_gui.generic": "常规",
+    "autotrade.gui.button.config_gui.hotkeys": "热键",
+    "autotrade.gui.button.config_gui.toggles": "开关",
+
+    "autotrade.gui.title.configs": "自动交易",
+    "autotrade.gui.title.select_enchantments": "选择附魔",
+    "autotrade.gui.button.done": "完成",
+    "autotrade.gui.enchantment_row": "%s %s",
+
+    "autotrade.gui.button.open_settings": "打开设置",
+    "autotrade.gui.button.disable_sell": "禁用出售",
+    "autotrade.gui.button.disable_buy": "禁用收购",
+    "autotrade.gui.button.set_input": "设为自动交易输入容器",
+    "autotrade.gui.button.set_output": "设为自动交易输出容器",
+    "autotrade.gui.button.enable_autotrade": "启用自动交易",
+    "autotrade.gui.button.disable_autotrade": "禁用自动交易",
+    "autotrade.gui.button.set_sell_item": "将 %s 设为出售物品",
+    "autotrade.gui.button.set_buy_item": "将 %s 设为收购物品",
+
+    "autotrade.gui.container.shulker_box": "潜影盒",
+    "autotrade.gui.container.chest": "箱子",
+
+    "autotrade.gui.spec.none": "（无）",
+    "autotrade.gui.spec.with_enchants": "%s +%s",
+    "autotrade.gui.label.current_item_off": "%s（已关闭）",
+    "autotrade.gui.placeholder.dash": "-",
+
+    "autotrade.hotkeys.category.hotkeys": "自动交易",
+
+    "autotrade.format.item_stack": "%s× %s",
+    "autotrade.format.cost_pair": "%s + %s",
+    "autotrade.format.cost_empty": "—",
+    "autotrade.format.cost_second": " + %s",
+
+    "autotrade.message.toggled_mod_off": "自动交易已§c关闭",
+    "autotrade.message.toggled_mod_on": "自动交易已§a开启",
+
+    "autotrade.message.sell_item_set": "出售物品：%s",
+    "autotrade.message.buy_item_set": "收购物品：%s",
+    "autotrade.message.input_container_set": "已将 %s 设为输入容器：%s",
+    "autotrade.message.output_container_set": "已将 %s 设为输出容器：%s",
+    "autotrade.message.container_pos_error": "无法确定容器位置",
+
+    "autotrade.message.trade_bought": "已收购 %s（花费：%s）",
+    "autotrade.message.trade_sold": "已出售 %s，获得 %s",
+
+    "autotrade.message.moved_bought_to_output": "已移至输出：从玩家转移 %s",
+    "autotrade.message.moved_excess_to_output": "已移至输出：转移多余 %s",
+    "autotrade.message.moved_from_input": "已放入背包：从输入容器取出 %s"
+}

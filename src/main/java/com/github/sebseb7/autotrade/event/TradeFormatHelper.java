@@ -49,53 +49,61 @@ final class TradeFormatHelper {
 		mc.gui.setOverlayMessage(Component.translatable(translationKey, arg1, arg2), false);
 	}
 
-	/** e.g. "3× Book" (one villager use). */
-	private static String formatItemCountAndName(ItemStack stack) {
-		return stack.getCount() + "× " + stack.getHoverName().getString();
+	private static Component formatItemStack(ItemStack stack, int count) {
+		return Component.translatable("autotrade.format.item_stack", count, stack.getHoverName());
 	}
 
 	/**
 	 * Per-trade count × how many of this offer remain before the trade, e.g. 1
 	 * iron/trade × 12 runs → "12× …".
 	 */
-	static String formatItemCountNameForTrades(ItemStack perTrade, int remainingOfferUses) {
-		if (remainingOfferUses <= 0) {
-			return formatItemCountAndName(perTrade);
-		}
-		return (perTrade.getCount() * remainingOfferUses) + "× " + perTrade.getHoverName().getString();
+	static Component formatItemCountNameForTrades(ItemStack perTrade, int remainingOfferUses) {
+		int count = remainingOfferUses <= 0 ? perTrade.getCount() : perTrade.getCount() * remainingOfferUses;
+		return formatItemStack(perTrade, count);
 	}
 
 	/** For buying: the stacks you pay, scaled to how many of this offer remain. */
-	static String formatOfferPriceForTrades(MerchantOffer offer, int t) {
-		if (t <= 0) {
-			String a = offer.getCostA().isEmpty() ? null : formatItemCountAndName(offer.getCostA());
-			if (offer.getCostB().isEmpty()) {
-				return a != null ? a : "—";
-			}
-			String b = formatItemCountAndName(offer.getCostB());
-			return a == null ? b : a + " + " + b;
-		}
-		String a = offer.getCostA().isEmpty()
-				? null
-				: (offer.getCostA().getCount() * t) + "× " + offer.getCostA().getHoverName().getString();
+	static Component formatOfferPriceForTrades(MerchantOffer offer, int tradesRemaining) {
+		Component costA = formatScaledCost(offer.getCostA(), tradesRemaining);
 		if (offer.getCostB().isEmpty()) {
-			return a != null ? a : "—";
+			return costA != null ? costA : Component.translatable("autotrade.format.cost_empty");
 		}
-		String b = (offer.getCostB().getCount() * t) + "× " + offer.getCostB().getHoverName().getString();
-		return a == null ? b : a + " + " + b;
+		Component costB = formatScaledCost(offer.getCostB(), tradesRemaining);
+		if (costA == null) {
+			return costB;
+		}
+		return Component.translatable("autotrade.format.cost_pair", costA, costB);
 	}
 
 	/**
-	 * If the trade has a second cost item, " + 2× …" scaled to remaining offer
-	 * uses.
+	 * Sell-side cost: primary cost plus optional second cost, scaled to remaining offer uses.
 	 */
-	static String formatOptionalSecondCostForTrades(MerchantOffer offer, int t) {
+	static Component formatSellCostForTrades(MerchantOffer offer, int tradesRemaining) {
+		Component cost = formatItemCountNameForTrades(offer.getCostA(), tradesRemaining);
 		if (offer.getCostB().isEmpty()) {
-			return "";
+			return cost;
 		}
-		if (t <= 0) {
-			return " + " + formatItemCountAndName(offer.getCostB());
+		return Component.empty().append(cost).append(formatOptionalSecondCostForTrades(offer, tradesRemaining));
+	}
+
+	/**
+	 * If the trade has a second cost item, " + 2× …" scaled to remaining offer uses.
+	 */
+	static Component formatOptionalSecondCostForTrades(MerchantOffer offer, int tradesRemaining) {
+		if (offer.getCostB().isEmpty()) {
+			return Component.empty();
 		}
-		return " + " + (offer.getCostB().getCount() * t) + "× " + offer.getCostB().getHoverName().getString();
+		Component costB = formatScaledCost(offer.getCostB(), tradesRemaining);
+		return Component.translatable("autotrade.format.cost_second", costB);
+	}
+
+	private static Component formatScaledCost(ItemStack stack, int tradesRemaining) {
+		if (stack.isEmpty()) {
+			return null;
+		}
+		if (tradesRemaining <= 0) {
+			return formatItemStack(stack, stack.getCount());
+		}
+		return formatItemStack(stack, stack.getCount() * tradesRemaining);
 	}
 }

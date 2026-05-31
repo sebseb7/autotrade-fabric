@@ -8,6 +8,7 @@ import fi.dy.masa.malilib.util.InfoUtils;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -232,7 +233,8 @@ final class ContainerIoHelper {
 	}
 
 	private static String formatStackForMessage(ItemStack stack) {
-		return stack.getCount() + "× " + stack.getHoverName().getString();
+		return Component.translatable("autotrade.format.item_stack", stack.getCount(), stack.getHoverName())
+				.getString();
 	}
 
 	/** Merges moved amounts by {@link Item} for one batched toast line per type. */

@@ -57,7 +57,7 @@ public class EnchantmentSelectionScreen extends Screen {
 	private final List<CheckboxEntry> checkboxEntries = new ArrayList<>();
 
 	public EnchantmentSelectionScreen(Screen parent) {
-		super(Component.literal("Select Enchantments"));
+		super(Component.translatable("autotrade.gui.title.select_enchantments"));
 		this.parent = parent;
 	}
 
@@ -87,7 +87,7 @@ public class EnchantmentSelectionScreen extends Screen {
 				int maxLevel = ench.getMaxLevel();
 				for (int level = 1; level <= maxLevel; level++) {
 					String key = id.toString() + "=" + level;
-					String label = id.toString() + " " + level;
+					Component label = Component.translatable("autotrade.gui.enchantment_row", id.toString(), level);
 					entries.add(new EnchantmentEntry(key, label));
 				}
 			}
@@ -96,7 +96,7 @@ public class EnchantmentSelectionScreen extends Screen {
 		contentHeight = entries.size() * ROW_HEIGHT;
 
 		// "Done" button at the bottom.
-		this.addRenderableWidget(Button.builder(Component.literal("Done"), btn -> onDone())
+		this.addRenderableWidget(Button.builder(Component.translatable("autotrade.gui.button.done"), btn -> onDone())
 				.bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
 
 		rebuildCheckboxes();
@@ -118,7 +118,7 @@ public class EnchantmentSelectionScreen extends Screen {
 			EnchantmentEntry e = entries.get(i);
 			boolean checked = selected.contains(e.key);
 
-			Checkbox cb = Checkbox.builder(Component.literal(e.label), this.font).pos(LEFT_PADDING, rowY)
+			Checkbox cb = Checkbox.builder(e.label, this.font).pos(LEFT_PADDING, rowY)
 					.selected(checked).build();
 			this.addRenderableWidget(cb);
 			checkboxEntries.add(new CheckboxEntry(i, cb));
@@ -174,7 +174,7 @@ public class EnchantmentSelectionScreen extends Screen {
 	}
 
 	/** An enchantment at a specific level. */
-	private record EnchantmentEntry(String key, String label) {
+	private record EnchantmentEntry(String key, Component label) {
 	}
 
 	/** Pairs a checkbox widget with its index in {@link #entries}. */

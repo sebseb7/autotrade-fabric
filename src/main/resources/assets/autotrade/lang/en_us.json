@@ -1,9 +1,39 @@
 {
+    "autotrade.mod.name": "Auto Trade",
+
     "autotrade.gui.button.config_gui.generic": "Generic",
     "autotrade.gui.button.config_gui.hotkeys": "Hotkeys",
     "autotrade.gui.button.config_gui.toggles": "Toggles",
 
     "autotrade.gui.title.configs": "AutoTrade",
+    "autotrade.gui.title.select_enchantments": "Select Enchantments",
+    "autotrade.gui.button.done": "Done",
+    "autotrade.gui.enchantment_row": "%s %s",
+
+    "autotrade.gui.button.open_settings": "Open Settings",
+    "autotrade.gui.button.disable_sell": "Disable sell",
+    "autotrade.gui.button.disable_buy": "Disable buy",
+    "autotrade.gui.button.set_input": "Set as Autotrade Input",
+    "autotrade.gui.button.set_output": "Set as Autotrade Output",
+    "autotrade.gui.button.enable_autotrade": "Enable Autotrade",
+    "autotrade.gui.button.disable_autotrade": "Disable Autotrade",
+    "autotrade.gui.button.set_sell_item": "Set %s as sell item",
+    "autotrade.gui.button.set_buy_item": "Set %s as buy item",
+
+    "autotrade.gui.container.shulker_box": "Shulker Box",
+    "autotrade.gui.container.chest": "Chest",
+
+    "autotrade.gui.spec.none": "(none)",
+    "autotrade.gui.spec.with_enchants": "%s +%s",
+    "autotrade.gui.label.current_item_off": "%s (off)",
+    "autotrade.gui.placeholder.dash": "-",
+
+    "autotrade.hotkeys.category.hotkeys": "Auto Trade",
+
+    "autotrade.format.item_stack": "%s× %s",
+    "autotrade.format.cost_pair": "%s + %s",
+    "autotrade.format.cost_empty": "—",
+    "autotrade.format.cost_second": " + %s",
 
     "autotrade.message.toggled_mod_off": "Toggled Auto Trade §cOFF",
     "autotrade.message.toggled_mod_on": "Toggled Auto Trade §aON",

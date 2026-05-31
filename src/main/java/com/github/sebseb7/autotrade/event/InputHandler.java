@@ -1,8 +1,8 @@
 package com.github.sebseb7.autotrade.event;
 
-import com.github.sebseb7.autotrade.Reference;
 import com.github.sebseb7.autotrade.config.Hotkeys;
 import fi.dy.masa.malilib.hotkeys.IHotkey;
+import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.malilib.hotkeys.IKeybindManager;
 import fi.dy.masa.malilib.hotkeys.IKeybindProvider;
 
@@ -22,6 +22,7 @@ public class InputHandler implements IKeybindProvider {
 
 	@Override
 	public void addHotkeys(IKeybindManager manager) {
-		manager.addHotkeysForCategory(Reference.MOD_NAME, "autotrade.hotkeys.category.hotkeys", Hotkeys.HOTKEY_LIST);
+		manager.addHotkeysForCategory(StringUtils.translate("autotrade.mod.name"),
+				"autotrade.hotkeys.category.hotkeys", Hotkeys.HOTKEY_LIST);
 	}
 }

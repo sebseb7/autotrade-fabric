@@ -70,10 +70,11 @@ public final class MerchantScreenButtonInjector {
 		if (screen instanceof MerchantScreen merchantScreen) {
 			addMerchantScreenButtons(client, merchantScreen, scaledWidth, scaledHeight);
 		} else if (screen instanceof ShulkerBoxScreen shulkerScreen) {
-			addContainerScreenButtons(client, shulkerScreen, scaledWidth, scaledHeight, "Shulker Box");
+			addContainerScreenButtons(client, shulkerScreen, scaledWidth, scaledHeight,
+					"autotrade.gui.container.shulker_box");
 		} else if (screen instanceof ContainerScreen) {
-			// Add buttons for chest and other container screens
-			addContainerScreenButtons(client, (ContainerScreen) screen, scaledWidth, scaledHeight, "Chest");
+			addContainerScreenButtons(client, (ContainerScreen) screen, scaledWidth, scaledHeight,
+					"autotrade.gui.container.chest");
 		}
 	}
 
@@ -89,7 +90,7 @@ public final class MerchantScreenButtonInjector {
 		int labelX = x + bw + 4;
 
 		Button openSettings = Button
-				.builder(Component.literal("Open Settings"), btn -> {
+				.builder(Component.translatable("autotrade.gui.button.open_settings"), btn -> {
 					// vanilla Screen.onClose -> setScreen(null) sends the container-close
 					// packet; switching the screen out from under the merchant GUI via
 					// GuiBase.openGui skips that path, so the server still thinks we are
@@ -156,9 +157,9 @@ public final class MerchantScreenButtonInjector {
 			selectSell.active = sellOffer != null || sellOn;
 			selectBuy.active = buyOffer != null || buyOn;
 			selectSell.setMessage(sellOffer != null ? sellButtonLabel(sellOffer)
-					: (sellOn ? Component.literal("Disable sell") : sellButtonLabel(null)));
+					: (sellOn ? Component.translatable("autotrade.gui.button.disable_sell") : sellButtonLabel(null)));
 			selectBuy.setMessage(buyOffer != null ? buyButtonLabel(buyOffer)
-					: (buyOn ? Component.literal("Disable buy") : buyButtonLabel(null)));
+					: (buyOn ? Component.translatable("autotrade.gui.button.disable_buy") : buyButtonLabel(null)));
 			sellCurrent.setMessage(currentSellLabel());
 			buyCurrent.setMessage(currentBuyLabel());
 			enableAutotrade.setMessage(autotradeButtonLabel());
@@ -166,7 +167,9 @@ public final class MerchantScreenButtonInjector {
 	}
 
 	/** Add buttons to container screens (shulker boxes and chests). */
-	private static void addContainerScreenButtons(Minecraft client, Screen screen, int scaledWidth, int scaledHeight, String containerName) {
+	private static void addContainerScreenButtons(Minecraft client, Screen screen, int scaledWidth, int scaledHeight,
+			String containerNameKey) {
+		String containerName = Component.translatable(containerNameKey).getString();
 		// Position buttons to the right of the container GUI
 		int x = scaledWidth / 2 + 140;
 		int y = scaledHeight / 2 - 83;
@@ -175,7 +178,7 @@ public final class MerchantScreenButtonInjector {
 		int gap = 2;
 
 		Button openSettings = Button
-				.builder(Component.literal("Open Settings"), btn -> {
+				.builder(Component.translatable("autotrade.gui.button.open_settings"), btn -> {
 					if (client.player != null) {
 						client.player.closeContainer();
 					}
@@ -184,7 +187,7 @@ public final class MerchantScreenButtonInjector {
 				.bounds(x, y, bw, h).build();
 
 		Button setAsInput = Button
-				.builder(Component.literal("Set as Autotrade Input"), btn -> {
+				.builder(Component.translatable("autotrade.gui.button.set_input"), btn -> {
 					BlockPos pos = getContainerPos(screen);
 					if (pos != null) {
 						Configs.Generic.INPUT_CONTAINER_X.setIntegerValue(pos.getX());
@@ -201,7 +204,7 @@ public final class MerchantScreenButtonInjector {
 				.bounds(x, y + (h + gap), bw, h).build();
 
 		Button setAsOutput = Button
-				.builder(Component.literal("Set as Autotrade Output"), btn -> {
+				.builder(Component.translatable("autotrade.gui.button.set_output"), btn -> {
 					BlockPos pos = getContainerPos(screen);
 					if (pos != null) {
 						Configs.Generic.OUTPUT_CONTAINER_X.setIntegerValue(pos.getX());
@@ -254,29 +257,40 @@ public final class MerchantScreenButtonInjector {
 
 	private static Component autotradeButtonLabel() {
 		boolean on = Configs.Generic.ENABLED.getBooleanValue();
-		return Component.literal(on ? "Disable Autotrade" : "Enable Autotrade");
+		return Component.translatable(on ? "autotrade.gui.button.disable_autotrade"
+				: "autotrade.gui.button.enable_autotrade");
 	}
 
 	/** Button label previews the item that would be written if clicked. */
 	private static Component sellButtonLabel(MerchantOffer offer) {
-		String item = offer == null ? "-" : describeSpec(TradeItemSpec.encodeFromStack(offer.getCostA()));
-		return Component.literal("Set " + item + " as sell item");
+		Component item = offer == null ? Component.translatable("autotrade.gui.placeholder.dash")
+				: describeSpec(TradeItemSpec.encodeFromStack(offer.getCostA()));
+		return Component.translatable("autotrade.gui.button.set_sell_item", item);
 	}
 
 	private static Component buyButtonLabel(MerchantOffer offer) {
-		String item = offer == null ? "-" : describeSpec(TradeItemSpec.encodeFromStack(offer.getResult()));
-		return Component.literal("Set " + item + " as buy item");
+		Component item = offer == null ? Component.translatable("autotrade.gui.placeholder.dash")
+				: describeSpec(TradeItemSpec.encodeFromStack(offer.getResult()));
+		return Component.translatable("autotrade.gui.button.set_buy_item", item);
 	}
 
 	/** Side-label shows the currently-configured sell/buy item from config. */
 	private static Component currentSellLabel() {
-		String off = Configs.Generic.ENABLE_SELL.getBooleanValue() ? "" : " (off)";
-		return Component.literal(describeSpec(Configs.Generic.SELL_ITEM.getStringValue()) + off);
+		return currentItemLabel(Configs.Generic.SELL_ITEM.getStringValue(),
+				Configs.Generic.ENABLE_SELL.getBooleanValue());
 	}
 
 	private static Component currentBuyLabel() {
-		String off = Configs.Generic.ENABLE_BUY.getBooleanValue() ? "" : " (off)";
-		return Component.literal(describeSpec(Configs.Generic.BUY_ITEM.getStringValue()) + off);
+		return currentItemLabel(Configs.Generic.BUY_ITEM.getStringValue(),
+				Configs.Generic.ENABLE_BUY.getBooleanValue());
+	}
+
+	private static Component currentItemLabel(String spec, boolean enabled) {
+		Component described = describeSpec(spec);
+		if (enabled) {
+			return described;
+		}
+		return Component.translatable("autotrade.gui.label.current_item_off", described);
 	}
 
 	/**
@@ -285,18 +299,18 @@ public final class MerchantScreenButtonInjector {
 	 * suffixes after a {@code +}, e.g. {@code minecraft:enchanted_book#minecraft:mending=1}
 	 * → {@code enchanted_book +mending=1}.
 	 */
-	private static String describeSpec(String spec) {
+	private static Component describeSpec(String spec) {
 		if (spec == null || spec.isEmpty()) {
-			return "(none)";
+			return Component.translatable("autotrade.gui.spec.none");
 		}
 		int sep = spec.indexOf('#');
 		String itemPart = sep < 0 ? spec : spec.substring(0, sep);
 		String name = stripVanillaNs(itemPart);
 		if (sep < 0) {
-			return name;
+			return Component.literal(name);
 		}
 		String enchants = spec.substring(sep + 1).replace("minecraft:", "");
-		return name + " +" + enchants;
+		return Component.translatable("autotrade.gui.spec.with_enchants", name, enchants);
 	}
 
 	private static String stripVanillaNs(String id) {
