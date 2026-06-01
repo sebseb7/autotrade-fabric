@@ -45,7 +45,7 @@
     "autotrade.message.container_pos_error": "Could not determine container position",
 
     "autotrade.message.trade_bought": "Bought %s (price: %s)",
-    "autotrade.message.trade_sold": "Sold %s for %s",
+    "autotrade.message.trade_sold": "Sold %s for %s (%s per emerald)",
 
     "autotrade.message.moved_bought_to_output": "To output: moved %s from player",
     "autotrade.message.moved_excess_to_output": "To output: moved excess %s",

@@ -45,7 +45,7 @@
     "autotrade.message.container_pos_error": "无法确定容器位置",
 
     "autotrade.message.trade_bought": "已收购 %s（花费：%s）",
-    "autotrade.message.trade_sold": "已出售 %s，获得 %s",
+    "autotrade.message.trade_sold": "已出售 %s，获得 %s（每绿宝石 %s）",
 
     "autotrade.message.moved_bought_to_output": "已移至输出：从玩家转移 %s",
     "autotrade.message.moved_excess_to_output": "已移至输出：转移多余 %s",

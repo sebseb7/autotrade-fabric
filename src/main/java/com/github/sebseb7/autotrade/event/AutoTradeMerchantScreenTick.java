@@ -21,8 +21,6 @@ final class AutoTradeMerchantScreenTick {
 	private static final int RESULT_QUICK_MOVE_DELAY_TICKS = 5;
 	private static final int RESULT_EMPTY_RETRY_TICKS = 2;
 	private static final int RESULT_EMPTY_MAX_WAITS = 15;
-	/** One trade per packet; chat/counters use this, not remaining offer uses. */
-	private static final int TRADES_PER_EXECUTION = 1;
 
 	private final AutoTradeTickState state;
 
@@ -55,6 +53,19 @@ final class AutoTradeMerchantScreenTick {
 			return;
 		}
 		menu.setSelectionHint(idx);
+		var offer = offers.get(idx);
+		var offerForNotice = offer.copy();
+		var player = mc.player;
+		String sellSpec = Configs.Generic.SELL_ITEM.getStringValue();
+		String buySpec = Configs.Generic.BUY_ITEM.getStringValue();
+		int sellItemBefore = 0;
+		int buyItemBefore = 0;
+		int emeraldBefore = TradeFormatHelper.countInInventory(player, "minecraft:emerald");
+		if (state.merchantResultQuickMoveIsBuy) {
+			buyItemBefore = TradeFormatHelper.countInInventory(player, buySpec);
+		} else {
+			sellItemBefore = TradeFormatHelper.countInInventory(player, sellSpec);
+		}
 		menu.tryMoveItems(idx);
 		var slot = menu.getSlot(2);
 		ItemStack slot2 = slot.getItem();
@@ -69,7 +80,7 @@ final class AutoTradeMerchantScreenTick {
 			return;
 		}
 		state.merchantResultEmptyWaits = 0;
-		String buySpec = Configs.Generic.BUY_ITEM.getStringValue();
+		int resultSlotCount = slot2.getCount();
 		try {
 			if (state.merchantResultQuickMoveIsBuy) {
 				if (TradeItemSpec.matches(slot2, buySpec)) {
@@ -85,6 +96,32 @@ final class AutoTradeMerchantScreenTick {
 		}
 		state.clearMerchantQuickMoveDefer();
 		ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
+
+		int emeraldAfter = TradeFormatHelper.countInInventory(player, "minecraft:emerald");
+		int emeraldFallback = TradeFormatHelper.modifiedCostCount(offerForNotice, offerForNotice.getItemCostA());
+		if (state.merchantResultQuickMoveIsBuy) {
+			int buyItemAfter = TradeFormatHelper.countInInventory(player, buySpec);
+			int emeraldPaid = TradeFormatHelper.inventoryDelta(emeraldBefore, emeraldAfter, emeraldFallback);
+			int buyItemCount = TradeFormatHelper.inventoryDelta(buyItemBefore, buyItemAfter, resultSlotCount);
+			TradeFormatHelper.showBuyTradeNotice(mc, offerForNotice, buyItemCount, emeraldPaid);
+		} else {
+			int sellItemAfter = TradeFormatHelper.countInInventory(player, sellSpec);
+			int sellCostFallback = offerForNotice.getCostA().getCount();
+			if (sellCostFallback <= 0) {
+				sellCostFallback = TradeFormatHelper.modifiedCostCount(offerForNotice,
+						offerForNotice.getItemCostA());
+			}
+			int emeraldReceivedFallback = Math.max(resultSlotCount, offerForNotice.getResult().getCount());
+			int ironPerEmerald = sellCostFallback;
+			int emeraldReceived = TradeFormatHelper.inventoryIncrease(emeraldBefore, emeraldAfter,
+					emeraldReceivedFallback);
+			int ironFromInventory = sellItemBefore - sellItemAfter;
+			int totalIronPaid = ironFromInventory > 0 ? ironFromInventory : ironPerEmerald * emeraldReceived;
+			if (emeraldReceived > 1) {
+				totalIronPaid = Math.max(totalIronPaid, ironPerEmerald * emeraldReceived);
+			}
+			TradeFormatHelper.showSellTradeNotice(mc, offerForNotice, totalIronPaid, emeraldReceived, ironPerEmerald);
+		}
 	}
 
 	void tick(Minecraft mc, MerchantScreen screen) {
@@ -161,9 +198,6 @@ final class AutoTradeMerchantScreenTick {
 					menu.setSelectionHint(i);
 					mc.player.connection.send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(i));
 					AutoTrade.bought += offer.getResult().getCount();
-					TradeFormatHelper.showTradeNotice(mc, "autotrade.message.trade_bought",
-							TradeFormatHelper.formatItemCountNameForTrades(offer.getResult(), TRADES_PER_EXECUTION),
-							TradeFormatHelper.formatOfferPriceForTrades(offer, TRADES_PER_EXECUTION));
 					state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
 					state.merchantResultQuickMoveOfferIndex = i;
 					state.merchantResultQuickMoveIsBuy = true;
@@ -177,9 +211,6 @@ final class AutoTradeMerchantScreenTick {
 					menu.setSelectionHint(i);
 					mc.player.connection.send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(i));
 					AutoTrade.sold += offer.getCostA().getCount();
-					TradeFormatHelper.showTradeNotice(mc, "autotrade.message.trade_sold",
-							TradeFormatHelper.formatSellCostForTrades(offer, TRADES_PER_EXECUTION),
-							TradeFormatHelper.formatItemCountNameForTrades(offer.getResult(), TRADES_PER_EXECUTION));
 					state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
 					state.merchantResultQuickMoveOfferIndex = i;
 					state.merchantResultQuickMoveIsBuy = false;
