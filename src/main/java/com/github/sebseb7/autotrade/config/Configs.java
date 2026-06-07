@@ -83,11 +83,25 @@ public class Configs implements IConfigHandler {
 		public static final ConfigString SELECTED_ENCHANTMENTS = i18n(new ConfigString("selectedEnchantments", "",
 				"Comma-separated list of selected enchantment IDs (set via the \"Select Enchantments\" button on a librarian's trade screen)"));
 
+		public static final ConfigString AFK_ON_COMMAND = i18n(new ConfigString("afkOnCommand", "",
+				"Command to execute to turn AFK on"));
+		public static final ConfigString AFK_OFF_COMMAND = i18n(new ConfigString("afkOffCommand", "",
+				"Command to execute to turn AFK off"));
+		public static final ConfigString EXECUTE_MIDNIGHT = i18n(new ConfigString("executeMidnight", "",
+				"Command to execute at midnight (tick 18000)"));
+		public static final ConfigString EXECUTE_DAWN = i18n(new ConfigString("executeDawn", "",
+				"Command to execute at dawn (tick 0)"));
+		public static final ConfigString EXECUTE_NOON = i18n(new ConfigString("executeNoon", "",
+				"Command to execute at noon (tick 6000)"));
+		public static final ConfigString EXECUTE_DUSK = i18n(new ConfigString("executeDusk", "",
+				"Command to execute at dusk (tick 12000)"));
+
 		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ITEM_FRAME, SELECT_BY_NAMETAG,
 			ENABLE_SELL, SELL_ITEM, SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS,
 				INPUT_CONTAINER_X, INPUT_CONTAINER_Y, INPUT_CONTAINER_Z, OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y,
 				OUTPUT_CONTAINER_Z, VOID_TRADING_DELAY, VOID_TRADING_DELAY_AFTER_TELEPORT, CONTAINER_CLOSE_DELAY,
-			SELECTED_ENCHANTMENTS);
+			SELECTED_ENCHANTMENTS,
+			AFK_ON_COMMAND, AFK_OFF_COMMAND, EXECUTE_MIDNIGHT, EXECUTE_DAWN, EXECUTE_NOON, EXECUTE_DUSK);
 	}
 
 	public static void loadFromFile() {
