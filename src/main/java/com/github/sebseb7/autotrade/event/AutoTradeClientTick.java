@@ -37,8 +37,9 @@ final class AutoTradeClientTick {
 			this.pendingAfkOnDelayTicks = -1;
 			this.pendingAfkOnCommand = "";
 		} else {
+			boolean enabled = Configs.Generic.ENABLED.getBooleanValue();
 			long timeOfDay = getTimeOfDayReflect(mc.level) % 24000L;
-			if (this.lastTimeOfDay != -1 && this.lastTimeOfDay != timeOfDay) {
+			if (enabled && this.lastTimeOfDay != -1 && this.lastTimeOfDay != timeOfDay) {
 				this.checkAndTimeTrigger(mc, this.lastTimeOfDay, timeOfDay);
 			}
 			this.lastTimeOfDay = timeOfDay;
@@ -46,7 +47,7 @@ final class AutoTradeClientTick {
 			if (this.pendingAfkOnDelayTicks > 0) {
 				this.pendingAfkOnDelayTicks--;
 				if (this.pendingAfkOnDelayTicks == 0) {
-					if (Configs.Generic.ENABLED.getBooleanValue()) {
+					if (enabled) {
 						this.executeCommand(mc, this.pendingAfkOnCommand);
 					}
 					this.pendingAfkOnDelayTicks = -1;
