@@ -13,6 +13,8 @@ public final class BaritoneHelper {
 	private static final boolean HAS_ELYTRA_API = PRESENT && hasClass("baritone.api.process.IElytraProcess");
 	private static final Deque<MovementGoal> GOAL_STACK = new ArrayDeque<>();
 	private static boolean MOVEMENT_PAUSED = false;
+	/** True when baritone was paused with an active goal that should be resumed. */
+	private static boolean HAS_GOAL_TO_RESUME = false;
 
 	private BaritoneHelper() {
 	}
@@ -38,6 +40,7 @@ public final class BaritoneHelper {
 		}
 		System.out.println("[AutoTrade] Baritone setMovementGoal x=" + x + " y=" + y + " z=" + z + " status=" + describeStatus());
 		MOVEMENT_PAUSED = false;
+		HAS_GOAL_TO_RESUME = false;
 		MovementGoal goal = new MovementGoal(x, y, z);
 		GOAL_STACK.clear();
 		GOAL_STACK.push(goal);
@@ -54,6 +57,7 @@ public final class BaritoneHelper {
 		}
 		System.out.println("[AutoTrade] Baritone pushNewMovementGoal x=" + x + " y=" + y + " z=" + z + " status=" + describeStatus());
 		MOVEMENT_PAUSED = false;
+		HAS_GOAL_TO_RESUME = false;
 		MovementGoal goal = new MovementGoal(x, y, z);
 		GOAL_STACK.push(goal);
 		applyGoal(goal);
@@ -65,6 +69,8 @@ public final class BaritoneHelper {
 			return;
 		}
 		MOVEMENT_PAUSED = true;
+		// Only resume after the interaction if there was actually a goal to resume.
+		HAS_GOAL_TO_RESUME = !GOAL_STACK.isEmpty();
 		System.out.println("[AutoTrade] Baritone pauseMovement status=" + describeStatus());
 		try {
 			Object primaryBaritone = getPrimaryBaritone();
@@ -106,8 +112,15 @@ public final class BaritoneHelper {
 			System.out.println("[AutoTrade] Baritone not present, skipping resumeMovementGoal");
 			return;
 		}
-		System.out.println("[AutoTrade] Baritone resumeMovementGoal status=" + describeStatus());
 		MOVEMENT_PAUSED = false;
+		// Only re-apply a goal if baritone was actually paused with one to resume.
+		// If the user wasn't in baritone mode, don't start walking.
+		if (!HAS_GOAL_TO_RESUME) {
+			System.out.println("[AutoTrade] Baritone resumeMovementGoal skipped (no goal to resume)");
+			return;
+		}
+		HAS_GOAL_TO_RESUME = false;
+		System.out.println("[AutoTrade] Baritone resumeMovementGoal status=" + describeStatus());
 		MovementGoal goal = GOAL_STACK.peek();
 		if (goal != null) {
 			applyGoal(goal);
@@ -139,6 +152,7 @@ public final class BaritoneHelper {
 
 	static void clearMovementGoals() {
 		GOAL_STACK.clear();
+		HAS_GOAL_TO_RESUME = false;
 	}
 
 	/**
@@ -149,6 +163,7 @@ public final class BaritoneHelper {
 			return;
 		}
 		GOAL_STACK.clear();
+		HAS_GOAL_TO_RESUME = false;
 		stopMovement();
 	}
 

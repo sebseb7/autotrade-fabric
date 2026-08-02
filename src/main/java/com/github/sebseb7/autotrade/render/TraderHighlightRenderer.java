@@ -121,7 +121,7 @@ public final class TraderHighlightRenderer {
 			double offY = Mth.lerp(tickDelta, trader.yOld, trader.getY()) - trader.getY();
 			double offZ = Mth.lerp(tickDelta, trader.zOld, trader.getZ()) - trader.getZ();
 			AABB worldBox = trader.getBoundingBox().move(offX, offY, offZ);
-			submitBoxOutline(ordered, drawPose, worldBox, TRADER_OUTLINE_COLOR);
+			submitBoxOutline(ordered, drawPose, worldBox, KeybindCallbacks.getInstance().getTraderGlowColor());
 		}
 
 		if (inTicks > 0) {
@@ -191,7 +191,7 @@ public final class TraderHighlightRenderer {
 			double offZ = Mth.lerp(tickDelta, trader.zOld, trader.getZ()) - trader.getZ();
 			AABB worldBox = trader.getBoundingBox().move(offX, offY, offZ);
 			AABB cameraRelative = worldBox.move(-camera.x, -camera.y, -camera.z);
-			renderShape(drawPose, consumer, cameraRelative, TRADER_OUTLINE_COLOR);
+			renderShape(drawPose, consumer, cameraRelative, KeybindCallbacks.getInstance().getTraderGlowColor());
 		}
 
 		if (inTicks > 0) {

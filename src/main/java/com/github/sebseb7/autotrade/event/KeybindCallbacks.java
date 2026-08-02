@@ -36,6 +36,10 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 		return clientTick.getTraderGlowEntityForRender(mc);
 	}
 
+	public int getTraderGlowColor() {
+		return clientTick.getTraderGlowColor();
+	}
+
 	public int getInputContainerHighlightTicks() {
 		return clientTick.getInputContainerHighlightTicks();
 	}

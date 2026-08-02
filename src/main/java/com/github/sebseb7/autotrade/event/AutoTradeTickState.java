@@ -25,6 +25,8 @@ final class AutoTradeTickState {
 
 	int traderGlowTicksRemaining;
 	int traderGlowEntityId = -1;
+	/** ARGB color of the trader glow outline. */
+	int traderGlowColor = 0xFF66FF66;
 
 	int inputContainerHighlightTicks;
 	int outputContainerHighlightTicks;
@@ -57,6 +59,10 @@ final class AutoTradeTickState {
 		return TraderInteractor.findEntityById(mc, traderGlowEntityId);
 	}
 
+	int getTraderGlowColor() {
+		return traderGlowColor;
+	}
+
 	int getInputContainerHighlightTicks() {
 		return inputContainerHighlightTicks;
 	}
@@ -71,7 +77,7 @@ final class AutoTradeTickState {
 		if (traderGlowTicksRemaining == 0) traderGlowEntityId = -1;
 	}
 
-	void startTraderGlow(Minecraft mc, int entityId) {
+	void startTraderGlow(Minecraft mc, int entityId, int color) {
 		if (mc.level == null) {
 			traderGlowTicksRemaining = 0;
 			traderGlowEntityId = -1;
@@ -84,6 +90,7 @@ final class AutoTradeTickState {
 			return;
 		}
 		traderGlowEntityId = entityId;
+		traderGlowColor = color;
 		traderGlowTicksRemaining = TRADER_HIGHLIGHT_TICKS;
 	}
 

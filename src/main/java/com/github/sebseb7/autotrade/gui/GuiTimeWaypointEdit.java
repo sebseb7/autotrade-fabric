@@ -79,9 +79,9 @@ public class GuiTimeWaypointEdit extends GuiStringListEdit {
             //?} else {
             /*long tick = mc.level.getDayTime() % 24000;
             *///?}
-            int x = (int) mc.player.getX();
-            int y = (int) mc.player.getY();
-            int z = (int) mc.player.getZ();
+            int x = (int) Math.floor(mc.player.getX());
+            int y = (int) Math.floor(mc.player.getY());
+            int z = (int) Math.floor(mc.player.getZ());
             return String.format("%d:%d,%d,%d", tick, x, y, z);
         }
         return "0:0,64,0";

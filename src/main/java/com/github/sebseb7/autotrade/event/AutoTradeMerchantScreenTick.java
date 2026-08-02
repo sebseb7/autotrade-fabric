@@ -124,7 +124,7 @@ final class AutoTradeMerchantScreenTick {
 		// the now-depleted offer.
 		screen.onClose();
 		state.postMerchantInventorySyncTicks = 15;
-		state.startTraderGlow(mc, state.getVillagerActive());
+		state.startTraderGlow(mc, state.getVillagerActive(), 0xFF00FF00); // green = trade done
 		BaritoneHelper.resumeMovementGoal();
 	}
 
@@ -213,7 +213,9 @@ final class AutoTradeMerchantScreenTick {
 				String reason = !buyCountOk ? "autotrade.message.reason_price_too_high"
 						: tradesLeft <= 0 ? "autotrade.message.reason_trades_exhausted"
 						: "autotrade.message.reason_no_resources";
-				finishMerchantSessionWithReason(mc, screen, reason);
+				// Yellow = has the buy item but trades exhausted; red = missing item.
+				int glowColor = tradesLeft <= 0 ? 0xFFFFFF00 : 0xFFFF0000;
+				finishMerchantSessionWithReason(mc, screen, reason, glowColor);
 				return false;
 			}
 
@@ -232,17 +234,19 @@ final class AutoTradeMerchantScreenTick {
 				String reason = !sellCountOk ? "autotrade.message.reason_price_too_high"
 						: tradesLeft <= 0 ? "autotrade.message.reason_trades_exhausted"
 						: "autotrade.message.reason_no_resources";
-				finishMerchantSessionWithReason(mc, screen, reason);
+				// Yellow = has the sell item but trades exhausted; red = missing item.
+				int glowColor = tradesLeft <= 0 ? 0xFFFFFF00 : 0xFFFF0000;
+				finishMerchantSessionWithReason(mc, screen, reason, glowColor);
 				return false;
 			}
 		}
 
-		// No matching trade found at all
-		finishMerchantSessionWithReason(mc, screen, "autotrade.message.reason_other");
+		// No matching trade found at all — red (doesn't have the sell or buy item).
+		finishMerchantSessionWithReason(mc, screen, "autotrade.message.reason_other", 0xFFFF0000);
 		return false;
 	}
 
-	private void finishMerchantSessionWithReason(Minecraft mc, MerchantScreen screen, String reasonKey) {
+	private void finishMerchantSessionWithReason(Minecraft mc, MerchantScreen screen, String reasonKey, int glowColor) {
 		Entity villager = TraderInteractor.findEntityById(mc, state.getVillagerActive());
 		TradeFormatHelper.showNoTradeNotice(mc, villager, reasonKey);
 		state.clearMerchantQuickMoveDefer();
@@ -250,7 +254,7 @@ final class AutoTradeMerchantScreenTick {
 		screen.onClose();
 		ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
 		state.postMerchantInventorySyncTicks = 15;
-		state.startTraderGlow(mc, state.getVillagerActive());
+		state.startTraderGlow(mc, state.getVillagerActive(), glowColor);
 		BaritoneHelper.resumeMovementGoal();
 	}
 }

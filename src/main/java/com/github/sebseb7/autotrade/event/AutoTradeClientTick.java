@@ -23,6 +23,10 @@ final class AutoTradeClientTick {
 		return state.getTraderGlowEntityForRender(mc);
 	}
 
+	int getTraderGlowColor() {
+		return state.getTraderGlowColor();
+	}
+
 	int getInputContainerHighlightTicks() {
 		return state.getInputContainerHighlightTicks();
 	}
