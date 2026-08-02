@@ -58,13 +58,10 @@ final class AutoTradeMerchantScreenTick {
 		var player = mc.player;
 		String sellSpec = Configs.Generic.SELL_ITEM.getStringValue();
 		String buySpec = Configs.Generic.BUY_ITEM.getStringValue();
-		int sellItemBefore = 0;
-		int buyItemBefore = 0;
 		int emeraldBefore = TradeFormatHelper.countInInventory(player, "minecraft:emerald");
+		int buyItemBefore = 0;
 		if (state.merchantResultQuickMoveIsBuy) {
 			buyItemBefore = TradeFormatHelper.countInInventory(player, buySpec);
-		} else {
-			sellItemBefore = TradeFormatHelper.countInInventory(player, sellSpec);
 		}
 		menu.tryMoveItems(idx);
 		var slot = menu.getSlot(2);
@@ -105,7 +102,6 @@ final class AutoTradeMerchantScreenTick {
 			int buyItemCount = TradeFormatHelper.inventoryDelta(buyItemBefore, buyItemAfter, resultSlotCount);
 			TradeFormatHelper.showBuyTradeNotice(mc, offerForNotice, buyItemCount, emeraldPaid);
 		} else {
-			int sellItemAfter = TradeFormatHelper.countInInventory(player, sellSpec);
 			int sellCostFallback = offerForNotice.getCostA().getCount();
 			if (sellCostFallback <= 0) {
 				sellCostFallback = TradeFormatHelper.modifiedCostCount(offerForNotice,
@@ -115,11 +111,7 @@ final class AutoTradeMerchantScreenTick {
 			int ironPerEmerald = sellCostFallback;
 			int emeraldReceived = TradeFormatHelper.inventoryIncrease(emeraldBefore, emeraldAfter,
 					emeraldReceivedFallback);
-			int ironFromInventory = sellItemBefore - sellItemAfter;
-			int totalIronPaid = ironFromInventory > 0 ? ironFromInventory : ironPerEmerald * emeraldReceived;
-			if (emeraldReceived > 1) {
-				totalIronPaid = Math.max(totalIronPaid, ironPerEmerald * emeraldReceived);
-			}
+			int totalIronPaid = ironPerEmerald * emeraldReceived;
 			TradeFormatHelper.showSellTradeNotice(mc, offerForNotice, totalIronPaid, emeraldReceived, ironPerEmerald);
 		}
 	}
