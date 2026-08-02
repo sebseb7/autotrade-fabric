@@ -95,9 +95,7 @@ public final class TraderHighlightRenderer {
 		float tickDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
 	//? if mc262 {
-	SubmitNodeCollector collector = context.submitNodeCollector();
-	OrderedSubmitNodeCollector ordered = collector.order(0);
-	submitBoxesToOutline(ordered, drawPose, camera, tickDelta, trader, inTicks, outTicks);
+	submitLevelOutline(context, drawPose, camera, tickDelta, trader, inTicks, outTicks);
 	//?}
 	//? if traderWireframeMc26Old {
 	/*MultiBufferSource.BufferSource bufferSource = context.bufferSource();
@@ -108,15 +106,22 @@ public final class TraderHighlightRenderer {
 	//?}
 
 	//? if mc262 {
-	private static void submitBoxesToOutline(OrderedSubmitNodeCollector ordered, PoseStack drawPose,
+	private static void submitLevelOutline(LevelRenderContext context, PoseStack drawPose,
 			Vec3 camera, float tickDelta, Entity trader, int inTicks, int outTicks) {
+		SubmitNodeCollector collector = context.submitNodeCollector();
+		OrderedSubmitNodeCollector ordered = collector.order(0);
+
+		// submitShapeOutline expects camera-relative coordinates, so translate
+		// the pose stack by the negative camera position (same as the 1.21.x path).
+		drawPose.pushPose();
+		drawPose.translate(-camera.x, -camera.y, -camera.z);
+
 		if (trader != null) {
 			double offX = Mth.lerp(tickDelta, trader.xOld, trader.getX()) - trader.getX();
 			double offY = Mth.lerp(tickDelta, trader.yOld, trader.getY()) - trader.getY();
 			double offZ = Mth.lerp(tickDelta, trader.zOld, trader.getZ()) - trader.getZ();
 			AABB worldBox = trader.getBoundingBox().move(offX, offY, offZ);
-			ordered.submitShapeOutline(drawPose, Shapes.create(worldBox), net.minecraft.client.renderer.rendertype.RenderTypes.lines(),
-					TRADER_OUTLINE_COLOR, LINE_WIDTH_262, true);
+			submitBoxOutline(ordered, drawPose, worldBox, TRADER_OUTLINE_COLOR);
 		}
 
 		if (inTicks > 0) {
@@ -124,8 +129,7 @@ public final class TraderHighlightRenderer {
 					Configs.Generic.INPUT_CONTAINER_Y.getIntegerValue(),
 					Configs.Generic.INPUT_CONTAINER_Z.getIntegerValue());
 			AABB world = AABB.encapsulatingFullBlocks(in, in);
-			ordered.submitShapeOutline(drawPose, Shapes.create(world), net.minecraft.client.renderer.rendertype.RenderTypes.lines(),
-					INPUT_CONTAINER_COLOR, LINE_WIDTH_262, true);
+			submitBoxOutline(ordered, drawPose, world, INPUT_CONTAINER_COLOR);
 		}
 
 		if (outTicks > 0) {
@@ -133,9 +137,17 @@ public final class TraderHighlightRenderer {
 					Configs.Generic.OUTPUT_CONTAINER_Y.getIntegerValue(),
 					Configs.Generic.OUTPUT_CONTAINER_Z.getIntegerValue());
 			AABB world = AABB.encapsulatingFullBlocks(out, out);
-			ordered.submitShapeOutline(drawPose, Shapes.create(world), net.minecraft.client.renderer.rendertype.RenderTypes.lines(),
-					OUTPUT_CONTAINER_COLOR, LINE_WIDTH_262, true);
+			submitBoxOutline(ordered, drawPose, world, OUTPUT_CONTAINER_COLOR);
 		}
+
+		drawPose.popPose();
+	}
+
+	private static void submitBoxOutline(OrderedSubmitNodeCollector ordered, PoseStack drawPose,
+			AABB box, int color) {
+		ordered.submitShapeOutline(drawPose, Shapes.create(box),
+				net.minecraft.client.renderer.rendertype.RenderTypes.lines(),
+				color, LINE_WIDTH_262, true);
 	}
 	//?}
 
