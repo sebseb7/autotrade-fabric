@@ -15,4 +15,7 @@ public interface AbstractContainerScreenAccessor {
 
 	@Accessor("imageWidth")
 	int getImageWidth();
+
+	@Accessor("imageHeight")
+	int getImageHeight();
 }

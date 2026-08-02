@@ -249,7 +249,7 @@ public final class MerchantScreenButtonInjector {
 
 		addScreenButton(screen, openSettings);
 		addScreenButton(screen, enableAutotrade);
-		registerInventoryButtonLayout(screen, openSettings, enableAutotrade, h, gap);
+		registerInventoryButtonLayout(screen, openSettings, enableAutotrade, bw, h, gap);
 	}
 
 	private static void addScreenButton(Screen screen, Button button) {
@@ -273,18 +273,17 @@ public final class MerchantScreenButtonInjector {
 	}
 
 	/**
-	 * Anchor buttons to the right of the inventory panel so opening the recipe book
-	 * (which shifts {@code leftPos}) does not cover them.
-	 * Offset Y downward to avoid overlapping beacon effects rendered at the top.
+	 * Anchor buttons below the inventory panel to avoid overlapping beacon effects
+	 * that occupy the top-left area of the screen.
 	 */
 	private static void registerInventoryButtonLayout(InventoryScreen screen, Button openSettings,
-			Button enableAutotrade, int h, int gap) {
+			Button enableAutotrade, int bw, int h, int gap) {
 		ScreenEvents.afterTick(screen).register(s -> {
 			AbstractContainerScreenAccessor gui = (AbstractContainerScreenAccessor) screen;
-			int x = gui.getLeftPos() + gui.getImageWidth() + 4;
-			int y = gui.getTopPos() + h + 4;
+			int x = gui.getLeftPos() + 4;
+			int y = gui.getTopPos() + gui.getImageHeight() + 4;
 			openSettings.setPosition(x, y);
-			enableAutotrade.setPosition(x, y + h + gap);
+			enableAutotrade.setPosition(x + bw + gap, y);
 			enableAutotrade.setMessage(autotradeButtonLabel());
 		});
 	}
