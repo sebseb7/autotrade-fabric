@@ -77,7 +77,11 @@ public class GuiConfigs extends GuiConfigsBase {
 			// Open enchantment screen and switch back to GENERIC tab
 			net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
 			if (mc != null) {
-				mc.setScreen(new EnchantmentSelectionScreen(this));
+				//? if mc262 {
+				mc.gui.setScreen(new EnchantmentSelectionScreen(this));
+				//?} else {
+				/*mc.setScreen(new EnchantmentSelectionScreen(this));
+				*///?}
 			}
 			GuiConfigs.tab = ConfigGuiTab.GENERIC;
 			return Collections.emptyList();

@@ -116,7 +116,7 @@ public class Configs implements IConfigHandler {
 		public static final ConfigString AFK_OFF_COMMAND = i18n(new ConfigString("afkOffCommand", "",
 				"Command to execute to turn AFK off"));
 		public static final ConfigStringList TIME_WAYPOINTS = i18n(new ConfigStringList("timeWaypoints",
-				com.google.common.collect.ImmutableList.of("0:0,64,0", "6000:0,64,0", "12000:0,64,0", "18000:0,64,0"),
+				com.google.common.collect.ImmutableList.of(),
 				"Time waypoints for Baritone walking. Format per entry: tick:x,y,z"));
 
 		/**

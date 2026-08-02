@@ -121,7 +121,7 @@ final class AutoTradeClientTick {
 
 	private static long getDayClockTime(net.minecraft.world.level.Level level) {
 		//? if mc26 {
-		return level.getDefaultClockTime();
+		return level.getOverworldClockTime();
 		//?} else {
 		/*return level.getDayTime();
 		*///?}

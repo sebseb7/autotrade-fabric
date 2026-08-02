@@ -36,7 +36,11 @@ final class AutoTradeMerchantScreenTick {
 		if (state.merchantResultQuickMoveDelayTicks > 0) {
 			return;
 		}
-		if (!(mc.screen instanceof MerchantScreen screen)) {
+		//? if mc262 {
+		if (!(mc.gui.screen() instanceof MerchantScreen screen)) {
+		//?} else {
+		/*if (!(mc.screen instanceof MerchantScreen screen)) {
+		*///?}
 			AutoTrade.logger.warn("[AutoTrade merchant] defer execute aborted: current screen is not MerchantScreen");
 			state.clearMerchantQuickMoveDefer();
 			return;

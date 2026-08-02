@@ -68,7 +68,11 @@ final class TradeFormatHelper {
 	static void showTradeNotice(Minecraft mc, String translationKey, Component arg1, Component arg2) {
 		Component notice = Component.translatable(translationKey, arg1, arg2);
 		if (mc.gui != null) {
-			mc.gui.setOverlayMessage(notice, false);
+			//? if mc262 {
+			mc.gui.hud.setOverlayMessage(notice, false);
+			//?} else {
+			/*mc.gui.setOverlayMessage(notice, false);
+			*///?}
 		}
 		AutotradeInfoUtils.postToChat(Message.MessageType.INFO, notice);
 	}
@@ -77,7 +81,11 @@ final class TradeFormatHelper {
 			Component arg3) {
 		Component notice = Component.translatable(translationKey, arg1, arg2, arg3);
 		if (mc.gui != null) {
-			mc.gui.setOverlayMessage(notice, false);
+			//? if mc262 {
+			mc.gui.hud.setOverlayMessage(notice, false);
+			//?} else {
+			/*mc.gui.setOverlayMessage(notice, false);
+			*///?}
 		}
 		AutotradeInfoUtils.postToChat(Message.MessageType.INFO, notice);
 	}
@@ -151,7 +159,11 @@ final class TradeFormatHelper {
 	static void showNoTradeNotice(Minecraft mc) {
 		Component notice = Component.translatable("autotrade.message.no_trade");
 		if (mc.gui != null) {
-			mc.gui.setOverlayMessage(notice, false);
+			//? if mc262 {
+			mc.gui.hud.setOverlayMessage(notice, false);
+			//?} else {
+			/*mc.gui.setOverlayMessage(notice, false);
+			*///?}
 		}
 		AutotradeInfoUtils.postToChat(Message.MessageType.INFO, notice);
 	}
@@ -193,7 +205,11 @@ final class TradeFormatHelper {
 		Component notice = Component.translatable("autotrade.message.no_trade_reason", villagerDesc,
 				Component.translatable(reasonKey));
 		if (mc.gui != null) {
-			mc.gui.setOverlayMessage(notice, false);
+			//? if mc262 {
+			mc.gui.hud.setOverlayMessage(notice, false);
+			//?} else {
+			/*mc.gui.setOverlayMessage(notice, false);
+			*///?}
 		}
 		AutotradeInfoUtils.postToChat(Message.MessageType.INFO, notice);
 	}

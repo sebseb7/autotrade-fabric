@@ -6,8 +6,6 @@ import com.github.sebseb7.autotrade.event.KeybindCallbacks;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -15,19 +13,27 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 //?}
-//? if traderWireframeMc26 {
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
-//?}
 //? if traderWireframe121 {
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 //?}
+//? if traderWireframeMc26 {
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+//?}
+//? if traderWireframe121 || traderWireframeMc26Old {
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.ShapeRenderer;
+//?}
 //? if traderWireframe12110 {
 import net.minecraft.client.renderer.RenderType;
 //?}
-//? if traderWireframeMc26 || traderWireframe12111 {
+//? if traderWireframe12111 || traderWireframeMc26Old {
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+//?}
+//? if mc262 {
+import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 //?}
 
 /**
@@ -50,14 +56,20 @@ public final class TraderHighlightRenderer {
 	}
 
 	//? if traderWireframeRender {
-	private static final ShapeRenderer SHAPE_RENDERER = new ShapeRenderer();
-
 	private static final int TRADER_OUTLINE_COLOR = 0xFF66FF66;
 	private static final int INPUT_CONTAINER_COLOR = 0xFFFF6666;
 	private static final int OUTPUT_CONTAINER_COLOR = 0xFF6666FF;
 
-	//? if traderWireframeMc26 || traderWireframe12111 {
+	//? if traderWireframe12111 || traderWireframeMc26Old {
 	private static final float LINE_WIDTH = 2.5F;
+	//?}
+
+	//? if mc262 {
+	private static final float LINE_WIDTH_262 = 2.5F;
+	//?}
+
+	//? if traderWireframe121 || traderWireframeMc26Old {
+	private static final ShapeRenderer SHAPE_RENDERER = new ShapeRenderer();
 	//?}
 
 	//? if traderWireframeMc26 {
@@ -74,13 +86,56 @@ public final class TraderHighlightRenderer {
 			return;
 		}
 
-		MultiBufferSource.BufferSource bufferSource = context.bufferSource();
-		VertexConsumer consumer = bufferSource.getBuffer(RenderTypes.lines());
 		PoseStack drawPose = new PoseStack();
-		Vec3 camera = mc.gameRenderer.getMainCamera().position();
+		//? if mc262 {
+		Vec3 camera = mc.gameRenderer.mainCamera().position();
+		//?} else {
+		/*Vec3 camera = mc.gameRenderer.getMainCamera().position();
+		*///?}
 		float tickDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
-		renderBoxes(mc, drawPose, consumer, camera, tickDelta, trader, inTicks, outTicks);
+	//? if mc262 {
+	SubmitNodeCollector collector = context.submitNodeCollector();
+	OrderedSubmitNodeCollector ordered = collector.order(0);
+	submitBoxesToOutline(ordered, drawPose, camera, tickDelta, trader, inTicks, outTicks);
+	//?}
+	//? if traderWireframeMc26Old {
+	/*MultiBufferSource.BufferSource bufferSource = context.bufferSource();
+	VertexConsumer consumer = bufferSource.getBuffer(RenderTypes.lines());
+	renderBoxes(drawPose, consumer, camera, tickDelta, trader, inTicks, outTicks);
+	*///?}
+	}
+	//?}
+
+	//? if mc262 {
+	private static void submitBoxesToOutline(OrderedSubmitNodeCollector ordered, PoseStack drawPose,
+			Vec3 camera, float tickDelta, Entity trader, int inTicks, int outTicks) {
+		if (trader != null) {
+			double offX = Mth.lerp(tickDelta, trader.xOld, trader.getX()) - trader.getX();
+			double offY = Mth.lerp(tickDelta, trader.yOld, trader.getY()) - trader.getY();
+			double offZ = Mth.lerp(tickDelta, trader.zOld, trader.getZ()) - trader.getZ();
+			AABB worldBox = trader.getBoundingBox().move(offX, offY, offZ);
+			ordered.submitShapeOutline(drawPose, Shapes.create(worldBox), net.minecraft.client.renderer.rendertype.RenderTypes.lines(),
+					TRADER_OUTLINE_COLOR, LINE_WIDTH_262, true);
+		}
+
+		if (inTicks > 0) {
+			BlockPos in = new BlockPos(Configs.Generic.INPUT_CONTAINER_X.getIntegerValue(),
+					Configs.Generic.INPUT_CONTAINER_Y.getIntegerValue(),
+					Configs.Generic.INPUT_CONTAINER_Z.getIntegerValue());
+			AABB world = AABB.encapsulatingFullBlocks(in, in);
+			ordered.submitShapeOutline(drawPose, Shapes.create(world), net.minecraft.client.renderer.rendertype.RenderTypes.lines(),
+					INPUT_CONTAINER_COLOR, LINE_WIDTH_262, true);
+		}
+
+		if (outTicks > 0) {
+			BlockPos out = new BlockPos(Configs.Generic.OUTPUT_CONTAINER_X.getIntegerValue(),
+					Configs.Generic.OUTPUT_CONTAINER_Y.getIntegerValue(),
+					Configs.Generic.OUTPUT_CONTAINER_Z.getIntegerValue());
+			AABB world = AABB.encapsulatingFullBlocks(out, out);
+			ordered.submitShapeOutline(drawPose, Shapes.create(world), net.minecraft.client.renderer.rendertype.RenderTypes.lines(),
+					OUTPUT_CONTAINER_COLOR, LINE_WIDTH_262, true);
+		}
 	}
 	//?}
 
@@ -108,14 +163,15 @@ public final class TraderHighlightRenderer {
 		consumer = vertexConsumers.getBuffer(RenderType.lines());
 		//?}
 		//? if traderWireframe12111 {
-		consumer = vertexConsumers.getBuffer(RenderTypes.lines());
-		//?}
+		/*consumer = vertexConsumers.getBuffer(RenderTypes.lines());
+		*///?}
 
-		renderBoxes(mc, drawPose, consumer, camera, tickDelta, trader, inTicks, outTicks);
+		renderBoxes(drawPose, consumer, camera, tickDelta, trader, inTicks, outTicks);
 	}
 	//?}
 
-	private static void renderBoxes(Minecraft mc, PoseStack drawPose, VertexConsumer consumer, Vec3 camera,
+	//? if traderWireframe121 || traderWireframeMc26Old {
+	private static void renderBoxes(PoseStack drawPose, VertexConsumer consumer, Vec3 camera,
 			float tickDelta, Entity trader, int inTicks, int outTicks) {
 		if (trader != null) {
 			double offX = Mth.lerp(tickDelta, trader.xOld, trader.getX()) - trader.getX();
@@ -152,10 +208,11 @@ public final class TraderHighlightRenderer {
 		//? if traderWireframe12110 {
 		SHAPE_RENDERER.renderShape(drawPose, consumer, Shapes.create(cameraRelative), 0.0D, 0.0D, 0.0D, color);
 		//?}
-		//? if traderWireframeMc26 || traderWireframe12111 {
+		//? if traderWireframe12111 || traderWireframeMc26 {
 		SHAPE_RENDERER.renderShape(drawPose, consumer, Shapes.create(cameraRelative), 0.0D, 0.0D, 0.0D, color,
 				LINE_WIDTH);
 		//?}
 	}
+	//?}
 	//?}
 }

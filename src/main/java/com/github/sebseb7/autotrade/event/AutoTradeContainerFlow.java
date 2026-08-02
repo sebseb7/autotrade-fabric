@@ -45,8 +45,8 @@ final class AutoTradeContainerFlow {
                 Configs.Generic.OUTPUT_CONTAINER_X.getIntegerValue(),
                 Configs.Generic.OUTPUT_CONTAINER_Y.getIntegerValue(),
                 Configs.Generic.OUTPUT_CONTAINER_Z.getIntegerValue());
-        Vec3 ic = input.getCenter();
-        Vec3 oc = output.getCenter();
+        Vec3 ic = Vec3.atCenterOf(input);
+        Vec3 oc = Vec3.atCenterOf(output);
 
         double containerRange = Configs.Generic.CONTAINER_INTERACTION_RANGE.getDoubleValue();
         double containerRangeSqr = containerRange * containerRange;

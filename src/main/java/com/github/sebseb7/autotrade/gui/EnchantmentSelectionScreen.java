@@ -165,7 +165,11 @@ public class EnchantmentSelectionScreen extends Screen {
 		String value = selected.stream().sorted().collect(Collectors.joining(","));
 		Configs.Generic.SELECTED_ENCHANTMENTS.setValueFromString(value);
 		Configs.saveToFile();
-		this.minecraft.setScreen(parent);
+		//? if mc262 {
+		this.minecraft.gui.setScreen(parent);
+		//?} else {
+		/*this.minecraft.setScreen(parent);
+		*///?}
 	}
 
 	@Override

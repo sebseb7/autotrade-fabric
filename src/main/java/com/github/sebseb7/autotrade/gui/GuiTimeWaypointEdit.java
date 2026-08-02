@@ -75,7 +75,7 @@ public class GuiTimeWaypointEdit extends GuiStringListEdit {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null && mc.player != null) {
             //? if mc26 {
-            long tick = mc.level.getDefaultClockTime() % 24000;
+            long tick = mc.level.getOverworldClockTime() % 24000;
             //?} else {
             /*long tick = mc.level.getDayTime() % 24000;
             *///?}
@@ -157,9 +157,17 @@ public class GuiTimeWaypointEdit extends GuiStringListEdit {
             // When opened standalone, go back to the parent screen
             Screen parent = this.getParent();
             if (parent != null) {
-                mc.setScreen(parent);
+                //? if mc262 {
+                mc.gui.setScreen(parent);
+                //?} else {
+                /*mc.setScreen(parent);
+                *///?}
             } else {
-                mc.setScreen(null);
+                //? if mc262 {
+                mc.gui.setScreen(null);
+                //?} else {
+                /*mc.setScreen(null);
+                *///?}
             }
         }
     }
