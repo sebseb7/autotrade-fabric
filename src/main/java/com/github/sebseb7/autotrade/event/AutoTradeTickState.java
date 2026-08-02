@@ -1,5 +1,7 @@
 package com.github.sebseb7.autotrade.event;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 
@@ -26,6 +28,9 @@ final class AutoTradeTickState {
 
 	int inputContainerHighlightTicks;
 	int outputContainerHighlightTicks;
+
+	/** "Moved N items" reports waiting for server inventory sync before being shown. */
+	final List<ContainerIoHelper.PendingMoveReport> pendingMoveReports = new ArrayList<>();
 
 	/**
 	 * After selecting a trade on the server, wait this many client ticks before

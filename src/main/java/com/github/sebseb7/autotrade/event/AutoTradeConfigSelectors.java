@@ -23,8 +23,6 @@ import net.minecraft.world.phys.Vec3;
 
 final class AutoTradeConfigSelectors {
 
-	private static final double ITEM_FRAME_RADIUS = 3.0D;
-
 	private AutoTradeConfigSelectors() {
 	}
 
@@ -35,8 +33,9 @@ final class AutoTradeConfigSelectors {
 			return;
 		}
 
+		double itemFrameRadius = Configs.Generic.ITEM_FRAME_RADIUS.getDoubleValue();
 		Vec3 playerPos = mc.player.position();
-		AABB box = mc.player.getBoundingBox().inflate(ITEM_FRAME_RADIUS);
+		AABB box = mc.player.getBoundingBox().inflate(itemFrameRadius);
 
 		BlockPos nearestInput = null;
 		double nearestInputDist = Double.MAX_VALUE;

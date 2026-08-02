@@ -8,11 +8,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fi.dy.masa.malilib.config.ConfigUtils;
+import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.config.IConfigValue;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
+import fi.dy.masa.malilib.config.options.ConfigDouble;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.config.options.ConfigString;
+import fi.dy.masa.malilib.config.options.ConfigStringList;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -40,12 +43,24 @@ public class Configs implements IConfigHandler {
 					.translatedName(GENERIC_KEY + ".prettyName." + config.getName());
 		}
 
+		private static ConfigDouble i18n(ConfigDouble config) {
+			return config.apply(GENERIC_KEY)
+					.translatedName(GENERIC_KEY + ".prettyName." + config.getName());
+		}
+
+		private static ConfigStringList i18n(ConfigStringList config) {
+			return config.apply(GENERIC_KEY)
+					.translatedName(GENERIC_KEY + ".prettyName." + config.getName());
+		}
+
 		public static final ConfigBoolean ENABLED = i18n(new ConfigBoolean("enabled", false,
 				"Do auto trading with villagers in range"));
 		public static final ConfigBoolean ITEM_FRAME = i18n(new ConfigBoolean("selectUsingItemFrame", true,
 				"Select buy/sell items with item frames (max. distance 3) with items nametagged \"buy\" or \"sell\""));
 		public static final ConfigBoolean SELECT_BY_NAMETAG = i18n(new ConfigBoolean("selectByNameTag", true,
 				"Select input/output containers via item frame on the block: put a nametagged chest item (\"input\" / \"output\") in the frame (max. distance 3)"));
+		public static final ConfigBoolean TURN_HEAD_BEFORE_INTERACT = i18n(new ConfigBoolean("turnHeadBeforeInteract", true,
+				"Turn the player's head toward the villager before interacting (some servers e.g. GrimAC check head direction, most servers don't need this)"));
 
 		public static final ConfigBoolean ENABLE_SELL = i18n(new ConfigBoolean("enableSell", false,
 				"Enable selling (if disabled emeralds are taken from the input container)"));
@@ -80,6 +95,19 @@ public class Configs implements IConfigHandler {
 		public static final ConfigInteger CONTAINER_CLOSE_DELAY = i18n(new ConfigInteger("containerCloseDelay", 0, 0,
 				30000000, "delay in ticks; to get signal from trapped chest"));
 
+		public static final ConfigDouble INTERACT_DISTANCE = i18n(new ConfigDouble("interactDistance", 2.5, 1.0, 10.0,
+				"Maximum distance to interact with a villager (in blocks)"));
+		public static final ConfigDouble REMOVE_DISTANCE = i18n(new ConfigDouble("removeDistance", 4.0, 1.0, 20.0,
+				"Distance at which a villager is removed from the tracked range list (in blocks)"));
+		public static final ConfigDouble ITEM_FRAME_RADIUS = i18n(new ConfigDouble("itemFrameRadius", 3.0, 1.0, 10.0,
+				"Maximum distance to detect item frames for buy/sell/container selection (in blocks)"));
+		public static final ConfigDouble CONTAINER_INTERACTION_RANGE = i18n(new ConfigDouble("containerInteractionRange", 4.0, 1.0, 32.0,
+				"Maximum distance to interact with input/output containers (in blocks)"));
+		public static final ConfigDouble CONTAINER_FORGET_RANGE = i18n(new ConfigDouble("containerForgetRange", 9.0, 1.0, 64.0,
+				"Distance at which a container is forgotten after interaction (must be > interaction range)"));
+		public static final ConfigDouble VISIBLE_POINT_BUFFER = i18n(new ConfigDouble("visiblePointBuffer", 0.0001, 0.0, 0.1,
+				"Buffer tolerance for line-of-sight checks (higher = more lenient)"));
+
 		public static final ConfigString SELECTED_ENCHANTMENTS = i18n(new ConfigString("selectedEnchantments", "",
 				"Comma-separated list of selected enchantment IDs (set via the \"Select Enchantments\" button on a librarian's trade screen)"));
 
@@ -87,22 +115,49 @@ public class Configs implements IConfigHandler {
 				"Command to execute to turn AFK on"));
 		public static final ConfigString AFK_OFF_COMMAND = i18n(new ConfigString("afkOffCommand", "",
 				"Command to execute to turn AFK off"));
-		public static final ConfigString EXECUTE_MIDNIGHT = i18n(new ConfigString("executeMidnight", "",
-				"Command to execute at midnight (tick 18000)"));
-		public static final ConfigString EXECUTE_DAWN = i18n(new ConfigString("executeDawn", "",
-				"Command to execute at dawn (tick 0)"));
-		public static final ConfigString EXECUTE_NOON = i18n(new ConfigString("executeNoon", "",
-				"Command to execute at noon (tick 6000)"));
-		public static final ConfigString EXECUTE_DUSK = i18n(new ConfigString("executeDusk", "",
-				"Command to execute at dusk (tick 12000)"));
+		public static final ConfigStringList TIME_WAYPOINTS = i18n(new ConfigStringList("timeWaypoints",
+				com.google.common.collect.ImmutableList.of("0:0,64,0", "6000:0,64,0", "12000:0,64,0", "18000:0,64,0"),
+				"Time waypoints for Baritone walking. Format per entry: tick:x,y,z"));
 
-		public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(ENABLED, ITEM_FRAME, SELECT_BY_NAMETAG,
+		/**
+		 * Parse time waypoints from the config list.
+		 * Each entry format: "tick:x,y,z" (e.g. "0:100,64,200")
+		 * @return list of TimeWaypoint objects sorted by tick
+		 */
+		public static java.util.List<TimeWaypoint> parseTimeWaypoints() {
+			java.util.List<TimeWaypoint> waypoints = new java.util.ArrayList<>();
+			for (String entry : TIME_WAYPOINTS.getStrings()) {
+				entry = entry.trim();
+				if (entry.isEmpty()) continue;
+				String[] parts = entry.split(":");
+				if (parts.length != 2) continue;
+				try {
+					long tick = Long.parseLong(parts[0].trim());
+					String[] coords = parts[1].split(",");
+					if (coords.length == 3) {
+						int x = Integer.parseInt(coords[0].trim());
+						int y = Integer.parseInt(coords[1].trim());
+						int z = Integer.parseInt(coords[2].trim());
+						waypoints.add(new TimeWaypoint(tick, x, y, z));
+					}
+				} catch (NumberFormatException ignored) {
+				}
+			}
+			waypoints.sort(java.util.Comparator.comparingLong(w -> w.tick));
+			return waypoints;
+		}
+
+		public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(ENABLED, ITEM_FRAME, SELECT_BY_NAMETAG,
+			TURN_HEAD_BEFORE_INTERACT,
 			ENABLE_SELL, SELL_ITEM, SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS,
 				INPUT_CONTAINER_X, INPUT_CONTAINER_Y, INPUT_CONTAINER_Z, OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y,
 				OUTPUT_CONTAINER_Z, VOID_TRADING_DELAY, VOID_TRADING_DELAY_AFTER_TELEPORT, CONTAINER_CLOSE_DELAY,
+				INTERACT_DISTANCE, REMOVE_DISTANCE, ITEM_FRAME_RADIUS, CONTAINER_INTERACTION_RANGE, CONTAINER_FORGET_RANGE, VISIBLE_POINT_BUFFER,
 			SELECTED_ENCHANTMENTS,
-			AFK_ON_COMMAND, AFK_OFF_COMMAND, EXECUTE_MIDNIGHT, EXECUTE_DAWN, EXECUTE_NOON, EXECUTE_DUSK);
+			AFK_ON_COMMAND, AFK_OFF_COMMAND, TIME_WAYPOINTS);
 	}
+
+	public record TimeWaypoint(long tick, int x, int y, int z) {}
 
 	public static void loadFromFile() {
 		File configFile = new File(getConfigDirectory(), CONFIG_FILE_NAME);

@@ -21,5 +21,6 @@ public class AutoTrade implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		InitializationHandler.getInstance().registerInitializationHandler(new InitHandler());
+		logger.info("AutoTrade mod initialized successfully");
 	}
 }

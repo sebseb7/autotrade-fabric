@@ -6,11 +6,18 @@ import fi.dy.masa.malilib.gui.Message;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
+//? if npcSplit {
+import net.minecraft.world.entity.npc.villager.Villager;
+//?}
+//? if npcFlat {
+import net.minecraft.world.entity.npc.Villager;
+//?}
 
 /**
  * Merchant trade overlay strings and cost checks (extracted from the client tick flow).
@@ -139,6 +146,56 @@ final class TradeFormatHelper {
 			rateLine = Component.translatable("autotrade.format.cost_empty");
 		}
 		showTradeNotice(mc, "autotrade.message.trade_sold", totalPaidLine, emeraldsLine, rateLine);
+	}
+
+	static void showNoTradeNotice(Minecraft mc) {
+		Component notice = Component.translatable("autotrade.message.no_trade");
+		if (mc.gui != null) {
+			mc.gui.setOverlayMessage(notice, false);
+		}
+		AutotradeInfoUtils.postToChat(Message.MessageType.INFO, notice);
+	}
+
+	/**
+	 * Build a human-readable description of a villager: its profession and, if
+	 * it has a custom name tag, that name. Falls back to a generic label.
+	 */
+	static Component describeVillager(Entity entity) {
+		if (entity == null) {
+			return Component.translatable("autotrade.message.villager_unknown");
+		}
+		String name = null;
+		if (entity.hasCustomName()) {
+			name = entity.getCustomName().getString();
+		}
+		String profession = null;
+		if (entity instanceof Villager villager) {
+			profession = villager.getVillagerData().profession().getRegisteredName();
+		}
+		if (name != null && profession != null) {
+			return Component.translatable("autotrade.message.villager_named_profession", name, profession);
+		}
+		if (name != null) {
+			return Component.translatable("autotrade.message.villager_named", name);
+		}
+		if (profession != null) {
+			return Component.translatable("autotrade.message.villager_profession", profession);
+		}
+		return Component.translatable("autotrade.message.villager_unknown");
+	}
+
+	/**
+	 * Show a "no trade" notice that includes the reason and the villager's
+	 * profession / name tag.
+	 */
+	static void showNoTradeNotice(Minecraft mc, Entity villager, String reasonKey) {
+		Component villagerDesc = describeVillager(villager);
+		Component notice = Component.translatable("autotrade.message.no_trade_reason", villagerDesc,
+				Component.translatable(reasonKey));
+		if (mc.gui != null) {
+			mc.gui.setOverlayMessage(notice, false);
+		}
+		AutotradeInfoUtils.postToChat(Message.MessageType.INFO, notice);
 	}
 
 	static void showBuyTradeNotice(Minecraft mc, MerchantOffer offer, int acquiredCount, int emeraldCount) {

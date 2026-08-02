@@ -48,8 +48,14 @@ final class AutoTradeContainerFlow {
         Vec3 ic = input.getCenter();
         Vec3 oc = output.getCenter();
 
-        if (mc.player.distanceToSqr(ic) < 16.0D && !state.inputInRange) {
+        double containerRange = Configs.Generic.CONTAINER_INTERACTION_RANGE.getDoubleValue();
+        double containerRangeSqr = containerRange * containerRange;
+        double forgetRange = Configs.Generic.CONTAINER_FORGET_RANGE.getDoubleValue();
+        double forgetRangeSqr = forgetRange * forgetRange;
+
+        if (mc.player.distanceToSqr(ic) < containerRangeSqr && !state.inputInRange) {
             state.inputInRange = true;
+            BaritoneHelper.pauseMovement();
             mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND,
                     new BlockHitResult(ic, net.minecraft.core.Direction.UP, input, false));
             state.containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
@@ -58,8 +64,9 @@ final class AutoTradeContainerFlow {
             return true;
         }
 
-        if (mc.player.distanceToSqr(oc) < 16.0D && !state.outputInRange) {
+        if (mc.player.distanceToSqr(oc) < containerRangeSqr && !state.outputInRange) {
             state.outputInRange = true;
+            BaritoneHelper.pauseMovement();
             mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND,
                     new BlockHitResult(oc, net.minecraft.core.Direction.UP, output, false));
             state.containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
@@ -68,11 +75,11 @@ final class AutoTradeContainerFlow {
             return true;
         }
 
-        if (mc.player.distanceToSqr(ic) > 25.0D) {
+        if (mc.player.distanceToSqr(ic) > forgetRangeSqr) {
             state.inputOpened = false;
             state.inputInRange = false;
         }
-        if (mc.player.distanceToSqr(oc) > 25.0D) {
+        if (mc.player.distanceToSqr(oc) > forgetRangeSqr) {
             state.outputOpened = false;
             state.outputInRange = false;
         }
@@ -84,16 +91,20 @@ final class AutoTradeContainerFlow {
         boolean closed = false;
         if (state.containerDelay == 0 && state.inputOpened) {
             state.inputOpened = false;
-            ContainerIoHelper.processInput(menu, plInv);
+            ContainerIoHelper.processInput(menu, plInv, state);
             closeScreen(screen);
             closed = true;
         }
         if (state.containerDelay == 0 && state.outputOpened) {
             state.outputOpened = false;
-            ContainerIoHelper.processOutput(menu, plInv);
+            ContainerIoHelper.processOutput(menu, plInv, state);
             if (!closed) {
                 closeScreen(screen);
+                closed = true;
             }
+        }
+        if (closed) {
+            BaritoneHelper.resumeMovementGoal();
         }
     }
 

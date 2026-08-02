@@ -48,7 +48,8 @@ final class TraderInteractor {
 		Vector<Entity> newVillagersInRange = new Vector<>(villagersInRange);
 		for (Entity entity : mc.level.entitiesForRendering()) {
 			if (entity instanceof Villager || entity instanceof WanderingTrader) {
-				if (entity.distanceToSqr(mc.player) < (2.5f * 2.5f)) {
+				double interactDist = Configs.Generic.INTERACT_DISTANCE.getDoubleValue();
+				if (entity.distanceToSqr(mc.player) < (interactDist * interactDist)) {
 					if (!found) {
 						if (!newVillagersInRange.contains(entity)) {
 							found = true;
@@ -56,15 +57,17 @@ final class TraderInteractor {
 							if (rotatingTargetId != entity.getId()) {
 								rotatingTargetId = entity.getId();
 								rotatingTargetTicks = 0;
-								Vec3 lookAt = aimPoint != null ? aimPoint : entity.getEyePosition();
-								Vec3 eyePos = mc.player.getEyePosition();
-								Vec3 delta = lookAt.subtract(eyePos);
-								double horiz = Math.sqrt(delta.x * delta.x + delta.z * delta.z);
-								float yaw = (float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90.0);
-								float pitch = (float) -Math.toDegrees(Math.atan2(delta.y, horiz));
-								mc.player.setYRot(yaw);
-								mc.player.setXRot(pitch);
-								mc.player.yHeadRot = yaw;
+								if (Configs.Generic.TURN_HEAD_BEFORE_INTERACT.getBooleanValue()) {
+									Vec3 lookAt = aimPoint != null ? aimPoint : entity.getEyePosition();
+									Vec3 eyePos = mc.player.getEyePosition();
+									Vec3 delta = lookAt.subtract(eyePos);
+									double horiz = Math.sqrt(delta.x * delta.x + delta.z * delta.z);
+									float yaw = (float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90.0);
+									float pitch = (float) -Math.toDegrees(Math.atan2(delta.y, horiz));
+									mc.player.setYRot(yaw);
+									mc.player.setXRot(pitch);
+									mc.player.yHeadRot = yaw;
+								}
 							} else {
 								rotatingTargetTicks++;
 							}
@@ -78,6 +81,7 @@ final class TraderInteractor {
 							newVillagersInRange.add(entity);
 							rotatingTargetId = -1;
 							EntityHitResult ehr = new EntityHitResult(entity, aimPoint);
+							BaritoneHelper.pauseMovement();
 							AutoTrade.autoInteracting = true;
 							try {
 								//? if mc26 {
@@ -100,7 +104,8 @@ final class TraderInteractor {
 			}
 		}
 		for (Entity entity : villagersInRange) {
-			if (entity.distanceToSqr(mc.player) >= 16.0D) {
+			double removeDist = Configs.Generic.REMOVE_DISTANCE.getDoubleValue();
+			if (entity.distanceToSqr(mc.player) >= (removeDist * removeDist)) {
 				newVillagersInRange.remove(entity);
 			}
 		}
@@ -132,6 +137,7 @@ final class TraderInteractor {
 		AABB box = target.getBoundingBox();
 		double cx = (box.minX + box.maxX) * 0.5;
 		double cz = (box.minZ + box.maxZ) * 0.5;
+		double buffer = Configs.Generic.VISIBLE_POINT_BUFFER.getDoubleValue();
 		Vec3[] candidates = {
 				target.getEyePosition(),
 				new Vec3(cx, (box.minY + box.maxY) * 0.5, cz),
@@ -146,7 +152,7 @@ final class TraderInteractor {
 			BlockHitResult hit = mc.level.clip(new ClipContext(eye, p, ClipContext.Block.COLLIDER,
 					ClipContext.Fluid.NONE, mc.player));
 			if (hit.getType() == HitResult.Type.MISS
-					|| eye.distanceToSqr(hit.getLocation()) >= eye.distanceToSqr(p) - 1.0E-4) {
+					|| eye.distanceToSqr(hit.getLocation()) >= eye.distanceToSqr(p) - buffer) {
 				return p;
 			}
 		}

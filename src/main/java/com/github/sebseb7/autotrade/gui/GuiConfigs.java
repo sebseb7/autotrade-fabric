@@ -73,6 +73,14 @@ public class GuiConfigs extends GuiConfigsBase {
 			configs = Configs.Generic.OPTIONS;
 		} else if (tab == ConfigGuiTab.HOTKEYS) {
 			configs = Hotkeys.HOTKEY_LIST;
+		} else if (tab == ConfigGuiTab.ENCHANTMENTS) {
+			// Open enchantment screen and switch back to GENERIC tab
+			net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+			if (mc != null) {
+				mc.setScreen(new EnchantmentSelectionScreen(this));
+			}
+			GuiConfigs.tab = ConfigGuiTab.GENERIC;
+			return Collections.emptyList();
 		} else {
 			return Collections.emptyList();
 		}
@@ -100,7 +108,9 @@ public class GuiConfigs extends GuiConfigsBase {
 	}
 
 	public enum ConfigGuiTab {
-		GENERIC("autotrade.gui.button.config_gui.generic"), HOTKEYS("autotrade.gui.button.config_gui.hotkeys");
+		GENERIC("autotrade.gui.button.config_gui.generic"),
+		HOTKEYS("autotrade.gui.button.config_gui.hotkeys"),
+		ENCHANTMENTS("autotrade.gui.button.config_gui.enchantments");
 
 		private final String translationKey;
 
@@ -139,81 +149,39 @@ public class GuiConfigs extends GuiConfigsBase {
 			super(x, y, width, height, labelWidth, configWidth, wrapper, listIndex, host, parent);
 		}
 
+		@Override
+		protected void addConfigOption(int x, int y, int labelWidth, int configWidth, fi.dy.masa.malilib.config.IConfigBase config) {
+			// Use custom button for timeWaypoints config
+			if (config instanceof fi.dy.masa.malilib.config.IConfigStringList stringListConfig
+					&& "timeWaypoints".equals(config.getName())) {
+				y += 1;
+				int configHeight = 20;
+				String configName = config.getConfigGuiDisplayName();
+				this.addLabel(x, y + 7, labelWidth, 8, 0xFFFFFFFF, configName);
+
+				String comment = config.getComment();
+				if (comment != null) {
+					this.addConfigComment(x, y + 5, labelWidth, 12, comment);
+				}
+
+				x += labelWidth + 10;
+				ConfigButtonTimeWaypoints optionButton = new ConfigButtonTimeWaypoints(x, y, configWidth, configHeight,
+						stringListConfig, this.host, this.host.getDialogHandler());
+				this.addConfigButtonEntry(x + configWidth + 2, y, (fi.dy.masa.malilib.config.IConfigResettable) config, optionButton);
+			} else {
+				super.addConfigOption(x, y, labelWidth, configWidth, config);
+			}
+		}
+
 		//? if npcSplit {
 		@Override
 		protected void addConfigTextFieldEntry(int x, int y, int resetX, int configWidth, int configHeight, IConfigValue config, TextFieldType type) {
-			String name = config.getName();
-			if (name.equals("executeMidnight") || name.equals("executeDawn") || name.equals("executeNoon") || name.equals("executeDusk")) {
-				int walkBtnWidth = 90;
-				int adjustedConfigWidth = configWidth - (walkBtnWidth + 4);
-				int adjustedResetX = x + adjustedConfigWidth + 2;
-
-				super.addConfigTextFieldEntry(x, y, adjustedResetX, adjustedConfigWidth, configHeight, config, type);
-
-				ButtonBase resetButton = null;
-				for (int i = this.subWidgets.size() - 1; i >= 0; i--) {
-					if (this.subWidgets.get(i) instanceof ButtonBase btn) {
-						resetButton = btn;
-						break;
-					}
-				}
-
-				int walkBtnX = resetButton != null ? adjustedResetX + resetButton.getWidth() + 2 : adjustedResetX + 30 + 2;
-				ButtonGeneric walkToHereBtn = new ButtonGeneric(walkBtnX, y, walkBtnWidth, 20, StringUtils.translate("autotrade.gui.button.walk_to_here"));
-				this.addButton(walkToHereBtn, (button, mouseButton) -> {
-					Minecraft client = Minecraft.getInstance();
-					if (client.player != null && this.textField != null) {
-						BlockPos playerPos = client.player.blockPosition();
-						String command = String.format("#goto %d %d %d", playerPos.getX(), playerPos.getY(), playerPos.getZ());
-						this.textField.textField().setValue(command);
-
-						ITextFieldListener listener = this.textField.listener();
-						if (listener != null) {
-							listener.onTextChange(this.textField.textField());
-						}
-					}
-				});
-			} else {
-				super.addConfigTextFieldEntry(x, y, resetX, configWidth, configHeight, config, type);
-			}
+			super.addConfigTextFieldEntry(x, y, resetX, configWidth, configHeight, config, type);
 		}
 		//?} else {
 		@Override
 		protected void addConfigTextFieldEntry(int x, int y, int resetX, int configWidth, int configHeight, IConfigValue config) {
-			String name = config.getName();
-			if (name.equals("executeMidnight") || name.equals("executeDawn") || name.equals("executeNoon") || name.equals("executeDusk")) {
-				int walkBtnWidth = 90;
-				int adjustedConfigWidth = configWidth - (walkBtnWidth + 4);
-				int adjustedResetX = x + adjustedConfigWidth + 2;
-
-				super.addConfigTextFieldEntry(x, y, adjustedResetX, adjustedConfigWidth, configHeight, config);
-
-				ButtonBase resetButton = null;
-				for (int i = this.subWidgets.size() - 1; i >= 0; i--) {
-					if (this.subWidgets.get(i) instanceof ButtonBase btn) {
-						resetButton = btn;
-						break;
-					}
-				}
-
-				int walkBtnX = resetButton != null ? adjustedResetX + resetButton.getWidth() + 2 : adjustedResetX + 30 + 2;
-				ButtonGeneric walkToHereBtn = new ButtonGeneric(walkBtnX, y, walkBtnWidth, 20, StringUtils.translate("autotrade.gui.button.walk_to_here"));
-				this.addButton(walkToHereBtn, (button, mouseButton) -> {
-					Minecraft client = Minecraft.getInstance();
-					if (client.player != null && this.textField != null) {
-						BlockPos playerPos = client.player.blockPosition();
-						String command = String.format("#goto %d %d %d", playerPos.getX(), playerPos.getY(), playerPos.getZ());
-						this.textField.getTextField().setValue(command);
-
-						ITextFieldListener listener = this.textField.getListener();
-						if (listener != null) {
-							listener.onTextChange(this.textField.getTextField());
-						}
-					}
-				});
-			} else {
-				super.addConfigTextFieldEntry(x, y, resetX, configWidth, configHeight, config);
-			}
+			super.addConfigTextFieldEntry(x, y, resetX, configWidth, configHeight, config);
 		}
 		//?}
 	}

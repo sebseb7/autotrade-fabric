@@ -38,7 +38,7 @@ final class AutoTradeClientTick {
 			this.pendingAfkOnCommand = "";
 		} else {
 			boolean enabled = Configs.Generic.ENABLED.getBooleanValue();
-			long timeOfDay = getTimeOfDayReflect(mc.level) % 24000L;
+			long timeOfDay = Math.floorMod(getDayClockTime(mc.level), 24000L);
 			if (enabled && this.lastTimeOfDay != -1 && this.lastTimeOfDay != timeOfDay) {
 				this.checkAndTimeTrigger(mc, this.lastTimeOfDay, timeOfDay);
 			}
@@ -65,6 +65,7 @@ final class AutoTradeClientTick {
 		if (mc.player == null) return;
 
 		tickPostMerchantSync(mc);
+		ContainerIoHelper.tickPendingMoveReports(mc, state);
 		AutoTradeConfigSelectors.tickItemFrameSelection(mc);
 
 		if (!Configs.Generic.ENABLED.getBooleanValue()) {
@@ -100,17 +101,11 @@ final class AutoTradeClientTick {
 			diff += 24000;
 		}
 		if (diff > 0 && diff <= 100) {
-			if (this.isTimeCrossed(lastTime, currTime, 18000)) {
-				this.triggerTimeCommand(mc, Configs.Generic.EXECUTE_MIDNIGHT.getStringValue());
-			}
-			if (this.isTimeCrossed(lastTime, currTime, 0)) {
-				this.triggerTimeCommand(mc, Configs.Generic.EXECUTE_DAWN.getStringValue());
-			}
-			if (this.isTimeCrossed(lastTime, currTime, 6000)) {
-				this.triggerTimeCommand(mc, Configs.Generic.EXECUTE_NOON.getStringValue());
-			}
-			if (this.isTimeCrossed(lastTime, currTime, 12000)) {
-				this.triggerTimeCommand(mc, Configs.Generic.EXECUTE_DUSK.getStringValue());
+			java.util.List<Configs.TimeWaypoint> waypoints = Configs.Generic.parseTimeWaypoints();
+			for (Configs.TimeWaypoint wp : waypoints) {
+				if (this.isTimeCrossed(lastTime, currTime, wp.tick())) {
+					this.triggerTimeMovement(mc, wp.x(), wp.y(), wp.z());
+				}
 			}
 		}
 	}
@@ -124,17 +119,27 @@ final class AutoTradeClientTick {
 		}
 	}
 
-	private void triggerTimeCommand(Minecraft mc, String cmdToRun) {
-		if (cmdToRun == null || cmdToRun.isEmpty()) {
-			return;
+	private static long getDayClockTime(net.minecraft.world.level.Level level) {
+		//? if mc26 {
+		return level.getDefaultClockTime();
+		//?} else {
+		/*return level.getDayTime();
+		*///?}
+	}
+
+	private void triggerTimeMovement(Minecraft mc, int x, int y, int z) {
+		System.out.println("[AutoTrade] time trigger -> target x=" + x + " y=" + y + " z=" + z + " baritone=" + BaritoneHelper.describeStatus());
+		if (BaritoneHelper.isPresent()) {
+			BaritoneHelper.pauseMovement();
+			BaritoneHelper.setMovementGoal(x, y, z);
+		} else {
+			System.out.println("[AutoTrade] Baritone not present; time-trigger movement skipped");
 		}
 
 		String offCmd = Configs.Generic.AFK_OFF_COMMAND.getStringValue();
 		if (!offCmd.isEmpty()) {
 			this.executeCommand(mc, offCmd);
 		}
-
-		this.executeCommand(mc, cmdToRun);
 
 		String onCmd = Configs.Generic.AFK_ON_COMMAND.getStringValue();
 		if (!onCmd.isEmpty()) {
@@ -154,31 +159,5 @@ final class AutoTradeClientTick {
 				mc.player.connection.sendChat(command);
 			}
 		}
-	}
-
-	private static java.lang.reflect.Method timeMethod = null;
-	private static boolean searchedTimeMethod = false;
-
-	private static long getTimeOfDayReflect(net.minecraft.world.level.Level level) {
-		if (!searchedTimeMethod) {
-			searchedTimeMethod = true;
-			String[] candidates = {"getDayTime", "dayTime", "getTimeOfDay"};
-			for (String name : candidates) {
-				try {
-					java.lang.reflect.Method m = level.getClass().getMethod(name);
-					m.setAccessible(true);
-					timeMethod = m;
-					break;
-				} catch (Exception ignored) {
-				}
-			}
-		}
-		if (timeMethod != null) {
-			try {
-				return (Long) timeMethod.invoke(level);
-			} catch (Exception ignored) {
-			}
-		}
-		return level.getGameTime();
 	}
 }

@@ -6,7 +6,10 @@ import com.github.sebseb7.autotrade.util.TradeItemSpec;
 import fi.dy.masa.malilib.gui.Message;
 import com.github.sebseb7.autotrade.util.AutotradeInfoUtils;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -114,39 +117,42 @@ final class ContainerIoHelper {
 
 	private static final String EMERALD_SPEC = "minecraft:emerald";
 
-	static void processOutput(AbstractContainerMenu menu, Inventory playerInv) {
+	static void processOutput(AbstractContainerMenu menu, Inventory playerInv, AutoTradeTickState state) {
 		Minecraft mc = Minecraft.getInstance();
+		BaritoneHelper.pauseMovement();
 		int maxKeepStacks = Configs.Generic.MAX_INPUT_ITEMS.getIntegerValue();
 		if (Configs.Generic.ENABLE_BUY.getBooleanValue()) {
 			String buySpec = Configs.Generic.BUY_ITEM.getStringValue();
-			MoveTotals movedBought = new MoveTotals();
+			Map<Item, Integer> before = snapshotMatchingItems(playerInv, buySpec);
 			for (int i = 0; i < menu.slots.size(); i++) {
 				Slot s = menu.getSlot(i);
-				if (s.container == playerInv && TradeItemSpec.matches(s.getItem(), buySpec)) {
-					if (s.getItem().isEmpty()) {
-						continue;
-					}
-					ItemStack beforeMove = s.getItem().copy();
+				if (s.container == playerInv && !s.getItem().isEmpty()
+						&& TradeItemSpec.matches(s.getItem(), buySpec)) {
 					try {
 						quickMoveResultSlot(mc, menu, i);
-						movedBought.add(beforeMove);
 					} catch (Exception e) {
 						System.out.println("err " + e);
 					}
 				}
 			}
-			movedBought.flush("autotrade.message.moved_bought_to_output");
+			schedulePendingMoveReport(state, menu, "autotrade.message.moved_bought_to_output", buySpec, before, false);
 		}
 		if (!Configs.Generic.ENABLE_BUY.getBooleanValue()) {
-			quickMovePlayerExcessOverCap(mc, menu, playerInv, EMERALD_SPEC, 0, true);
+			Map<Item, Integer> before = snapshotMatchingItems(playerInv, EMERALD_SPEC);
+			quickMovePlayerExcessOverCap(mc, menu, playerInv, EMERALD_SPEC, 0);
+			schedulePendingMoveReport(state, menu, "autotrade.message.moved_excess_to_output", EMERALD_SPEC, before,
+					false);
 		}
 		if (Configs.Generic.ENABLE_SELL.getBooleanValue()) {
-			quickMovePlayerExcessOverCap(mc, menu, playerInv, Configs.Generic.SELL_ITEM.getStringValue(), maxKeepStacks,
-					true);
+			String sellSpec = Configs.Generic.SELL_ITEM.getStringValue();
+			Map<Item, Integer> before = snapshotMatchingItems(playerInv, sellSpec);
+			quickMovePlayerExcessOverCap(mc, menu, playerInv, sellSpec, maxKeepStacks);
+			schedulePendingMoveReport(state, menu, "autotrade.message.moved_excess_to_output", sellSpec, before, false);
 		}
 	}
 
-	static void processInput(AbstractContainerMenu menu, Inventory playerInv) {
+	static void processInput(AbstractContainerMenu menu, Inventory playerInv, AutoTradeTickState state) {
+		BaritoneHelper.pauseMovement();
 		String spec = EMERALD_SPEC;
 		if (Configs.Generic.ENABLE_SELL.getBooleanValue()) {
 			spec = Configs.Generic.SELL_ITEM.getStringValue();
@@ -156,8 +162,7 @@ final class ContainerIoHelper {
 		if (DEBUG_INPUT_COUNT) {
 			debugInputCount(menu, playerInv, spec, maxStacks, "START");
 		}
-		MoveTotals movedFromInput = new MoveTotals();
-		int itemsAtStart = countMatchingItemsOnPlayer(menu, playerInv, spec);
+		Map<Item, Integer> itemsAtStart = snapshotMatchingItems(playerInv, spec);
 
 		// Shift-click only while below stack cap (shift-click at cap spills into extra stacks).
 		for (int guard = 0; guard < maxStacks; guard++) {
@@ -185,7 +190,6 @@ final class ContainerIoHelper {
 			}
 			try {
 				quickMoveResultSlot(mc, menu, chestSlot);
-				movedFromInput.add(beforeMove);
 			} catch (Exception e) {
 				System.out.println("[AutoTrade input] err " + e);
 				break;
@@ -223,7 +227,7 @@ final class ContainerIoHelper {
 				System.out.println("[AutoTrade input] pickup guard=" + guard + " maxInputStacks=" + maxStacks
 						+ " | " + formatInputTotals(menu, playerInv, spec, maxStacks));
 			}
-			if (!mergePartialFromInputChest(mc, menu, playerInv, spec, movedFromInput)) {
+			if (!mergePartialFromInputChest(mc, menu, playerInv, spec)) {
 				if (DEBUG_INPUT_COUNT) {
 					logInputStop("pickup phase", "merge failed or no partial slot");
 				}
@@ -242,14 +246,7 @@ final class ContainerIoHelper {
 		if (DEBUG_INPUT_COUNT) {
 			debugInputCount(menu, playerInv, spec, maxStacks, "END");
 		}
-		int itemsMovedTotal = countMatchingItemsOnPlayer(menu, playerInv, spec) - itemsAtStart;
-		if (itemsMovedTotal > 0 && movedFromInput.isEmpty()) {
-			ItemStack sample = firstMatchingStackOnPlayer(menu, playerInv, spec);
-			if (!sample.isEmpty()) {
-				movedFromInput.add(sample.copyWithCount(itemsMovedTotal));
-			}
-		}
-		movedFromInput.flush("autotrade.message.moved_from_input");
+		schedulePendingMoveReport(state, menu, "autotrade.message.moved_from_input", spec, itemsAtStart, true);
 	}
 
 	/** Shift-click player stacks over {@code maxStacks} back into the open input chest. */
@@ -263,7 +260,7 @@ final class ContainerIoHelper {
 			System.out.println("[AutoTrade input] returning excess to chest: counted " + stacks
 					+ " stacks > maxInputStacks=" + maxStacks);
 		}
-		quickMovePlayerExcessOverCap(mc, menu, playerInv, spec, maxStacks, false);
+		quickMovePlayerExcessOverCap(mc, menu, playerInv, spec, maxStacks);
 	}
 
 	private static void logInputStop(String phase, String reason) {
@@ -275,7 +272,7 @@ final class ContainerIoHelper {
 	 * (never into an empty slot).
 	 */
 	private static boolean mergePartialFromInputChest(Minecraft mc, AbstractContainerMenu menu, Inventory playerInv,
-			String spec, MoveTotals moved) {
+			String spec) {
 		if (mc.player == null || mc.gameMode == null) {
 			return false;
 		}
@@ -283,7 +280,7 @@ final class ContainerIoHelper {
 
 		ItemStack carried = menu.getCarried();
 		if (!carried.isEmpty()) {
-			return depositCarriedToPartialOnly(mc, menu, playerInv, spec, moved);
+			return depositCarriedToPartialOnly(mc, menu, playerInv, spec);
 		}
 
 		int chestSlot = findInputChestSlot(menu, playerInv, spec);
@@ -318,16 +315,11 @@ final class ContainerIoHelper {
 		}
 
 		int itemsAfter = countMatchingItemsOnPlayer(menu, playerInv, spec);
-		int movedCount = itemsAfter - itemsBefore;
-		if (movedCount <= 0) {
-			return false;
-		}
-		moved.add(chestStack.copyWithCount(movedCount));
-		return true;
+		return itemsAfter - itemsBefore > 0;
 	}
 
 	private static boolean depositCarriedToPartialOnly(Minecraft mc, AbstractContainerMenu menu, Inventory playerInv,
-			String spec, MoveTotals moved) {
+			String spec) {
 		ItemStack carried = menu.getCarried();
 		if (!TradeItemSpec.matches(carried, spec)) {
 			return false;
@@ -338,11 +330,7 @@ final class ContainerIoHelper {
 		}
 		int itemsBefore = countMatchingItemsOnPlayer(menu, playerInv, spec);
 		containerPickupClick(mc, menu, partialSlot, 0);
-		int movedCount = countMatchingItemsOnPlayer(menu, playerInv, spec) - itemsBefore;
-		if (movedCount > 0) {
-			moved.add(carried.copyWithCount(movedCount));
-		}
-		return movedCount > 0;
+		return countMatchingItemsOnPlayer(menu, playerInv, spec) - itemsBefore > 0;
 	}
 
 	private static int findPartialDepositSlot(AbstractContainerMenu menu, Inventory playerInv, ItemStack stack,
@@ -464,23 +452,12 @@ final class ContainerIoHelper {
 		return items;
 	}
 
-	private static ItemStack firstMatchingStackOnPlayer(AbstractContainerMenu menu, Inventory playerInv, String spec) {
-		for (int i = 0; i < menu.slots.size(); i++) {
-			Slot s = menu.getSlot(i);
-			if (s.container == playerInv && TradeItemSpec.matches(s.getItem(), spec) && !s.getItem().isEmpty()) {
-				return s.getItem();
-			}
-		}
-		return ItemStack.EMPTY;
-	}
-
 	/**
 	 * Quick-move player stacks until at most {@code maxKeepStacks} matching stacks remain
 	 * (same cap as processInput — {@link Configs.Generic#MAX_INPUT_ITEMS} is stack count).
 	 */
 	private static void quickMovePlayerExcessOverCap(Minecraft mc, AbstractContainerMenu menu, Inventory playerInv,
-			String spec, int maxKeepStacks, boolean notify) {
-		MoveTotals movedExcess = new MoveTotals();
+			String spec, int maxKeepStacks) {
 		while (countMatchingStacksOnPlayer(menu, playerInv, spec) > maxKeepStacks) {
 			boolean moved = false;
 			for (int i = 0; i < menu.slots.size(); i++) {
@@ -491,26 +468,91 @@ final class ContainerIoHelper {
 				if (s.getItem().isEmpty()) {
 					continue;
 				}
-				int stacksBefore = countMatchingStacksOnPlayer(menu, playerInv, spec);
-				ItemStack beforeMove = s.getItem().copy();
 				try {
 					quickMoveResultSlot(mc, menu, i);
-					movedExcess.add(beforeMove);
 				} catch (Exception e) {
 					System.out.println("err " + e);
 				}
 				moved = true;
-				if (countMatchingStacksOnPlayer(menu, playerInv, spec) >= stacksBefore) {
-					break;
-				}
 				break;
 			}
 			if (!moved) {
 				break;
 			}
 		}
-		if (notify) {
-			movedExcess.flush("autotrade.message.moved_excess_to_output");
+	}
+
+	/** Per-{@link Item} counts of spec-matching stacks in the player inventory. */
+	private static Map<Item, Integer> snapshotMatchingItems(Inventory playerInv, String spec) {
+		Map<Item, Integer> counts = new HashMap<>();
+		for (int i = 0; i < playerInv.getContainerSize(); i++) {
+			ItemStack stack = playerInv.getItem(i);
+			if (!stack.isEmpty() && TradeItemSpec.matches(stack, spec)) {
+				counts.merge(stack.getItem(), stack.getCount(), Integer::sum);
+			}
+		}
+		return counts;
+	}
+
+	private static void schedulePendingMoveReport(AutoTradeTickState state, AbstractContainerMenu menu,
+			String translationKey, String spec, Map<Item, Integer> baseline, boolean expectIncrease) {
+		state.pendingMoveReports
+				.add(new PendingMoveReport(menu.containerId, translationKey, spec, baseline, expectIncrease));
+	}
+
+	/**
+	 * Called once per client tick; fires each report once the container it was
+	 * created on has been closed, counting the actual player inventory.
+	 */
+	static void tickPendingMoveReports(Minecraft mc, AutoTradeTickState state) {
+		if (state.pendingMoveReports.isEmpty()) {
+			return;
+		}
+		if (mc.player == null) {
+			state.pendingMoveReports.clear();
+			return;
+		}
+		Iterator<PendingMoveReport> it = state.pendingMoveReports.iterator();
+		while (it.hasNext()) {
+			PendingMoveReport report = it.next();
+			AbstractContainerMenu current = mc.player.containerMenu;
+			if (current == null || current.containerId != report.containerId) {
+				it.remove();
+				report.fire(mc.player.getInventory());
+			}
+		}
+	}
+
+	/** Deferred "moved N items" message, measured after the source container closed. */
+	static final class PendingMoveReport {
+		private final int containerId;
+		private final String translationKey;
+		private final String spec;
+		private final Map<Item, Integer> baseline;
+		private final boolean expectIncrease;
+
+		private PendingMoveReport(int containerId, String translationKey, String spec, Map<Item, Integer> baseline,
+				boolean expectIncrease) {
+			this.containerId = containerId;
+			this.translationKey = translationKey;
+			this.spec = spec;
+			this.baseline = baseline;
+			this.expectIncrease = expectIncrease;
+		}
+
+		private void fire(Inventory playerInv) {
+			Map<Item, Integer> now = snapshotMatchingItems(playerInv, spec);
+			Set<Item> items = new HashSet<>(baseline.keySet());
+			items.addAll(now.keySet());
+			MoveTotals totals = new MoveTotals();
+			for (Item item : items) {
+				int delta = now.getOrDefault(item, 0) - baseline.getOrDefault(item, 0);
+				int moved = expectIncrease ? delta : -delta;
+				if (moved > 0) {
+					totals.add(new ItemStack(item, moved));
+				}
+			}
+			totals.flush(translationKey);
 		}
 	}
 
