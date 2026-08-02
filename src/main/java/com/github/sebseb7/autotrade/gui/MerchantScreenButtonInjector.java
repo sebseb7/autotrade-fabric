@@ -85,8 +85,9 @@ public final class MerchantScreenButtonInjector {
 	/** Add buttons to merchant (villager/trader) screens. */
 	private static void addMerchantScreenButtons(Minecraft client, MerchantScreen merchantScreen, int scaledWidth, int scaledHeight) {
 		// Position buttons safely to the right of the merchant GUI (276 px wide, centered).
+		// Moved down to avoid overlapping beacon effects at the top.
 		int x = scaledWidth / 2 + 140;
-		int y = scaledHeight / 2 - 83;
+		int y = scaledHeight / 2 - 63;
 		int bw = 160;
 		int lw = 110;
 		int h = 20;
@@ -274,13 +275,14 @@ public final class MerchantScreenButtonInjector {
 	/**
 	 * Anchor buttons to the right of the inventory panel so opening the recipe book
 	 * (which shifts {@code leftPos}) does not cover them.
+	 * Offset Y downward to avoid overlapping beacon effects rendered at the top.
 	 */
 	private static void registerInventoryButtonLayout(InventoryScreen screen, Button openSettings,
 			Button enableAutotrade, int h, int gap) {
 		ScreenEvents.afterTick(screen).register(s -> {
 			AbstractContainerScreenAccessor gui = (AbstractContainerScreenAccessor) screen;
 			int x = gui.getLeftPos() + gui.getImageWidth() + 4;
-			int y = gui.getTopPos() + 4;
+			int y = gui.getTopPos() + h + 4;
 			openSettings.setPosition(x, y);
 			enableAutotrade.setPosition(x, y + h + gap);
 			enableAutotrade.setMessage(autotradeButtonLabel());

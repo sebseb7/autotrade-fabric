@@ -118,6 +118,14 @@ final class AutoTradeMerchantScreenTick {
 			int totalIronPaid = ironPerEmerald * emeraldReceived;
 			TradeFormatHelper.showSellTradeNotice(mc, offerForNotice, totalIronPaid, emeraldReceived, ironPerEmerald);
 		}
+
+		// Trade completed successfully — close the session so tick() won't
+		// re-enter tryExecuteOneMerchantTrade and log "trades exhausted" for
+		// the now-depleted offer.
+		screen.onClose();
+		state.postMerchantInventorySyncTicks = 15;
+		state.startTraderGlow(mc, state.getVillagerActive());
+		BaritoneHelper.resumeMovementGoal();
 	}
 
 	void tick(Minecraft mc, MerchantScreen screen) {
@@ -136,12 +144,14 @@ final class AutoTradeMerchantScreenTick {
 			return;
 		}
 
-		if (tryExecuteOneMerchantTrade(mc, menu, offers)) {
+		if (tryExecuteOneMerchantTrade(mc, menu, offers, screen)) {
 			ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
 			return;
 		}
 
-		finishMerchantSession(mc, screen);
+		// tryExecuteOneMerchantTrade already handled cleanup when no matching
+		// trade was found. When a matching trade was found but couldn't be
+		// executed, the specific reason was already shown.
 	}
 	private static boolean merchantResultSlotEmpty(MerchantMenu menu) {
 		return menu.getSlot(2).getItem().isEmpty();
@@ -167,7 +177,7 @@ final class AutoTradeMerchantScreenTick {
 		}
 	}
 
-	private boolean tryExecuteOneMerchantTrade(Minecraft mc, MerchantMenu menu, MerchantOffers offers) {
+	private boolean tryExecuteOneMerchantTrade(Minecraft mc, MerchantMenu menu, MerchantOffers offers, MerchantScreen screen) {
 		if (offers == null || offers.isEmpty() || !merchantResultSlotEmpty(menu)) {
 			return false;
 		}
@@ -189,65 +199,52 @@ final class AutoTradeMerchantScreenTick {
 			boolean sellCountOk = offer.getCostA().getCount() <= sellLimit;
 
 			if (buyOn && buyRecipe) {
-				if (buyCountOk) {
-					if (tradesLeft > 0 && costOk) {
-						menu.setSelectionHint(i);
-						mc.player.connection.send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(i));
-						AutoTrade.bought += offer.getResult().getCount();
-						state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
-						state.merchantResultQuickMoveOfferIndex = i;
-						state.merchantResultQuickMoveIsBuy = true;
-						state.merchantResultEmptyWaits = 0;
-						return true;
-					}
-					// Buy recipe found but can't execute - log why
-					if (tradesLeft <= 0) {
-						TradeFormatHelper.showNoTradeNotice(mc, TraderInteractor.findEntityById(mc, state.getVillagerActive()),
-								"autotrade.message.reason_trades_exhausted");
-					} else if (!costOk) {
-						TradeFormatHelper.showNoTradeNotice(mc, TraderInteractor.findEntityById(mc, state.getVillagerActive()),
-								"autotrade.message.reason_no_resources");
-					}
-				} else {
-					// Buy recipe found but price exceeds the configured limit
-					TradeFormatHelper.showNoTradeNotice(mc, TraderInteractor.findEntityById(mc, state.getVillagerActive()),
-							"autotrade.message.reason_price_too_high");
+				if (buyCountOk && tradesLeft > 0 && costOk) {
+					menu.setSelectionHint(i);
+					mc.player.connection.send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(i));
+					AutoTrade.bought += offer.getResult().getCount();
+					state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
+					state.merchantResultQuickMoveOfferIndex = i;
+					state.merchantResultQuickMoveIsBuy = true;
+					state.merchantResultEmptyWaits = 0;
+					return true;
 				}
+				// Buy recipe matched but can't execute — show why and close session
+				String reason = !buyCountOk ? "autotrade.message.reason_price_too_high"
+						: tradesLeft <= 0 ? "autotrade.message.reason_trades_exhausted"
+						: "autotrade.message.reason_no_resources";
+				finishMerchantSessionWithReason(mc, screen, reason);
+				return false;
 			}
 
 			if (sellOn && sellRecipe) {
-				if (sellCountOk) {
-					if (tradesLeft > 0 && costOk) {
-						menu.setSelectionHint(i);
-						mc.player.connection.send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(i));
-						AutoTrade.sold += offer.getCostA().getCount();
-						state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
-						state.merchantResultQuickMoveOfferIndex = i;
-						state.merchantResultQuickMoveIsBuy = false;
-						state.merchantResultEmptyWaits = 0;
-						return true;
-					}
-					// Sell recipe found but can't execute - log why
-					if (tradesLeft <= 0) {
-						TradeFormatHelper.showNoTradeNotice(mc, TraderInteractor.findEntityById(mc, state.getVillagerActive()),
-								"autotrade.message.reason_trades_exhausted");
-					} else if (!costOk) {
-						TradeFormatHelper.showNoTradeNotice(mc, TraderInteractor.findEntityById(mc, state.getVillagerActive()),
-								"autotrade.message.reason_no_resources");
-					}
-				} else {
-					// Sell recipe found but price exceeds the configured limit
-					TradeFormatHelper.showNoTradeNotice(mc, TraderInteractor.findEntityById(mc, state.getVillagerActive()),
-							"autotrade.message.reason_price_too_high");
+				if (sellCountOk && tradesLeft > 0 && costOk) {
+					menu.setSelectionHint(i);
+					mc.player.connection.send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(i));
+					AutoTrade.sold += offer.getCostA().getCount();
+					state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
+					state.merchantResultQuickMoveOfferIndex = i;
+					state.merchantResultQuickMoveIsBuy = false;
+					state.merchantResultEmptyWaits = 0;
+					return true;
 				}
+				// Sell recipe matched but can't execute — show why and close session
+				String reason = !sellCountOk ? "autotrade.message.reason_price_too_high"
+						: tradesLeft <= 0 ? "autotrade.message.reason_trades_exhausted"
+						: "autotrade.message.reason_no_resources";
+				finishMerchantSessionWithReason(mc, screen, reason);
+				return false;
 			}
 		}
+
+		// No matching trade found at all
+		finishMerchantSessionWithReason(mc, screen, "autotrade.message.reason_other");
 		return false;
 	}
 
-	private void finishMerchantSession(Minecraft mc, MerchantScreen screen) {
+	private void finishMerchantSessionWithReason(Minecraft mc, MerchantScreen screen, String reasonKey) {
 		Entity villager = TraderInteractor.findEntityById(mc, state.getVillagerActive());
-		TradeFormatHelper.showNoTradeNotice(mc, villager, "autotrade.message.reason_other");
+		TradeFormatHelper.showNoTradeNotice(mc, villager, reasonKey);
 		state.clearMerchantQuickMoveDefer();
 		ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
 		screen.onClose();

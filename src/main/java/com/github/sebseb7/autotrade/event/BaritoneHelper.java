@@ -4,7 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import net.minecraft.client.Minecraft;
 
-final class BaritoneHelper {
+public final class BaritoneHelper {
 	private static final boolean PRESENT = hasClass("baritone.api.BaritoneAPI");
 	private static final boolean HAS_GOAL_API = PRESENT
 			&& hasClass("baritone.api.pathing.goals.GoalXZ")
@@ -17,7 +17,7 @@ final class BaritoneHelper {
 	private BaritoneHelper() {
 	}
 
-	static boolean isPresent() {
+	public static boolean isPresent() {
 		return PRESENT;
 	}
 

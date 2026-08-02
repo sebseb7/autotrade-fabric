@@ -170,8 +170,7 @@ public class GuiConfigs extends GuiConfigsBase {
 
 				x += labelWidth + 10;
 				ConfigButtonTimeWaypoints optionButton = new ConfigButtonTimeWaypoints(x, y, configWidth, configHeight,
-						stringListConfig, this.host, this.host.getDialogHandler());
-				this.addConfigButtonEntry(x + configWidth + 2, y, (fi.dy.masa.malilib.config.IConfigResettable) config, optionButton);
+						stringListConfig, this.host, this.host.getDialogHandler());					optionButton.setEnabled(com.github.sebseb7.autotrade.event.BaritoneHelper.isPresent());				this.addConfigButtonEntry(x + configWidth + 2, y, (fi.dy.masa.malilib.config.IConfigResettable) config, optionButton);
 			} else {
 				super.addConfigOption(x, y, labelWidth, configWidth, config);
 			}
