@@ -6,6 +6,7 @@
 	"client": [
 		"MultiPlayerGameModeInvoker",
 		"MerchantMenuAccessor",
+		"MerchantMenuTraderAccessor",
 		"AbstractContainerScreenAccessor"
 	],
 	"injectors": {

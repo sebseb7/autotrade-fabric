@@ -60,13 +60,8 @@ final class AutoTradeMerchantScreenTick {
 		var offer = offers.get(idx);
 		var offerForNotice = offer.copy();
 		var player = mc.player;
-		String sellSpec = Configs.Generic.SELL_ITEM.getStringValue();
 		String buySpec = Configs.Generic.BUY_ITEM.getStringValue();
 		int emeraldBefore = TradeFormatHelper.countInInventory(player, "minecraft:emerald");
-		int buyItemBefore = 0;
-		if (state.merchantResultQuickMoveIsBuy) {
-			buyItemBefore = TradeFormatHelper.countInInventory(player, buySpec);
-		}
 		menu.tryMoveItems(idx);
 		var slot = menu.getSlot(2);
 		ItemStack slot2 = slot.getItem();
@@ -99,11 +94,9 @@ final class AutoTradeMerchantScreenTick {
 		ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
 
 		int emeraldAfter = TradeFormatHelper.countInInventory(player, "minecraft:emerald");
-		int emeraldFallback = TradeFormatHelper.modifiedCostCount(offerForNotice, offerForNotice.getItemCostA());
 		if (state.merchantResultQuickMoveIsBuy) {
-			int buyItemAfter = TradeFormatHelper.countInInventory(player, buySpec);
-			int emeraldPaid = TradeFormatHelper.inventoryDelta(emeraldBefore, emeraldAfter, emeraldFallback);
-			int buyItemCount = TradeFormatHelper.inventoryDelta(buyItemBefore, buyItemAfter, resultSlotCount);
+			int emeraldPaid = TradeFormatHelper.modifiedCostCount(offerForNotice, offerForNotice.getItemCostA());
+			int buyItemCount = offerForNotice.getResult().getCount();
 			TradeFormatHelper.showBuyTradeNotice(mc, offerForNotice, buyItemCount, emeraldPaid);
 		} else {
 			int sellCostFallback = offerForNotice.getCostA().getCount();

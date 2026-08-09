@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Thùng đầu vào/ra qua khung trên khối: rương có thẻ (\"input\" / \"output\") trong khung (tối đa 3 khối)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Quay đầu trước khi tương tác",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Quay đầu người chơi về phía dân làng trước khi tương tác (một số máy chủ như GrimAC kiểm tra hướng đầu, đa số không cần)",
+    "autotrade.config.generic.prettyName.useBaritone": "Dùng Baritone",
+    "autotrade.config.generic.comment.useBaritone": "Dùng Baritone để di chuyển (tạm dừng/tiếp tục và đi theo waypoint thời gian). Tắt nếu bạn tự di chuyển người chơi.",
     "autotrade.config.generic.prettyName.enableSell": "Bật bán",
     "autotrade.config.generic.comment.enableSell": "Bật bán (nếu tắt, lấy ngọc lục bảo từ thùng đầu vào)",
     "autotrade.config.generic.prettyName.sellItem": "Vật bán",

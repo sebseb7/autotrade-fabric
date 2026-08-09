@@ -1,5 +1,6 @@
 package com.github.sebseb7.autotrade.event;
 
+import com.github.sebseb7.autotrade.config.Configs;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import net.minecraft.client.Minecraft;
@@ -36,6 +37,9 @@ public final class BaritoneHelper {
 	}
 
 	static void setMovementGoal(int x, int y, int z) {
+		if (!Configs.Generic.USE_BARITONE.getBooleanValue()) {
+			return;
+		}
 		if (!PRESENT) {			System.out.println("[AutoTrade] Baritone not present, skipping setMovementGoal");			return;
 		}
 		System.out.println("[AutoTrade] Baritone setMovementGoal x=" + x + " y=" + y + " z=" + z + " status=" + describeStatus());
@@ -53,6 +57,9 @@ public final class BaritoneHelper {
 	 * resume the previous navigation after an interaction.
 	 */
 	static void pushNewMovementGoal(int x, int y, int z) {
+		if (!Configs.Generic.USE_BARITONE.getBooleanValue()) {
+			return;
+		}
 		if (!PRESENT) {			System.out.println("[AutoTrade] Baritone not present, skipping pushNewMovementGoal");			return;
 		}
 		System.out.println("[AutoTrade] Baritone pushNewMovementGoal x=" + x + " y=" + y + " z=" + z + " status=" + describeStatus());
@@ -64,6 +71,9 @@ public final class BaritoneHelper {
 	}
 
 	static void pauseMovement() {
+		if (!Configs.Generic.USE_BARITONE.getBooleanValue()) {
+			return;
+		}
 		if (!PRESENT) {
 			System.out.println("[AutoTrade] Baritone not present, skipping pauseMovement");
 			return;
@@ -92,6 +102,9 @@ public final class BaritoneHelper {
 	}
 
 	static void stopMovement() {
+		if (!Configs.Generic.USE_BARITONE.getBooleanValue()) {
+			return;
+		}
 		if (!PRESENT) {
 			return;
 		}
@@ -108,6 +121,9 @@ public final class BaritoneHelper {
 	}
 
 	static void resumeMovementGoal() {
+		if (!Configs.Generic.USE_BARITONE.getBooleanValue()) {
+			return;
+		}
 		if (!PRESENT) {
 			System.out.println("[AutoTrade] Baritone not present, skipping resumeMovementGoal");
 			return;
@@ -132,6 +148,9 @@ public final class BaritoneHelper {
 	 * Used when we've completed an interaction and want to go back to the previous navigation target.
 	 */
 	static void popAndResumeMovementGoal() {
+		if (!Configs.Generic.USE_BARITONE.getBooleanValue()) {
+			return;
+		}
 		if (!PRESENT) {
 			System.out.println("[AutoTrade] Baritone not present, skipping popAndResumeMovementGoal");
 			return;
@@ -151,6 +170,9 @@ public final class BaritoneHelper {
 	}
 
 	static void clearMovementGoals() {
+		if (!Configs.Generic.USE_BARITONE.getBooleanValue()) {
+			return;
+		}
 		GOAL_STACK.clear();
 		HAS_GOAL_TO_RESUME = false;
 	}
@@ -159,6 +181,9 @@ public final class BaritoneHelper {
 	 * Clear all goals and stop any current navigation.
 	 */
 	static void stopAndClearGoals() {
+		if (!Configs.Generic.USE_BARITONE.getBooleanValue()) {
+			return;
+		}
 		if (!PRESENT) {
 			return;
 		}

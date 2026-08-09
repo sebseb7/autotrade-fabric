@@ -54,6 +54,26 @@ final class AutoTradeTickState {
 		return villagerActive;
 	}
 
+	/** Resolve the villager entity whose trade screen is currently open (if any). */
+	Entity getActiveVillagerEntity(Minecraft mc) {
+		if (mc.level == null) {
+			return null;
+		}
+		// Prefer the villager the auto-trader is currently trading with; fall back
+		// to the last villager the player right-clicked to open a screen manually.
+		// Note: villagerActive defaults to 0 (not -1), so only trust it if it
+		// actually resolves to a live entity.
+		Entity active = TraderInteractor.findEntityById(mc, villagerActive);
+		if (active != null) {
+			return active;
+		}
+		int id = com.github.sebseb7.autotrade.AutoTrade.lastInteractedVillagerId;
+		if (id < 0) {
+			return null;
+		}
+		return TraderInteractor.findEntityById(mc, id);
+	}
+
 	Entity getTraderGlowEntityForRender(Minecraft mc) {
 		if (traderGlowTicksRemaining <= 0 || traderGlowEntityId < 0 || mc.level == null) return null;
 		return TraderInteractor.findEntityById(mc, traderGlowEntityId);

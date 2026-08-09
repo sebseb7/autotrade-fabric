@@ -18,9 +18,15 @@ final class AutoTradeClientTick {
 	private long lastTimeOfDay = -1;
 	private int pendingAfkOnDelayTicks = -1;
 	private String pendingAfkOnCommand = "";
+	/** Last parsed waypoint list, used to log only when the config changes. */
+	private java.util.List<Configs.TimeWaypoint> lastLoggedWaypoints = null;
 
 	Entity getTraderGlowEntityForRender(Minecraft mc) {
 		return state.getTraderGlowEntityForRender(mc);
+	}
+
+	Entity getActiveVillagerEntity(Minecraft mc) {
+		return state.getActiveVillagerEntity(mc);
 	}
 
 	int getTraderGlowColor() {
@@ -62,6 +68,9 @@ final class AutoTradeClientTick {
 
 		state.tickTraderGlow(mc);
 		state.tickContainerHighlights(mc);
+
+		// Villager roller runs independently of the global autotrade toggle.
+		VillagerRoller.getInstance().tick(mc);
 
 		if (AutoTradeVoidDelay.handle(mc, state)) return;
 
@@ -106,6 +115,15 @@ final class AutoTradeClientTick {
 		}
 		if (diff > 0 && diff <= 100) {
 			java.util.List<Configs.TimeWaypoint> waypoints = Configs.Generic.parseTimeWaypoints();
+			// Log the configured waypoints only when they change, so the log isn't flooded.
+			if (!waypoints.equals(this.lastLoggedWaypoints)) {
+				this.lastLoggedWaypoints = waypoints;
+				System.out.println("[AutoTrade time] " + waypoints.size() + " configured waypoint(s):");
+				for (Configs.TimeWaypoint wp : waypoints) {
+					System.out.println("[AutoTrade time]   tick=" + wp.tick() + " -> " + wp.x() + "," + wp.y()
+							+ "," + wp.z());
+				}
+			}
 			for (Configs.TimeWaypoint wp : waypoints) {
 				if (this.isTimeCrossed(lastTime, currTime, wp.tick())) {
 					this.triggerTimeMovement(mc, wp.x(), wp.y(), wp.z());

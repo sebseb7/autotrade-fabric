@@ -24,6 +24,7 @@
     "autotrade.gui.button.walk_to_here": "Walk to here",
     "autotrade.gui.button.set_sell_item": "Set %s as sell item",
     "autotrade.gui.button.set_buy_item": "Set %s as buy item",
+    "autotrade.gui.button.roll": "Roll",
 
     "autotrade.gui.container.shulker_box": "Shulker Box",
     "autotrade.gui.container.chest": "Chest",
@@ -64,6 +65,15 @@
     "autotrade.message.reason_trades_exhausted": "Trades exhausted",
     "autotrade.message.reason_other": "No matching trade found",
 
+    "autotrade.message.roller_no_enchantments": "No enchantments in the list",
+    "autotrade.message.roller_need_lecterns": "Need at least 3 lecterns in offhand",
+    "autotrade.message.roller_need_axe": "Need an axe in main hand",
+    "autotrade.message.roller_no_lectern": "No lectern above you",
+    "autotrade.message.roller_started": "Rolling started",
+    "autotrade.message.roller_stopped": "Rolling stopped",
+    "autotrade.message.roller_found": "Found %s",
+    "autotrade.message.roller_out_of_lecterns": "Out of lecterns",
+
     "autotrade.message.moved_bought_to_output": "To output: moved %s from player",
     "autotrade.message.moved_excess_to_output": "To output: moved excess %s",
     "autotrade.message.moved_from_input": "To inventory: took %s from input",
@@ -76,6 +86,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Select input/output containers via item frame on the block: put a nametagged chest item (\"input\" / \"output\") in the frame (max. distance 3)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Turn Head Before Interact",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Turn the player's head toward the villager before interacting (some servers e.g. GrimAC check head direction, most servers don't need this)",
+    "autotrade.config.generic.prettyName.useBaritone": "Use Baritone",
+    "autotrade.config.generic.comment.useBaritone": "Use Baritone for movement (pause/resume and time waypoint walking). Disable if you move the player yourself.",
     "autotrade.config.generic.prettyName.enableSell": "Enable Sell",
     "autotrade.config.generic.comment.enableSell": "Enable selling (if disabled emeralds are taken from the input container)",
     "autotrade.config.generic.prettyName.sellItem": "Sell Item",

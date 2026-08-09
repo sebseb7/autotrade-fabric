@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Contenedores entrada/salida por marco en el bloque: cofre etiquetado (\"input\" / \"output\") en el marco (máx. 3 bloques)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Girar la cabeza antes de interactuar",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Girar la cabeza del jugador hacia el aldeano antes de interactuar (algunos servidores, p. ej. GrimAC, comprueban la dirección de la cabeza; la mayoría no lo necesita)",
+    "autotrade.config.generic.prettyName.useBaritone": "Usar Baritone",
+    "autotrade.config.generic.comment.useBaritone": "Usar Baritone para el movimiento (pausar/reanudar y caminar por waypoints de tiempo). Desactívalo si mueves al jugador tú mismo.",
     "autotrade.config.generic.prettyName.enableSell": "Activar venta",
     "autotrade.config.generic.comment.enableSell": "Activar venta (si está desactivada, las esmeraldas se toman del contenedor de entrada)",
     "autotrade.config.generic.prettyName.sellItem": "Objeto de venta",

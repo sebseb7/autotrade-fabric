@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Conteneurs entrée/sortie via cadre sur le bloc : coffre étiqueté (\"input\" / \"output\") dans le cadre (max. 3 blocs)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Tourner la tête avant d'interagir",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Tourner la tête du joueur vers le villageois avant d'interagir (certains serveurs, ex. GrimAC, vérifient la direction de la tête ; la plupart n'en ont pas besoin)",
+    "autotrade.config.generic.prettyName.useBaritone": "Utiliser Baritone",
+    "autotrade.config.generic.comment.useBaritone": "Utiliser Baritone pour le déplacement (pause/reprise et marche par waypoints temporels). Désactivez si vous déplacez le joueur vous-même.",
     "autotrade.config.generic.prettyName.enableSell": "Activer la vente",
     "autotrade.config.generic.comment.enableSell": "Activer la vente (si désactivé, émeraudes prises dans le conteneur d'entrée)",
     "autotrade.config.generic.prettyName.sellItem": "Objet à vendre",

@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Contenitori ingresso/uscita tramite cornice sul blocco: baule etichettato (\"input\" / \"output\") nella cornice (max 3 blocchi)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Gira la testa prima di interagire",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Gira la testa del giocatore verso il villager prima di interagire (alcuni server, es. GrimAC, controllano la direzione della testa; la maggior parte non ne ha bisogno)",
+    "autotrade.config.generic.prettyName.useBaritone": "Usa Baritone",
+    "autotrade.config.generic.comment.useBaritone": "Usa Baritone per il movimento (pausa/ripresa e camminata per waypoint temporali). Disattiva se muovi tu il giocatore.",
     "autotrade.config.generic.prettyName.enableSell": "Attiva vendita",
     "autotrade.config.generic.comment.enableSell": "Attiva vendita (se disattivata, gli smeraldi sono presi dal contenitore di ingresso)",
     "autotrade.config.generic.prettyName.sellItem": "Oggetto in vendita",

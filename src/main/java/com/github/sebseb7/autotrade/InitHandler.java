@@ -13,7 +13,10 @@ import fi.dy.masa.malilib.gui.Message;
 import fi.dy.masa.malilib.interfaces.IInitializationHandler;
 import fi.dy.masa.malilib.interfaces.IValueChangeCallback;
 import com.github.sebseb7.autotrade.util.AutotradeInfoUtils;
+import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 //? if npcSplit {
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
@@ -44,13 +47,36 @@ public class InitHandler implements IInitializationHandler {
 		// itself emits in AutoTradeClientTick (guarded by AutoTrade.autoInteracting).
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
 			if (!AutoTrade.autoInteracting && player.level().isClientSide()
-					&& (entity instanceof Villager || entity instanceof WanderingTrader)
-					&& Configs.Generic.ENABLED.getBooleanValue()) {
-				Configs.Generic.ENABLED.setBooleanValue(false);
-				AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.toggled_mod_off");
-				Configs.saveToFile();
+					&& (entity instanceof Villager || entity instanceof WanderingTrader)) {
+				// Remember which villager the player is opening a trade screen with.
+				AutoTrade.lastInteractedVillagerId = entity.getId();
+				if (Configs.Generic.ENABLED.getBooleanValue()) {
+					Configs.Generic.ENABLED.setBooleanValue(false);
+					AutotradeInfoUtils.showGuiOrInGameMessage(Message.MessageType.INFO, "autotrade.message.toggled_mod_off");
+					Configs.saveToFile();
+				}
 			}
 			return InteractionResult.PASS;
+		});
+
+		// Left or right click stops the villager roller cycle.
+		AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+			if (world.isClientSide()) {
+				com.github.sebseb7.autotrade.event.VillagerRoller.getInstance().stop(net.minecraft.client.Minecraft.getInstance());
+			}
+			return net.minecraft.world.InteractionResult.PASS;
+		});
+		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+			if (world.isClientSide()) {
+				com.github.sebseb7.autotrade.event.VillagerRoller.getInstance().stop(net.minecraft.client.Minecraft.getInstance());
+			}
+			return net.minecraft.world.InteractionResult.PASS;
+		});
+		UseItemCallback.EVENT.register((player, world, hand) -> {
+			if (world.isClientSide()) {
+				com.github.sebseb7.autotrade.event.VillagerRoller.getInstance().stop(net.minecraft.client.Minecraft.getInstance());
+			}
+			return net.minecraft.world.InteractionResult.PASS;
 		});
 
 		ValueChangeCallback valueChangeCallback = new ValueChangeCallback();

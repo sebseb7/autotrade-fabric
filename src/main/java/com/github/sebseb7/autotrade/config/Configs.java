@@ -59,8 +59,10 @@ public class Configs implements IConfigHandler {
 				"Select buy/sell items with item frames (max. distance 3) with items nametagged \"buy\" or \"sell\""));
 		public static final ConfigBoolean SELECT_BY_NAMETAG = i18n(new ConfigBoolean("selectByNameTag", true,
 				"Select input/output containers via item frame on the block: put a nametagged chest item (\"input\" / \"output\") in the frame (max. distance 3)"));
-		public static final ConfigBoolean TURN_HEAD_BEFORE_INTERACT = i18n(new ConfigBoolean("turnHeadBeforeInteract", true,
+		public static final ConfigBoolean TURN_HEAD_BEFORE_INTERACT = i18n(new ConfigBoolean("turnHeadBeforeInteract", false,
 				"Turn the player's head toward the villager before interacting (some servers e.g. GrimAC check head direction, most servers don't need this)"));
+		public static final ConfigBoolean USE_BARITONE = i18n(new ConfigBoolean("useBaritone", true,
+				"Use Baritone for movement (pause/resume and time waypoint walking). Disable if you move the player yourself."));
 
 		public static final ConfigBoolean ENABLE_SELL = i18n(new ConfigBoolean("enableSell", false,
 				"Enable selling (if disabled emeralds are taken from the input container)"));
@@ -148,7 +150,7 @@ public class Configs implements IConfigHandler {
 		}
 
 		public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(ENABLED, ITEM_FRAME, SELECT_BY_NAMETAG,
-			TURN_HEAD_BEFORE_INTERACT,
+			TURN_HEAD_BEFORE_INTERACT, USE_BARITONE,
 			ENABLE_SELL, SELL_ITEM, SELL_LIMIT, ENABLE_BUY, BUY_ITEM, BUY_LIMIT, MAX_INPUT_ITEMS,
 				INPUT_CONTAINER_X, INPUT_CONTAINER_Y, INPUT_CONTAINER_Z, OUTPUT_CONTAINER_X, OUTPUT_CONTAINER_Y,
 				OUTPUT_CONTAINER_Z, VOID_TRADING_DELAY, VOID_TRADING_DELAY_AFTER_TELEPORT, CONTAINER_CLOSE_DELAY,

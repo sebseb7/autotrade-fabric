@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "In-/uitvoercontainers via lijst op blok: kist met naambordje (\"input\" / \"output\") in lijst (max. 3 blokken)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Hoofd draaien vóór interactie",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Draai het hoofd van de speler naar de dorpeling vóór interactie (sommige servers, bijv. GrimAC, controleren de hoofdrichting; de meeste servers hebben dit niet nodig)",
+    "autotrade.config.generic.prettyName.useBaritone": "Baritone gebruiken",
+    "autotrade.config.generic.comment.useBaritone": "Baritone gebruiken voor beweging (pauzeren/hervatten en tijd-waypoints lopen). Schakel uit als je de speler zelf beweegt.",
     "autotrade.config.generic.prettyName.enableSell": "Verkoop inschakelen",
     "autotrade.config.generic.comment.enableSell": "Verkoop inschakelen (indien uit, smaragden uit invoercontainer)",
     "autotrade.config.generic.prettyName.sellItem": "Verkoopitem",

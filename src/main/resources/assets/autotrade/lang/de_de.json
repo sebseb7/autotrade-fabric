@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Eingabe-/Ausgabebehälter per Rahmen am Block: benannte Truhe (\"input\" / \"output\") im Rahmen (max. 3 Blöcke)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Kopf vor Interaktion drehen",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Kopf des Spielers vor der Interaktion zum Dorfbewohner drehen (manche Server z.B. GrimAC prüfen die Kopfrichtung, die meisten nicht)",
+    "autotrade.config.generic.prettyName.useBaritone": "Baritone verwenden",
+    "autotrade.config.generic.comment.useBaritone": "Baritone für Bewegung verwenden (Pause/Fortsetzen und Zeit-Wegpunkte). Deaktivieren, wenn du den Spieler selbst bewegst.",
     "autotrade.config.generic.prettyName.enableSell": "Verkauf aktivieren",
     "autotrade.config.generic.comment.enableSell": "Verkauf aktivieren (wenn deaktiviert, Smaragde aus Eingabebehälter)",
     "autotrade.config.generic.prettyName.sellItem": "Verkaufsgegenstand",

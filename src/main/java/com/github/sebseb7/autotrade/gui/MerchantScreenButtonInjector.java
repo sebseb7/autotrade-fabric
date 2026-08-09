@@ -26,10 +26,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 //? if npcSplit {
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 //?}
 //? if npcFlat {
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.WanderingTrader;
 //?}
 import net.minecraft.world.inventory.MerchantMenu;
@@ -122,6 +124,30 @@ public final class MerchantScreenButtonInjector {
 		Button enableAutotrade = Button
 				.builder(autotradeButtonLabel(), btn -> toggleAutotrade(btn))
 				.bounds(x, y + 3 * (h + gap), bw, h).build();
+
+		// "Roll" button — only shown for librarians. Re-rolls trades until a
+		// desired enchantment appears (see VillagerRoller).
+		// Note: MerchantMenu.getTrader() returns a ClientSideMerchant wrapper, not
+		// the actual Villager entity, so we use the villager whose screen is open.
+		Entity activeTrader = com.github.sebseb7.autotrade.event.KeybindCallbacks.getInstance()
+				.getActiveVillagerEntity(client);
+		if (activeTrader instanceof Villager villager
+				&& villager.getVillagerData().profession().is(VillagerProfession.LIBRARIAN)) {
+			Button rollButton = Button
+					.builder(Component.translatable("autotrade.gui.button.roll"), btn -> {
+						com.github.sebseb7.autotrade.event.VillagerRoller.getInstance()
+								.start(client, villager.getId());
+					})
+					.bounds(x, y + 4 * (h + gap), bw, h).build();
+			addScreenButton(merchantScreen, rollButton);
+		} else {
+			com.github.sebseb7.autotrade.AutoTrade.logger.warn(
+					"[AutoTrade] Roll button hidden: active trader is {} (not a librarian)",
+					activeTrader == null ? "null"
+							: activeTrader instanceof Villager v
+									? v.getVillagerData().profession().getRegisteredName()
+									: activeTrader.getClass().getSimpleName());
+		}
 
 		Screen asScreen = merchantScreen;
 		addScreenButton(asScreen, openSettings);

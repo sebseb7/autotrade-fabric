@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Вход/выход через рамку на блоке: сундук с биркой (\"input\" / \"output\") в рамке (макс. 3 блока)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Повернуть голову перед взаимодействием",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Поворачивает голову игрока к жителю перед взаимодействием (некоторые серверы, напр. GrimAC, проверяют направление головы; большинству это не нужно)",
+    "autotrade.config.generic.prettyName.useBaritone": "Использовать Baritone",
+    "autotrade.config.generic.comment.useBaritone": "Использовать Baritone для движения (пауза/возобновление и ходьба по временным точкам). Отключите, если двигаете игрока сами.",
     "autotrade.config.generic.prettyName.enableSell": "Включить продажу",
     "autotrade.config.generic.comment.enableSell": "Включить продажу (если выкл., изумруды берутся из входного контейнера)",
     "autotrade.config.generic.prettyName.sellItem": "Предмет продажи",

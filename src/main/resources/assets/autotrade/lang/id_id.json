@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Kontainer masukan/keluaran via bingkai di blok: peti berlabel (\"input\" / \"output\") di bingkai (maks. 3 blok)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Putar kepala sebelum interaksi",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Putar kepala pemain ke arah penduduk desa sebelum berinteraksi (beberapa server mis. GrimAC memeriksa arah kepala, kebanyakan server tidak perlu)",
+    "autotrade.config.generic.prettyName.useBaritone": "Gunakan Baritone",
+    "autotrade.config.generic.comment.useBaritone": "Gunakan Baritone untuk pergerakan (jeda/lanjutkan dan berjalan waypoint waktu). Nonaktifkan jika kamu menggerakkan pemain sendiri.",
     "autotrade.config.generic.prettyName.enableSell": "Aktifkan jual",
     "autotrade.config.generic.comment.enableSell": "Aktifkan jual (jika nonaktif, zamrud diambil dari kontainer masukan)",
     "autotrade.config.generic.prettyName.sellItem": "Barang jual",

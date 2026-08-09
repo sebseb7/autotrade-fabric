@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "블록의 액자로 입출력 용기 선택: nametag \"input\" / \"output\" 상자를 액자에 (최대 3블록)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "상호작용 전 고개 돌리기",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "상호작용 전에 플레이어의 고개를 주민 쪽으로 돌립니다 (GrimAC 같은 일부 서버는 고개 방향을 확인하지만 대부분의 서버는 필요 없습니다)",
+    "autotrade.config.generic.prettyName.useBaritone": "Baritone 사용",
+    "autotrade.config.generic.comment.useBaritone": "이동에 Baritone을 사용합니다 (일시정지/재개 및 시간 웨이포인트 걷기). 직접 플레이어를 움직이면 비활성화하세요.",
     "autotrade.config.generic.prettyName.enableSell": "판매 활성화",
     "autotrade.config.generic.comment.enableSell": "판매 활성화 (비활성 시 입력 용기에서 에메랄드 가져옴)",
     "autotrade.config.generic.prettyName.sellItem": "판매 아이템",

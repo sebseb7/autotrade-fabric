@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Girdi/çıktı kapları blok üzerindeki çerçeveyle: etiketli sandık (\"input\" / \"output\") çerçevede (en fazla 3 blok)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Etkileşimden önce kafayı çevir",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Etkileşimden önce oyuncunun kafasını köylüye çevirir (GrimAC gibi bazı sunucular kafa yönünü kontrol eder; çoğu sunucunun buna ihtiyacı yoktur)",
+    "autotrade.config.generic.prettyName.useBaritone": "Baritone Kullan",
+    "autotrade.config.generic.comment.useBaritone": "Hareket için Baritone kullan (duraklat/devam ettir ve zaman waypoint yürüyüşü). Oyuncuyu kendin hareket ettiriyorsan devre dışı bırak.",
     "autotrade.config.generic.prettyName.enableSell": "Satışı etkinleştir",
     "autotrade.config.generic.comment.enableSell": "Satışı etkinleştir (kapalıysa zümrütler girdi kabından alınır)",
     "autotrade.config.generic.prettyName.sellItem": "Satış eşyası",

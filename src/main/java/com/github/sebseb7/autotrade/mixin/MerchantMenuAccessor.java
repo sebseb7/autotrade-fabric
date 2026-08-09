@@ -1,6 +1,7 @@
 package com.github.sebseb7.autotrade.mixin;
 
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
+import net.minecraft.world.item.trading.Merchant;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 

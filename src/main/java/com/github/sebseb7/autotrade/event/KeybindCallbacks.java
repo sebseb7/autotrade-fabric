@@ -36,6 +36,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler {
 		return clientTick.getTraderGlowEntityForRender(mc);
 	}
 
+	/** The villager entity whose trade screen is currently open, or null. */
+	public Entity getActiveVillagerEntity(Minecraft mc) {
+		return clientTick.getActiveVillagerEntity(mc);
+	}
+
 	public int getTraderGlowColor() {
 		return clientTick.getTraderGlowColor();
 	}

@@ -18,6 +18,15 @@ public class AutoTrade implements ModInitializer {
 	 */
 	public static boolean autoInteracting = false;
 
+	/**
+	 * Entity id of the last villager/wandering trader the player right-clicked
+	 * to open a trade screen. Captured in {@link InitHandler}'s
+	 * {@code UseEntityCallback} so the merchant screen knows which villager it
+	 * belongs to (the menu's {@code trader} is only a {@code ClientSideMerchant}
+	 * wrapper, not the entity).
+	 */
+	public static int lastInteractedVillagerId = -1;
+
 	@Override
 	public void onInitialize() {
 		InitializationHandler.getInstance().registerInitializationHandler(new InitHandler());

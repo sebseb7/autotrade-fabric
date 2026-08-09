@@ -459,6 +459,7 @@ final class ContainerIoHelper {
 	private static void quickMovePlayerExcessOverCap(Minecraft mc, AbstractContainerMenu menu, Inventory playerInv,
 			String spec, int maxKeepStacks) {
 		while (countMatchingStacksOnPlayer(menu, playerInv, spec) > maxKeepStacks) {
+			int stacksBefore = countMatchingStacksOnPlayer(menu, playerInv, spec);
 			boolean moved = false;
 			for (int i = 0; i < menu.slots.size(); i++) {
 				Slot s = menu.getSlot(i);
@@ -477,6 +478,11 @@ final class ContainerIoHelper {
 				break;
 			}
 			if (!moved) {
+				break;
+			}
+			// If the quick-move made no progress (e.g. the input chest is full and
+			// nothing could be moved back), stop instead of looping forever.
+			if (countMatchingStacksOnPlayer(menu, playerInv, spec) >= stacksBefore) {
 				break;
 			}
 		}

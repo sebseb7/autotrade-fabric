@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Contêineres entrada/saída por moldura no bloco: baú etiquetado (\"input\" / \"output\") na moldura (máx. 3 blocos)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Virar a cabeça antes de interagir",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Vira a cabeça do jogador em direção ao aldeão antes de interagir (alguns servidores, ex. GrimAC, verificam a direção da cabeça; a maioria não precisa)",
+    "autotrade.config.generic.prettyName.useBaritone": "Usar Baritone",
+    "autotrade.config.generic.comment.useBaritone": "Usar Baritone para movimento (pausar/retomar e andar por waypoints de tempo). Desative se você mover o jogador.",
     "autotrade.config.generic.prettyName.enableSell": "Ativar venda",
     "autotrade.config.generic.comment.enableSell": "Ativar venda (se desativada, esmeraldas são retiradas do contêiner de entrada)",
     "autotrade.config.generic.prettyName.sellItem": "Item de venda",

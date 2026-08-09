@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "透過方塊上的物品展示框選擇輸入/輸出容器：在展示框中放入命名為 \"input\" 或 \"output\" 的箱子物品（最遠 3 格）",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "互動前轉頭",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "互動前將玩家的頭轉向村民（部分伺服器如 GrimAC 會檢查頭部朝向，大多數伺服器不需要）",
+    "autotrade.config.generic.prettyName.useBaritone": "使用 Baritone",
+    "autotrade.config.generic.comment.useBaritone": "使用 Baritone 進行移動（暫停/恢復和時間路徑點行走）。如果你自己移動玩家，請停用。",
     "autotrade.config.generic.prettyName.enableSell": "啟用出售",
     "autotrade.config.generic.comment.enableSell": "啟用出售（若停用則從輸入容器取綠寶石）",
     "autotrade.config.generic.prettyName.sellItem": "出售物品",

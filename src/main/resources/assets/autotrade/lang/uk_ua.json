@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Вхід/вихід через рамку на блоці: скриня з біркою (\"input\" / \"output\") в рамці (макс. 3 блоки)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Повернути голову перед взаємодією",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Повертає голову гравця до жителя перед взаємодією (деякі сервери, напр. GrimAC, перевіряють напрямок голови; більшості це не потрібно)",
+    "autotrade.config.generic.prettyName.useBaritone": "Використовувати Baritone",
+    "autotrade.config.generic.comment.useBaritone": "Використовувати Baritone для руху (пауза/відновлення та ходьба за часовими точками). Вимкніть, якщо рухаєте гравця самостійно.",
     "autotrade.config.generic.prettyName.enableSell": "Увімкнути продаж",
     "autotrade.config.generic.comment.enableSell": "Увімкнути продаж (якщо вимкнено, смарагди з вхідного контейнера)",
     "autotrade.config.generic.prettyName.sellItem": "Предмет продажу",

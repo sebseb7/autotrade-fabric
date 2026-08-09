@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "ブロック上の額縁で入出力コンテナを選択：nametag \"input\" / \"output\" のチェストを額縁に（最大3ブロック）",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "インタラクト前に頭を向ける",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "インタラクト前にプレイヤーの頭を村人の方向へ向ける（GrimACなど一部のサーバーは頭の向きをチェックするが、ほとんどのサーバーでは不要）",
+    "autotrade.config.generic.prettyName.useBaritone": "Baritoneを使用",
+    "autotrade.config.generic.comment.useBaritone": "移動にBaritoneを使用（一時停止/再開と時間ウェイポイント歩行）。自分でプレイヤーを動かす場合は無効にしてください。",
     "autotrade.config.generic.prettyName.enableSell": "売却を有効",
     "autotrade.config.generic.comment.enableSell": "売却を有効（無効時は入力コンテナからエメラルドを取得）",
     "autotrade.config.generic.prettyName.sellItem": "売却アイテム",

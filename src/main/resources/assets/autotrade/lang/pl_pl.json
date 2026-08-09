@@ -64,6 +64,8 @@
     "autotrade.config.generic.comment.selectByNameTag": "Kontenery wejścia/wyjścia przez ramkę na bloku: skrzynia z etykietą (\"input\" / \"output\") w ramce (maks. 3 bloki)",
     "autotrade.config.generic.prettyName.turnHeadBeforeInteract": "Obróć głowę przed interakcją",
     "autotrade.config.generic.comment.turnHeadBeforeInteract": "Obraca głowę gracza w stronę osadnika przed interakcją (niektóre serwery, np. GrimAC, sprawdzają kierunek głowy; większość tego nie wymaga)",
+    "autotrade.config.generic.prettyName.useBaritone": "Użyj Baritone",
+    "autotrade.config.generic.comment.useBaritone": "Użyj Baritone do ruchu (pauza/wznów i chodzenie po waypointach czasowych). Wyłącz, jeśli sam poruszasz graczem.",
     "autotrade.config.generic.prettyName.enableSell": "Włącz sprzedaż",
     "autotrade.config.generic.comment.enableSell": "Włącz sprzedaż (gdy wyłączone, szmaragdy z kontenera wejściowego)",
     "autotrade.config.generic.prettyName.sellItem": "Przedmiot sprzedaży",
