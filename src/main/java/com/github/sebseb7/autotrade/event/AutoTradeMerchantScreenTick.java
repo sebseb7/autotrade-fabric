@@ -61,7 +61,10 @@ final class AutoTradeMerchantScreenTick {
 		var offerForNotice = offer.copy();
 		var player = mc.player;
 		String buySpec = Configs.Generic.BUY_ITEM.getStringValue();
+		String sellSpec = Configs.Generic.SELL_ITEM.getStringValue();
 		int emeraldBefore = TradeFormatHelper.countInInventory(player, "minecraft:emerald");
+		int buyBefore = TradeFormatHelper.countInInventory(player, buySpec);
+		int sellBefore = TradeFormatHelper.countInInventory(player, sellSpec);
 		menu.tryMoveItems(idx);
 		var slot = menu.getSlot(2);
 		ItemStack slot2 = slot.getItem();
@@ -95,8 +98,13 @@ final class AutoTradeMerchantScreenTick {
 
 		int emeraldAfter = TradeFormatHelper.countInInventory(player, "minecraft:emerald");
 		if (state.merchantResultQuickMoveIsBuy) {
-			int emeraldPaid = TradeFormatHelper.modifiedCostCount(offerForNotice, offerForNotice.getItemCostA());
-			int buyItemCount = offerForNotice.getResult().getCount();
+			// Actual number of bought items = increase in buy-stack count; fall
+			// back to the per-trade result count only if the delta is zero.
+			int buyAfter = TradeFormatHelper.countInInventory(player, buySpec);
+			int buyItemCount = TradeFormatHelper.inventoryIncrease(buyBefore, buyAfter,
+					offerForNotice.getResult().getCount());
+			int emeraldPaid = TradeFormatHelper.inventoryDecrease(emeraldBefore, emeraldAfter,
+					TradeFormatHelper.modifiedCostCount(offerForNotice, offerForNotice.getItemCostA()));
 			TradeFormatHelper.showBuyTradeNotice(mc, offerForNotice, buyItemCount, emeraldPaid);
 		} else {
 			int sellCostFallback = offerForNotice.getCostA().getCount();
@@ -104,11 +112,15 @@ final class AutoTradeMerchantScreenTick {
 				sellCostFallback = TradeFormatHelper.modifiedCostCount(offerForNotice,
 						offerForNotice.getItemCostA());
 			}
-			int emeraldReceivedFallback = Math.max(resultSlotCount, offerForNotice.getResult().getCount());
-			int ironPerEmerald = sellCostFallback;
+			// Actual number of emeralds received = increase in emerald count.
 			int emeraldReceived = TradeFormatHelper.inventoryIncrease(emeraldBefore, emeraldAfter,
-					emeraldReceivedFallback);
-			int totalIronPaid = ironPerEmerald * emeraldReceived;
+					Math.max(resultSlotCount, offerForNotice.getResult().getCount()));
+			// Actual number of sell items paid = decrease in sell-stack count;
+			// fall back to emeralds-received * per-trade rate when zero.
+			int sellAfter = TradeFormatHelper.countInInventory(player, sellSpec);
+			int totalIronPaid = TradeFormatHelper.inventoryDecrease(sellBefore, sellAfter,
+					emeraldReceived * sellCostFallback);
+			int ironPerEmerald = sellCostFallback;
 			TradeFormatHelper.showSellTradeNotice(mc, offerForNotice, totalIronPaid, emeraldReceived, ironPerEmerald);
 		}
 
