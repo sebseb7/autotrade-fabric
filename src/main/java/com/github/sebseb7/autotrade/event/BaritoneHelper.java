@@ -16,6 +16,13 @@ public final class BaritoneHelper {
 	private static boolean MOVEMENT_PAUSED = false;
 	/** True when baritone was paused with an active goal that should be resumed. */
 	private static boolean HAS_GOAL_TO_RESUME = false;
+	/**
+	 * True when this mod itself armed a baritone goal (via {@link #setMovementGoal}
+	 * / {@link #pushNewMovementGoal}). We only ever resume baritone after an
+	 * interaction if we were the ones driving it before we paused it, otherwise a
+	 * manual trade would make us resume a long-forgotten navigation.
+	 */
+	private static boolean MOD_DRIVES_GOAL = false;
 
 	private BaritoneHelper() {
 	}
@@ -36,46 +43,6 @@ public final class BaritoneHelper {
 		return HAS_ELYTRA_API;
 	}
 
-	/**
-	 * Whether baritone is actually actively pursuing a path right now.
-	 * We only want to resume after an interaction if baritone was genuinely
-	 * navigating before we paused it, so we don't start walking the player to
-	 * a long-forgotten goal when they traded manually.
-	 */
-	private static boolean hasActiveGoal() {
-		// Any purpose fit: everything except idle is "actively doing something".
-		try {
-			Object baritone = getPrimaryBaritone();
-			Object processManager = invokeInstance(baritone, "getPathingBehavior");
-			Object purpose = invokeInstance(processManager, "purpose");
-			if (purpose != null) {
-				String repr = purpose.toString();
-				if (repr != null && !repr.isEmpty()) {
-					return true;
-				}
-			}
-		} catch (Throwable t) {
-			System.out.println("[AutoTrade] Baritone hasActiveGoal purpose query failed: " + t);
-			// Fall through to the goal-stack check below.
-		}
-		return hasBaritoneGoal();
-	}
-
-	/**
-	 * Whether baritone currently has an actual (non-null) goal set.
-	 */
-	private static boolean hasBaritoneGoal() {
-		try {
-			Object baritone = getPrimaryBaritone();
-			Object customGoalProcess = invokeInstance(baritone, "getCustomGoalProcess");
-			Object goal = invokeInstance(customGoalProcess, "getGoal");
-			return goal != null;
-		} catch (Throwable t) {
-			System.out.println("[AutoTrade] Baritone hasBaritoneGoal failed: " + t);
-			return false;
-		}
-	}
-
 	static void setMovementGoal(int x, int y, int z) {
 		if (!Configs.Generic.USE_BARITONE.getBooleanValue()) {
 			return;
@@ -85,6 +52,7 @@ public final class BaritoneHelper {
 		System.out.println("[AutoTrade] Baritone setMovementGoal x=" + x + " y=" + y + " z=" + z + " status=" + describeStatus());
 		MOVEMENT_PAUSED = false;
 		HAS_GOAL_TO_RESUME = false;
+		MOD_DRIVES_GOAL = true;
 		MovementGoal goal = new MovementGoal(x, y, z);
 		GOAL_STACK.clear();
 		GOAL_STACK.push(goal);
@@ -105,6 +73,7 @@ public final class BaritoneHelper {
 		System.out.println("[AutoTrade] Baritone pushNewMovementGoal x=" + x + " y=" + y + " z=" + z + " status=" + describeStatus());
 		MOVEMENT_PAUSED = false;
 		HAS_GOAL_TO_RESUME = false;
+		MOD_DRIVES_GOAL = true;
 		MovementGoal goal = new MovementGoal(x, y, z);
 		GOAL_STACK.push(goal);
 		applyGoal(goal);
@@ -118,12 +87,12 @@ public final class BaritoneHelper {
 			System.out.println("[AutoTrade] Baritone not present, skipping pauseMovement");
 			return;
 		}
-		// Only resume after the interaction if baritone was actually actively
-		// navigating a goal right now (not merely because a stale goal lingers in
-		// our stack). If the user/path wasn't moving before the trade, don't
-		// start walking again afterwards.
+		// Only ever resume after the interaction if this mod was the one driving
+		// baritone before we paused it. If the player traded manually (baritone
+		// was never armed by us), set the goal to null and don't resume later.
 		MOVEMENT_PAUSED = true;
-		HAS_GOAL_TO_RESUME = hasActiveGoal();
+		HAS_GOAL_TO_RESUME = MOD_DRIVES_GOAL && !GOAL_STACK.isEmpty();
+		MOD_DRIVES_GOAL = false;
 		System.out.println("[AutoTrade] Baritone pauseMovement status=" + describeStatus());
 		try {
 			Object primaryBaritone = getPrimaryBaritone();
@@ -172,12 +141,13 @@ public final class BaritoneHelper {
 			return;
 		}
 		if (!HAS_GOAL_TO_RESUME) {
-			System.out.println("[AutoTrade] Baritone resumeMovementGoal skipped (was not paused with an active goal)");
+			System.out.println("[AutoTrade] Baritone resumeMovementGoal skipped (mod was not driving before trade)");
 			MOVEMENT_PAUSED = false;
 			return;
 		}
 		MOVEMENT_PAUSED = false;
 		HAS_GOAL_TO_RESUME = false;
+		MOD_DRIVES_GOAL = false;
 		System.out.println("[AutoTrade] Baritone resumeMovementGoal status=" + describeStatus());
 		MovementGoal goal = GOAL_STACK.peek();
 		if (goal != null) {
@@ -217,6 +187,7 @@ public final class BaritoneHelper {
 		}
 		GOAL_STACK.clear();
 		HAS_GOAL_TO_RESUME = false;
+		MOD_DRIVES_GOAL = false;
 	}
 
 	/**
@@ -231,6 +202,7 @@ public final class BaritoneHelper {
 		}
 		GOAL_STACK.clear();
 		HAS_GOAL_TO_RESUME = false;
+		MOD_DRIVES_GOAL = false;
 		stopMovement();
 	}
 
