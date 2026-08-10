@@ -87,13 +87,15 @@ public final class BaritoneHelper {
 			System.out.println("[AutoTrade] Baritone not present, skipping pauseMovement");
 			return;
 		}
-		// Only ever resume after the interaction if this mod was the one driving
-		// baritone before we paused it. If the player traded manually (baritone
-		// was never armed by us), set the goal to null and don't resume later.
+		// Only ever resume after an interaction if this mod armed the navigation
+		// in the first place. This flag is NOT consumed here: one armed goal spans
+		// many pause/resume cycles (walk to container, then walk to villager), so
+		// it must persist across them. It is cleared when navigation is abandoned.
 		MOVEMENT_PAUSED = true;
 		HAS_GOAL_TO_RESUME = MOD_DRIVES_GOAL && !GOAL_STACK.isEmpty();
-		MOD_DRIVES_GOAL = false;
-		System.out.println("[AutoTrade] Baritone pauseMovement status=" + describeStatus());
+		System.out.println("[AutoTrade] Baritone PAUSE modDrives=" + MOD_DRIVES_GOAL
+				+ " goalStack=" + GOAL_STACK.size() + " -> willResume=" + HAS_GOAL_TO_RESUME
+				+ " status=" + describeStatus());
 		try {
 			Object primaryBaritone = getPrimaryBaritone();
 			Object customGoalProcess = invokeInstance(primaryBaritone, "getCustomGoalProcess");
@@ -140,19 +142,64 @@ public final class BaritoneHelper {
 			System.out.println("[AutoTrade] Baritone not present, skipping resumeMovementGoal");
 			return;
 		}
+		System.out.println("[AutoTrade] Baritone RESUME enter willResume=" + HAS_GOAL_TO_RESUME
+				+ " modDrives=" + MOD_DRIVES_GOAL + " goalStack=" + GOAL_STACK.size()
+				+ " paused=" + MOVEMENT_PAUSED + " status=" + describeStatus());
 		if (!HAS_GOAL_TO_RESUME) {
-			System.out.println("[AutoTrade] Baritone resumeMovementGoal skipped (mod was not driving before trade)");
+			System.out.println("[AutoTrade] Baritone RESUME skipped (was not set to resume)");
 			MOVEMENT_PAUSED = false;
 			return;
 		}
 		MOVEMENT_PAUSED = false;
 		HAS_GOAL_TO_RESUME = false;
-		MOD_DRIVES_GOAL = false;
-		System.out.println("[AutoTrade] Baritone resumeMovementGoal status=" + describeStatus());
+		// If the mod-drove navigation has already reached its target, it is
+		// complete: stop tracking it and do not send baritone on another trip.
 		MovementGoal goal = GOAL_STACK.peek();
+		if (goal != null && goalReached(goal)) {
+			System.out.println("[AutoTrade] Baritone RESUME goal reached at "
+					+ mcPlayerPos() + " target=" + goal.x + "," + goal.y + "," + goal.z
+					+ "; clearing navigation state");
+			finishNavigation();
+			return;
+		}
+		System.out.println("[AutoTrade] Baritone RESUME applying goal " + (goal == null ? "(none)" : goal.x + "," + goal.y + "," + goal.z));
 		if (goal != null) {
 			applyGoal(goal);
 		}
+	}
+
+	/**
+	 * True while this mod's armed navigation genuinely still needs to move.
+	 * Mirrors Baritone's GoalBlock: the goal counts as reached when the player
+	 * is within 2 blocks horizontally and 3 blocks vertically of the target.
+	 */
+	private static boolean goalReached(MovementGoal goal) {
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.player == null) {
+			return false;
+		}
+		var pos = mc.player.blockPosition();
+		int dx = pos.getX() - goal.x;
+		int dy = pos.getY() - goal.y;
+		int dz = pos.getZ() - goal.z;
+		return Math.abs(dx) <= 2 && Math.abs(dz) <= 2 && Math.abs(dy) <= 3;
+	}
+
+	/** Coordinates of the player for the pause/resume logs. */
+	private static String mcPlayerPos() {
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.player == null) {
+			return "(no player)";
+		}
+		var p = mc.player.blockPosition();
+		return p.getX() + "," + p.getY() + "," + p.getZ();
+	}
+
+	/** The mod-drove navigation has ended: clear all tracking and flags. */
+	private static void finishNavigation() {
+		GOAL_STACK.clear();
+		HAS_GOAL_TO_RESUME = false;
+		MOD_DRIVES_GOAL = false;
 	}
 
 	/**

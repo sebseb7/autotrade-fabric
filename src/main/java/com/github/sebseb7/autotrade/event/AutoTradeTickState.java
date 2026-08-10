@@ -44,6 +44,10 @@ final class AutoTradeTickState {
 	/** Waits for the server to put the trade result in slot 2 before quick-moving. */
 	int merchantResultEmptyWaits;
 
+	/** Cumulative items bought/sold during the current merchant session. */
+	int sessionBought;
+	int sessionSold;
+
 	void clearMerchantQuickMoveDefer() {
 		merchantResultQuickMoveDelayTicks = 0;
 		merchantResultQuickMoveOfferIndex = -1;
