@@ -41,6 +41,7 @@ final class AutoTradeTickState {
 	int merchantResultQuickMoveDelayTicks;
 	int merchantResultQuickMoveOfferIndex = -1;
 	boolean merchantResultQuickMoveIsBuy;
+	int merchantResultQuickMoveMenuId = -1;
 	/** Waits for the server to put the trade result in slot 2 before quick-moving. */
 	int merchantResultEmptyWaits;
 
@@ -51,6 +52,7 @@ final class AutoTradeTickState {
 	void clearMerchantQuickMoveDefer() {
 		merchantResultQuickMoveDelayTicks = 0;
 		merchantResultQuickMoveOfferIndex = -1;
+		merchantResultQuickMoveMenuId = -1;
 		merchantResultEmptyWaits = 0;
 	}
 
