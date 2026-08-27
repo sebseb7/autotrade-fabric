@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffers;
 
 /**
@@ -32,10 +33,6 @@ final class AutoTradeMerchantScreenTick {
 		if (state.merchantResultQuickMoveDelayTicks <= 0) {
 			return;
 		}
-		state.merchantResultQuickMoveDelayTicks--;
-		if (state.merchantResultQuickMoveDelayTicks > 0) {
-			return;
-		}
 		//? if mc262 {
 		if (!(mc.gui.screen() instanceof MerchantScreen screen)) {
 		//?} else {
@@ -46,6 +43,15 @@ final class AutoTradeMerchantScreenTick {
 			return;
 		}
 		MerchantMenu menu = screen.getMenu();
+		if (menu.containerId != state.merchantResultQuickMoveMenuId) {
+			AutoTrade.logger.warn("[AutoTrade merchant] deferred trade cancelled: merchant menu changed");
+			state.clearMerchantQuickMoveDefer();
+			return;
+		}
+		state.merchantResultQuickMoveDelayTicks--;
+		if (state.merchantResultQuickMoveDelayTicks > 0) {
+			return;
+		}
 		MerchantOffers offers = menu.getOffers();
 		int idx = state.merchantResultQuickMoveOfferIndex;
 		if (offers == null || idx < 0 || idx >= offers.size()) {
@@ -76,6 +82,16 @@ final class AutoTradeMerchantScreenTick {
 			}
 			AutoTrade.logger.warn("[AutoTrade merchant] result slot still empty after {} waits", RESULT_EMPTY_MAX_WAITS);
 			state.clearMerchantQuickMoveDefer();
+			return;
+		}
+		if ((state.merchantResultQuickMoveIsBuy && !TradeItemSpec.matches(slot2, buySpec))
+				|| (!state.merchantResultQuickMoveIsBuy && !slot2.is(Items.EMERALD))) {
+			AutoTrade.logger.warn(
+					"[AutoTrade merchant] deferred trade cancelled: unexpected result {}",
+					slot2.getHoverName().getString());
+			state.clearMerchantQuickMoveDefer();
+			screen.onClose();
+			BaritoneHelper.resumeMovementGoal();
 			return;
 		}
 		state.merchantResultEmptyWaits = 0;
@@ -225,6 +241,7 @@ final class AutoTradeMerchantScreenTick {
 					state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
 					state.merchantResultQuickMoveOfferIndex = i;
 					state.merchantResultQuickMoveIsBuy = true;
+					state.merchantResultQuickMoveMenuId = menu.containerId;
 					state.merchantResultEmptyWaits = 0;
 					return true;
 				}
@@ -246,6 +263,7 @@ final class AutoTradeMerchantScreenTick {
 					state.merchantResultQuickMoveDelayTicks = RESULT_QUICK_MOVE_DELAY_TICKS;
 					state.merchantResultQuickMoveOfferIndex = i;
 					state.merchantResultQuickMoveIsBuy = false;
+					state.merchantResultQuickMoveMenuId = menu.containerId;
 					state.merchantResultEmptyWaits = 0;
 					return true;
 				}
