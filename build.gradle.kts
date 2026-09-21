@@ -55,7 +55,7 @@ modstitch {
 		replacementProperties.put(
 			"fabric_api_dependency",
 			when (minecraft) {
-				"26.3" -> ">=0.161.0"
+				"26.3" -> ">=0.160.6"
 				"26.2" -> ">=0.153.0"
 				"26.1.2" -> ">=0.145.0"
 				"1.21.11" -> ">=0.140.0"
