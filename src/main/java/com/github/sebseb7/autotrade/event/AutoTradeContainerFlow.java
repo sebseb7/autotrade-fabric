@@ -37,6 +37,10 @@ final class AutoTradeContainerFlow {
     }
 
     boolean handleContainerProximity(Minecraft mc) {
+        if (state.inputOpened || state.outputOpened) {
+            return true;
+        }
+
         BlockPos input = new BlockPos(
                 Configs.Generic.INPUT_CONTAINER_X.getIntegerValue(),
                 Configs.Generic.INPUT_CONTAINER_Y.getIntegerValue(),
