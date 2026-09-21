@@ -93,7 +93,11 @@ final class TraderInteractor {
 							} finally {
 								AutoTrade.autoInteracting = false;
 							}
+							//? if mc263 {
+							mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+							//?} else {
 							mc.player.swing(InteractionHand.MAIN_HAND);
+							//?}
 							state.postMerchantInventorySyncTicks = 0;
 							state.voidDelay = Configs.Generic.VOID_TRADING_DELAY.getIntegerValue();
 							state.villagerActive = entity.getId();

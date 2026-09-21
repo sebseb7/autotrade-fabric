@@ -185,7 +185,11 @@ public final class VillagerRoller {
 		} finally {
 			com.github.sebseb7.autotrade.AutoTrade.autoInteracting = false;
 		}
+		//? if mc263 {
+		mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+		//?} else {
 		mc.player.swing(InteractionHand.MAIN_HAND);
+		//?}
 		waitTicks = 10;
 	}
 
@@ -258,7 +262,11 @@ public final class VillagerRoller {
 				ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, lecternPos, Direction.UP));
 		mc.getConnection().send(new ServerboundPlayerActionPacket(
 				ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, lecternPos, Direction.UP));
+		//? if mc263 {
+		mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+		//?} else {
 		mc.player.swing(InteractionHand.MAIN_HAND);
+		//?}
 		waitTicks = 20; // wait for the block to break and profession to clear
 	}
 
@@ -278,7 +286,11 @@ public final class VillagerRoller {
 		Vec3 target = new Vec3(lecternPos.getX() + 0.5, lecternPos.getY() + 0.5, lecternPos.getZ() + 0.5);
 		BlockHitResult hit = new BlockHitResult(target, Direction.DOWN, lecternPos.below(), false);
 		mc.gameMode.useItemOn(mc.player, InteractionHand.OFF_HAND, hit);
+		//? if mc263 {
+		mc.player.swing(InteractionHand.OFF_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+		//?} else {
 		mc.player.swing(InteractionHand.OFF_HAND);
+		//?}
 		waitTicks = 40; // wait for the villager to take the profession
 	}
 

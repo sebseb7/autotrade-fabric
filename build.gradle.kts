@@ -20,7 +20,7 @@ val minecraft = findProperty("deps.minecraft")?.toString()
 
 val javaLanguageVersion = when (minecraft) {
 	"1.21.10", "1.21.11" -> 21
-	"26.1.2", "26.2" -> 25
+	"26.1.2", "26.2", "26.3" -> 25
 	else -> error("Add Java toolchain mapping for Minecraft $minecraft in build.gradle.kts.")
 }
 
@@ -55,6 +55,7 @@ modstitch {
 		replacementProperties.put(
 			"fabric_api_dependency",
 			when (minecraft) {
+				"26.3" -> ">=0.161.0"
 				"26.2" -> ">=0.153.0"
 				"26.1.2" -> ">=0.145.0"
 				"1.21.11" -> ">=0.140.0"
@@ -84,16 +85,17 @@ stonecutter {
 		"neoforge" to loader.equals("neoforge", ignoreCase = true),
 		"forge" to loader.equals("forge", ignoreCase = true),
 		"vanilla" to loader.equals("vanilla", ignoreCase = true),
-		"mc26" to (minecraft == "26.2" || minecraft == "26.1.2"),
-		"mc262" to (minecraft == "26.2"),
+		"mc26" to (minecraft == "26.3" || minecraft == "26.2" || minecraft == "26.1.2"),
+		"mc262" to (minecraft == "26.3" || minecraft == "26.2"),
+		"mc263" to (minecraft == "26.3"),
 		"traderWireframeMc26Old" to (minecraft == "26.1.2"),
 		// TraderHighlightRenderer: MC 26 uses Fabric LevelRenderEvents; 1.21.x uses WorldRenderEvents (v1.world).
-		"traderWireframeRender" to (minecraft == "26.2" || minecraft == "26.1.2" || minecraft == "1.21.11" || minecraft == "1.21.10"),
-		"traderWireframeMc26" to (minecraft == "26.2" || minecraft == "26.1.2"),
+		"traderWireframeRender" to (minecraft == "26.3" || minecraft == "26.2" || minecraft == "26.1.2" || minecraft == "1.21.11" || minecraft == "1.21.10"),
+		"traderWireframeMc26" to (minecraft == "26.3" || minecraft == "26.2" || minecraft == "26.1.2"),
 		"traderWireframe121" to (minecraft == "1.21.10" || minecraft == "1.21.11"),
 		"traderWireframe12110" to (minecraft == "1.21.10"),
 		"traderWireframe12111" to (minecraft == "1.21.11"),
-		"npcSplit" to (minecraft == "26.2" || minecraft == "26.1.2" || minecraft == "1.21.11"),
+		"npcSplit" to (minecraft == "26.3" || minecraft == "26.2" || minecraft == "26.1.2" || minecraft == "1.21.11"),
 		"npcFlat" to (minecraft == "1.21.10"),
 	)
 }
