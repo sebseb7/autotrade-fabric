@@ -119,7 +119,6 @@ final class ContainerIoHelper {
 
 	static void processOutput(AbstractContainerMenu menu, Inventory playerInv, AutoTradeTickState state) {
 		Minecraft mc = Minecraft.getInstance();
-		BaritoneHelper.pauseMovement();
 		int maxKeepStacks = Configs.Generic.MAX_INPUT_ITEMS.getIntegerValue();
 		if (Configs.Generic.ENABLE_BUY.getBooleanValue()) {
 			String buySpec = Configs.Generic.BUY_ITEM.getStringValue();
@@ -152,7 +151,6 @@ final class ContainerIoHelper {
 	}
 
 	static void processInput(AbstractContainerMenu menu, Inventory playerInv, AutoTradeTickState state) {
-		BaritoneHelper.pauseMovement();
 		String spec = EMERALD_SPEC;
 		if (Configs.Generic.ENABLE_SELL.getBooleanValue()) {
 			spec = Configs.Generic.SELL_ITEM.getStringValue();

@@ -81,7 +81,6 @@ final class TraderInteractor {
 							newVillagersInRange.add(entity);
 							rotatingTargetId = -1;
 							EntityHitResult ehr = new EntityHitResult(entity, aimPoint);
-							BaritoneHelper.pauseMovement();
 							AutoTrade.autoInteracting = true;
 							try {
 								//? if mc26 {

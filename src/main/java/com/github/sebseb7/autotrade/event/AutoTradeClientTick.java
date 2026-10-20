@@ -1,5 +1,6 @@
 package com.github.sebseb7.autotrade.event;
 
+import com.github.sebseb7.autotrade.AutoTrade;
 import com.github.sebseb7.autotrade.config.Configs;
 import fi.dy.masa.malilib.util.GuiUtils;
 import net.minecraft.client.Minecraft;
@@ -11,15 +12,26 @@ import net.minecraft.world.entity.Entity;
  * Orchestrates trader location, merchant trading, and container management.
  */
 final class AutoTradeClientTick {
+	/**
+	 * Maximum forward clock advance that is considered a normal tick. The
+	 * server re-syncs the client clock periodically, which can jump the clock
+	 * by more than a few ticks; such a jump must not be treated as the clock
+	 * having swept across every target in between.
+	 */
+	private static final long MAX_NORMAL_CLOCK_ADVANCE = 100L;
+
 	private final AutoTradeTickState state = new AutoTradeTickState();
 	private final TraderInteractor traderInteractor = new TraderInteractor(state);
 	private final AutoTradeContainerFlow containerFlow = new AutoTradeContainerFlow(state);
 	private final AutoTradeMerchantScreenTick merchantScreenTick = new AutoTradeMerchantScreenTick(state);
+	/** Last seen in-game day time, used to detect when a configured tick was crossed. */
 	private long lastTimeOfDay = -1;
-	private int pendingAfkOnDelayTicks = -1;
-	private String pendingAfkOnCommand = "";
-	/** Last parsed waypoint list, used to log only when the config changes. */
-	private java.util.List<Configs.TimeWaypoint> lastLoggedWaypoints = null;
+	/**
+	 * Indices of the time command entries that already fired in the current day.
+	 * The server periodically corrects the client clock, which can move it
+	 * backwards across a target; without this the command would fire again.
+	 */
+	private final java.util.Set<Integer> firedTimeCommands = new java.util.HashSet<>();
 
 	Entity getTraderGlowEntityForRender(Minecraft mc) {
 		return state.getTraderGlowEntityForRender(mc);
@@ -42,29 +54,10 @@ final class AutoTradeClientTick {
 	}
 
 	void tick(Minecraft mc) {
-		if (mc.level == null) {
-			this.lastTimeOfDay = -1;
-			this.pendingAfkOnDelayTicks = -1;
-			this.pendingAfkOnCommand = "";
-		} else {
-			boolean enabled = Configs.Generic.ENABLED.getBooleanValue();
-			long timeOfDay = Math.floorMod(getDayClockTime(mc.level), 24000L);
-			if (enabled && this.lastTimeOfDay != -1 && this.lastTimeOfDay != timeOfDay) {
-				this.checkAndTimeTrigger(mc, this.lastTimeOfDay, timeOfDay);
-			}
-			this.lastTimeOfDay = timeOfDay;
-
-			if (this.pendingAfkOnDelayTicks > 0) {
-				this.pendingAfkOnDelayTicks--;
-				if (this.pendingAfkOnDelayTicks == 0) {
-					if (enabled) {
-						this.executeCommand(mc, this.pendingAfkOnCommand);
-					}
-					this.pendingAfkOnDelayTicks = -1;
-					this.pendingAfkOnCommand = "";
-				}
-			}
-		}
+		// The clock is always tracked (so the day rollover is detected and the
+		// commands are re-armed), but the commands only run while auto trading
+		// is enabled.
+		tickTimeCommands(mc, Configs.Generic.ENABLED.getBooleanValue());
 
 		state.tickTraderGlow(mc);
 		state.tickContainerHighlights(mc);
@@ -108,37 +101,91 @@ final class AutoTradeClientTick {
 		}
 	}
 
-	private void checkAndTimeTrigger(Minecraft mc, long lastTime, long currTime) {
-		long diff = currTime - lastTime;
-		if (diff < 0) {
-			diff += 24000;
+	/**
+	 * Run the configured time-triggered commands when the in-game day time
+	 * crosses their configured tick. The in-game day time wraps at 24000 ticks,
+	 * so a tick near 0 can be crossed both when the clock rolls over and when
+	 * it reaches it from the previous day.
+	 *
+	 * @param enabled whether auto trading is currently enabled; the commands
+	 *                are only executed while this is true
+	 */
+	private void tickTimeCommands(Minecraft mc, boolean enabled) {
+		if (mc.level == null) {
+			this.lastTimeOfDay = -1;
+			this.firedTimeCommands.clear();
+			return;
 		}
-		if (diff > 0 && diff <= 100) {
-			java.util.List<Configs.TimeWaypoint> waypoints = Configs.Generic.parseTimeWaypoints();
-			// Log the configured waypoints only when they change, so the log isn't flooded.
-			if (!waypoints.equals(this.lastLoggedWaypoints)) {
-				this.lastLoggedWaypoints = waypoints;
-				System.out.println("[AutoTrade time] " + waypoints.size() + " configured waypoint(s):");
-				for (Configs.TimeWaypoint wp : waypoints) {
-					System.out.println("[AutoTrade time]   tick=" + wp.tick() + " -> " + wp.x() + "," + wp.y()
-							+ "," + wp.z());
-				}
+
+		long timeOfDay = Math.floorMod(getDayClockTime(mc.level), 24000L);
+		long lastTime = this.lastTimeOfDay;
+		this.lastTimeOfDay = timeOfDay;
+
+		// First tick after joining / after the world was (re)loaded: only record
+		// the baseline, don't fire anything.
+		if (lastTime == -1) {
+			return;
+		}
+
+		if (lastTime == timeOfDay) {
+			return;
+		}
+
+		// The clock wrapped past 24000: a new in-game day started, so re-arm
+		// the commands for the new day. A real wrap means the clock jumped from
+		// the end of the day back to the start, so the backwards distance is
+		// large. A small backwards distance is a server correction, not a wrap.
+		if (lastTime > timeOfDay && (lastTime - timeOfDay) > MAX_NORMAL_CLOCK_ADVANCE) {
+			this.firedTimeCommands.clear();
+		}
+
+		java.util.List<Configs.TimeCommand> commands = Configs.Generic.parseTimeCommands();
+		for (int i = 0; i < commands.size(); i++) {
+			Configs.TimeCommand entry = commands.get(i);
+			long target = Math.floorMod(entry.tick(), 24000L);
+			// Skip entries that already fired today, and entries whose target
+			// was already passed before the clock was first seen.
+			if (!isTimeCrossed(lastTime, timeOfDay, target) || this.firedTimeCommands.contains(i)) {
+				continue;
 			}
-			for (Configs.TimeWaypoint wp : waypoints) {
-				if (this.isTimeCrossed(lastTime, currTime, wp.tick())) {
-					this.triggerTimeMovement(mc, wp.x(), wp.y(), wp.z());
-				}
+			// Mark it as fired even while disabled, so a command that came due
+			// while auto trading was off is not fired retroactively once it is
+			// turned back on.
+			this.firedTimeCommands.add(i);
+			if (!enabled) {
+				AutoTrade.logger.info("[AutoTrade] time command skipped (auto trade disabled): tick={} command=\"{}\"",
+						entry.tick(), entry.command());
+				continue;
 			}
+			AutoTrade.logger.info("[AutoTrade] time command at tick {}: \"{}\"", entry.tick(), entry.command());
+			this.executeCommand(mc, entry.command());
 		}
 	}
 
-	private boolean isTimeCrossed(long lastTime, long currTime, long target) {
-		if (lastTime == currTime) return false;
-		if (lastTime < currTime) {
-			return lastTime < target && currTime >= target;
-		} else {
-			return lastTime < target || currTime >= target;
+	/**
+	 * True when the in-game clock moved from {@code lastTime} to {@code currTime}
+	 * and passed (or landed on) {@code target}.
+	 *
+	 * <p>
+	 * The server periodically re-syncs the client clock, which can move it
+	 * <em>backwards</em> by a tick (the client counts the day time locally, the
+	 * server is authoritative). Such a backwards correction must never re-fire a
+	 * target that was already passed, so only a normal forward advance counts.
+	 */
+	private static boolean isTimeCrossed(long lastTime, long currTime, long target) {
+		// Forward distance of the clock in ticks, modulo the 24000 tick day.
+		// A backwards correction yields a huge value, which the guard below
+		// rejects.
+		long diff = Math.floorMod(currTime - lastTime, 24000L);
+		if (diff == 0 || diff > MAX_NORMAL_CLOCK_ADVANCE) {
+			return false;
 		}
+		target = Math.floorMod(target, 24000L);
+		// Forward distance from lastTime to the target. A target of 0 means the
+		// target sits exactly on lastTime, i.e. it was already handled in the
+		// previous tick, so it must not fire again.
+		long toTarget = Math.floorMod(target - lastTime, 24000L);
+		return toTarget != 0 && toTarget <= diff;
 	}
 
 	private static long getDayClockTime(net.minecraft.world.level.Level level) {
@@ -149,37 +196,21 @@ final class AutoTradeClientTick {
 		*///?}
 	}
 
-	private void triggerTimeMovement(Minecraft mc, int x, int y, int z) {
-		System.out.println("[AutoTrade] time trigger -> target x=" + x + " y=" + y + " z=" + z + " baritone=" + BaritoneHelper.describeStatus());
-		if (BaritoneHelper.isPresent()) {
-			BaritoneHelper.pauseMovement();
-			BaritoneHelper.setMovementGoal(x, y, z);
-		} else {
-			System.out.println("[AutoTrade] Baritone not present; time-trigger movement skipped");
-		}
-
-		String offCmd = Configs.Generic.AFK_OFF_COMMAND.getStringValue();
-		if (!offCmd.isEmpty()) {
-			this.executeCommand(mc, offCmd);
-		}
-
-		String onCmd = Configs.Generic.AFK_ON_COMMAND.getStringValue();
-		if (!onCmd.isEmpty()) {
-			this.pendingAfkOnCommand = onCmd;
-			this.pendingAfkOnDelayTicks = 1200; // 60 seconds * 20 ticks
-		}
-	}
-
-	private void executeCommand(Minecraft mc, String command) {
+	/**
+	 * Send a chat or command message. Messages starting with {@code /} are sent
+	 * as a command, everything else as a chat message.
+	 */
+	private static void executeCommand(Minecraft mc, String command) {
 		if (command == null || command.isEmpty()) {
 			return;
 		}
-		if (mc.player != null && mc.player.connection != null) {
-			if (command.startsWith("/")) {
-				mc.player.connection.sendCommand(command.substring(1));
-			} else {
-				mc.player.connection.sendChat(command);
-			}
+		if (mc.player == null || mc.player.connection == null) {
+			return;
+		}
+		if (command.startsWith("/")) {
+			mc.player.connection.sendCommand(command.substring(1));
+		} else {
+			mc.player.connection.sendChat(command);
 		}
 	}
 }

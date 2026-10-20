@@ -91,7 +91,6 @@ final class AutoTradeMerchantScreenTick {
 					slot2.getHoverName().getString());
 			state.clearMerchantQuickMoveDefer();
 			screen.onClose();
-			BaritoneHelper.resumeMovementGoal();
 			return;
 		}
 		state.merchantResultEmptyWaits = 0;
@@ -160,7 +159,6 @@ final class AutoTradeMerchantScreenTick {
 		screen.onClose();
 		state.postMerchantInventorySyncTicks = 15;
 		state.startTraderGlow(mc, state.getVillagerActive(), 0xFF00FF00); // green = trade done
-		BaritoneHelper.resumeMovementGoal();
 	}
 
 	void tick(Minecraft mc, MerchantScreen screen) {
@@ -292,6 +290,5 @@ final class AutoTradeMerchantScreenTick {
 		ContainerIoHelper.syncPlayerInventoryAfterMerchant(mc);
 		state.postMerchantInventorySyncTicks = 15;
 		state.startTraderGlow(mc, state.getVillagerActive(), glowColor);
-		BaritoneHelper.resumeMovementGoal();
 	}
 }

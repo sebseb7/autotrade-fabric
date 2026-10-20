@@ -17,13 +17,6 @@ import fi.dy.masa.malilib.gui.widgets.WidgetListConfigOptions;
 import fi.dy.masa.malilib.gui.widgets.WidgetConfigOption;
 import fi.dy.masa.malilib.gui.widgets.WidgetListConfigOptionsBase;
 import fi.dy.masa.malilib.gui.interfaces.IKeybindConfigGui;
-import fi.dy.masa.malilib.gui.interfaces.ITextFieldListener;
-import fi.dy.masa.malilib.config.IConfigValue;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-//? if npcSplit {
-import fi.dy.masa.malilib.gui.wrappers.TextFieldType;
-//?}
 
 public class GuiConfigs extends GuiConfigsBase {
 	private static ConfigGuiTab tab = ConfigGuiTab.GENERIC;
@@ -155,9 +148,9 @@ public class GuiConfigs extends GuiConfigsBase {
 
 		@Override
 		protected void addConfigOption(int x, int y, int labelWidth, int configWidth, fi.dy.masa.malilib.config.IConfigBase config) {
-			// Use custom button for timeWaypoints config
+			// Use the custom editor for the timeCommands config
 			if (config instanceof fi.dy.masa.malilib.config.IConfigStringList stringListConfig
-					&& "timeWaypoints".equals(config.getName())) {
+					&& "timeCommands".equals(config.getName())) {
 				y += 1;
 				int configHeight = 20;
 				String configName = config.getConfigGuiDisplayName();
@@ -169,23 +162,12 @@ public class GuiConfigs extends GuiConfigsBase {
 				}
 
 				x += labelWidth + 10;
-				ConfigButtonTimeWaypoints optionButton = new ConfigButtonTimeWaypoints(x, y, configWidth, configHeight,
-						stringListConfig, this.host, this.host.getDialogHandler());					optionButton.setEnabled(com.github.sebseb7.autotrade.event.BaritoneHelper.isPresent());				this.addConfigButtonEntry(x + configWidth + 2, y, (fi.dy.masa.malilib.config.IConfigResettable) config, optionButton);
+				ConfigButtonTimeCommands optionButton = new ConfigButtonTimeCommands(x, y, configWidth, configHeight,
+						stringListConfig, this.host, this.host.getDialogHandler());
+				this.addConfigButtonEntry(x + configWidth + 2, y, (fi.dy.masa.malilib.config.IConfigResettable) config, optionButton);
 			} else {
 				super.addConfigOption(x, y, labelWidth, configWidth, config);
 			}
 		}
-
-		//? if npcSplit {
-		@Override
-		protected void addConfigTextFieldEntry(int x, int y, int resetX, int configWidth, int configHeight, IConfigValue config, TextFieldType type) {
-			super.addConfigTextFieldEntry(x, y, resetX, configWidth, configHeight, config, type);
-		}
-		//?} else {
-		@Override
-		protected void addConfigTextFieldEntry(int x, int y, int resetX, int configWidth, int configHeight, IConfigValue config) {
-			super.addConfigTextFieldEntry(x, y, resetX, configWidth, configHeight, config);
-		}
-		//?}
 	}
 }

@@ -59,7 +59,6 @@ final class AutoTradeContainerFlow {
 
         if (mc.player.distanceToSqr(ic) < containerRangeSqr && !state.inputInRange) {
             state.inputInRange = true;
-            BaritoneHelper.pauseMovement();
             mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND,
                     new BlockHitResult(ic, net.minecraft.core.Direction.UP, input, false));
             state.containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
@@ -70,7 +69,6 @@ final class AutoTradeContainerFlow {
 
         if (mc.player.distanceToSqr(oc) < containerRangeSqr && !state.outputInRange) {
             state.outputInRange = true;
-            BaritoneHelper.pauseMovement();
             mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND,
                     new BlockHitResult(oc, net.minecraft.core.Direction.UP, output, false));
             state.containerDelay = Configs.Generic.CONTAINER_CLOSE_DELAY.getIntegerValue();
@@ -106,9 +104,6 @@ final class AutoTradeContainerFlow {
                 closeScreen(screen);
                 closed = true;
             }
-        }
-        if (closed) {
-            BaritoneHelper.resumeMovementGoal();
         }
     }
 
